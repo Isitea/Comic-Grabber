@@ -1,0 +1,30 @@
+﻿{
+	"manifest_version": 2,
+	"name": "Image beholder",
+	"version": "0.0.1",
+	"description": "This extension watches loaded images and serves the downloading function of them.",
+	"author": "Isitea",
+	"icons": {
+		"128": "resources/icon-128.png"
+	},
+	"permissions": [
+		"webRequest",
+		"webRequestBlocking",
+		"downloads",
+		"activeTab"
+	],
+	"content_scripts": [
+		{
+			"matches": [
+			],
+			"js": [
+			],
+			"run_at": "document_end",
+			"all_frames": false
+		}
+	],
+	"background": {
+		"page": "beholder.html"
+	},
+	"minimum_chrome_version": "61"
+}
