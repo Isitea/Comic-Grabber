@@ -1,30 +1,28 @@
-﻿{
+{
 	"manifest_version": 2,
-	"name": "Image beholder",
+	"name": "Tistory downloader",
 	"version": "0.0.1",
-	"description": "This extension watches loaded images and serves the downloading function of them.",
+	"description": "This extension downloads attachments in page automatically.",
 	"author": "Isitea",
-	"icons": {
-		"128": "resources/icon-128.png"
-	},
 	"permissions": [
 		"webRequest",
 		"webRequestBlocking",
-		"downloads",
-		"activeTab"
+		"downloads"
 	],
 	"content_scripts": [
 		{
 			"matches": [
+				"*://*.tistory.com/*"
 			],
 			"js": [
+				"scanner.js"
 			],
 			"run_at": "document_end",
 			"all_frames": false
 		}
 	],
 	"background": {
-		"page": "beholder.html"
+		"page": "watcher.html"
 	},
 	"minimum_chrome_version": "61"
 }
