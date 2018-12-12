@@ -40,8 +40,7 @@ class Header {
 class Downloader {
     constructor ( downloadsAPI ) {
         Object.defineProperties( this, {
-            api: { value: downloadsAPI },
-            downloading: { value: 0, writable: true },
+            api: { value: downloadsAPI }
         } );
     }
 
@@ -64,16 +63,20 @@ class Downloader {
         }
     }
 
-    saveAsArchive ( mediaList, archiveName ) {
+    makeArchive ( mediaList, archiveName ) {
         let Zip = new JSZip(), list = [];
         Zip.file( 'Media origin.json', new Blob( [ JSON.stringify( mediaList ) ], { type: 'text/plain' } ) );
         for ( let media of mediaList ) {
             list.push( this.getMedia( media ).then( blob => Zip.file( media.match( /.+\/(?<uri>.+)/ ).groups.uri, blob ) ) );
         }
         Promise.all( list ).then( () => {} )
-        Zip.generateAsync( { type: "blob" } ).then( blob => {
-            
-        } );
+        Zip.generateAsync( { type: "blob" } )
+        .then( blob => this.save( {
+            url: URL.createObjectURL( blob ),
+            filename: `${archiveName}.zip`.replace( /\/+/g, "/" ),
+            conflictAction: "overwrite",
+            retainList: archive.retainList
+        } ) )
     }
 
     save ( info ) {
@@ -90,20 +93,7 @@ class Downloader {
         } catch ( e ) {
             download = new Promise( resolve => this.api.download( info, resolve ) );
         }
-        return download
-//            .then( id => new Promise( ( resolve, reject ) => {
-//                    function onComplete ( item ) {
-//                        if ( item.id === id && item.state && item.state.current === "complete" ) {
-//                            api.onChanged.removeListener( onComplete );
-//                            if ( !retainList ) api.erase( { id } );
-//                            resolve( info.url );
-//                        }
-//                    }
-//                    api.onChanged.addListener( onComplete );
-//                } ) )
-            .then( url => {
-                URL.revokeObjectURL( info.url );
-            } );
+        return download.then( () => URL.revokeObjectURL( info.url ) );
     }
 }
 
