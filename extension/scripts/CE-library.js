@@ -1,5 +1,4 @@
 "use strict";
-import { secureRandom as uniquId } from './uniqueId.js';
 class customEventTarget {
     constructor () {
         Object.defineProperties( this, {
@@ -69,19 +68,15 @@ class customEventTarget {
 }
 
 class HTMLExtender {
-    constructor ( fnList = [] ) {
-        for ( let fn of fnList ) {
-            this[fn]();
-        }
+    static extend ( fnList = [] ) {
+        for ( let fn of fnList ) this[fn]();
     }
 
-    appendChildren () {
+    static appendChildren () {
         if ( !Node.prototype.appendChildren ) {
             Node.prototype.appendChildren = function ( children ) {
                 if ( children instanceof NodeList ) {
-                    while ( children.length > 0 ) {
-                        this.appendChild( children[0] );
-                    }
+                    for ( let item of [ ...children ] ) this.appendChild( item );
                 } else {
                     throw new TypeError( "Passed parameter on method appendChildren under Node must be a NodeList." );
                 }
@@ -89,42 +84,57 @@ class HTMLExtender {
         }
     }
 
-    xhrImageLoader () {
+    static xhrImageLoader () {
         if ( !Image.prototype.xhrUri ) {
             Object.defineProperty( Image.prototype, "xhrUri", {
                 set: function ( uri ) {
+                    this.async = new Promise( ( resolve, reject ) => {
+                        this.addEventListener( "load", () => { resolve( this.binaryData ); }, { once: true } );
+                        this.addEventListener( "error", reject, { once: true } );
+                    } );
                     let xhr = new XMLHttpRequest();
                     Object.defineProperties( this, {
-                        xhr: { value: xhr },
-                        lengthComputable: { value: true },
-                        loaded: { value: 0 },
-                        total: { value: 0 }
+                        xhr: { value: xhr, writable: false, configurable: true },
+                        lengthComputable: { value: true, writable: false, configurable: true },
+                        loaded: { value: 0, writable: false, configurable: true },
+                        total: { value: 0, writable: false, configurable: true },
+                        binaryData: { writable: false, configurable: true },
                     } );
                     xhr.responseType = "blob";
                     xhr.open( 'get', uri, true );
-                    xhr.addEventListener( "load", e => {
-                        if ( xhr.status === 200 && xhr.response.type.match( 'image' ) ) {
-                            this.blob = xhr.response;
-                            this.src = URL.createObjectURL( this.blob );
-                            this.mime = this.blob.type;
-                        } else {
-                            this.dispatchEvent( Object.assign( new Event( "error" ), { status: xhr.status, mime: xhr.response.type } ) );
+                    xhr.addEventListener( "load", async () => {
+                        let blob;
+                        if ( xhr.response.type.match( 'image' ) ) { blob = xhr.response; }
+                        else {
+                            blob = await new Promise( resolve => {
+                                let fileReader = new FileReader();
+                                fileReader.addEventListener( "load", evt => {
+                                    const arraybuffer = evt.target.result;
+                                    resolve( new Blob( [ arraybuffer ], { type: recognizeByFileSignature( arraybuffer ) } ) );
+                                } );
+                                fileReader.readAsArrayBuffer( xhr.response );
+                            } );
+                        }
+                        if ( blob.type.match( 'image' ) ) {
+                            Object.defineProperties( this, {
+                                binaryData: { value: blob },
+                            } );
+                            this.src = URL.createObjectURL( blob );
+                            this.addEventListener( "load", () => URL.revokeObjectURL( this.src ), { once: true } );
+                        }
+                        else {
+                            this.dispatchEvent( Object.assign( new Event( "error" ), { status: xhr.status, blob, statusText: "Content which URI indicated is not an image." } ) );
                         }
                     } );
-                    xhr.addEventListener( "progress", e => {
-                        let event = new ProgressEvent( "progress", { lengthComputable: e.lengthComputable, loaded: e.loaded, total: e.total } );
+                    xhr.addEventListener( "progress", ( { lengthComputable, loaded, total } ) => {
                         Object.defineProperties( this, {
-                            lengthComputable: { value: e.lengthComputable },
-                            loaded: { value: e.loaded },
-                            total: { value: e.total }
+                            lengthComputable: { value: lengthComputable },
+                            loaded: { value: loaded },
+                            total: { value: total }
                         } );
-                        this.dispatchEvent( event );
+                        this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable, loaded, total } ) );
                     } );
                     xhr.send();
-                    this.async = new Promise( ( resolve, reject ) => {
-                        this.addEventListener( "load", () => { resolve( this.blob ); }, { once: true } );
-                        this.addEventListener( "error", reject, { once: true } );
-                    } );
                 },
                 get: function () {
                     return this.xhr;
@@ -135,27 +145,16 @@ class HTMLExtender {
 }
 
 class HTML {
-    static fillAppendChildren () {
-        if ( !Node.prototype.appendChildren ) {
-            Node.prototype.appendChildren = function ( children ) {
-                if ( children instanceof NodeList ) {
-                    while ( children.length > 0 ) {
-                        this.appendChild( children[0] );
-                    }
-                } else {
-                    throw new TypeError( "Passed parameter on method appendChildren under Node must be a NodeList." );
-                }
-            }
-        }
-    }
-
-    static render ( structure, preset ) {
-        this.fillAppendChildren();
-        if ( structure instanceof Node || structure instanceof NodeList ) return structure;
+    static render ( structure, preset = {} ) {
+        if ( Node.appendChildren === undefined ) { HTMLExtender.appendChildren(); }
+        if ( structure instanceof NodeList ) return structure;
         let fragment = document.createDocumentFragment();
-        if ( structure instanceof Object ) {
-            if ( !( structure instanceof Array ) ) { structure = [ structure ]; }
-            for ( const item of structure ) {
+        if ( structure instanceof Node ) { fragment.appendChild( structure ); }
+        else if ( structure instanceof Object ) {
+            let list;
+            if ( !( structure instanceof Array ) ) { list = [ structure ]; }
+            else { list = [ ...structure ]; }
+            for ( const item of list ) {
                 let node;
                 if ( item instanceof Node ) { node = item; }
                 else if ( typeof item === "string" ) { node = document.createTextNode( item ); }
@@ -195,9 +194,9 @@ class HTML {
                     break;
                 }
                 default: {
-                    if ( value === "true" ) { node.setAttributeNode( document.createAttribute( key ) ); }
-                    else { node[key] = value; }
-                    
+                    let AttributeNode = document.createAttribute( key );
+                    if ( value !== "" ) AttributeNode.value = value;
+                    node.setAttributeNode( AttributeNode );
                 }
             }
         }
@@ -207,20 +206,73 @@ class HTML {
     }
 
     static remove ( node, uncover = false ) {
-        if ( !node.parentNode ) return false;
+        if ( !node.parentNode ) return null;
         if ( uncover ) {
             for ( let item of [ ...node.parentNode.childNodes ] ) {
-                if ( item === node ) { for ( let child of [ ...node ] ) { node.parentNode.appendChild( child ); } }
+                if ( item === node ) { node.parentNode.appendChildren( node.childNodes ); }
                 else { node.parentNode.appendChild( item ); }
             }
-            node.parentNode.removeChild( node );
         }
-        else { node.parentNode.removeChild( node ); }
+        return node.parentNode.removeChild( node );
     }
 }
 
-class ComicViewer {
+class ImageGrabbler {
+    constructor ( storage ) {
+        
+    }
+
 
 }
 
-export { customEventTarget, HTMLExtender, HTML, CommicViewer };
+class StorageManager extends customEventTarget {
+    constructor ( area, id = secureRandom(), init = {} ) {
+        super();
+        Object.defineProperties( this, { area: { value: area }, id: { value: id }, _Stored: { value: init, writable: true } } );
+        this.storage = Object.assign( this._Stored, this.update );
+    }
+
+    get update () {
+        this._Stored = JSON.parse( this.area.getItem( this.id ) );
+    }
+
+    get storage () {
+        return this._Stored;
+    }
+
+    set storage ( json ) {
+        JSON.parse( this.area.getItem( this.id ) )
+    }
+}
+
+function recognizeByFileSignature ( arraybuffer ) {
+    //File signature information ( https://en.wikipedia.org/wiki/List_of_file_signatures )
+    const signatures = {
+        "image/png": [ "89504E470D0A1A0A" ],
+        "image/jpeg": [ "FFD8FFDB", "FFD9FFE000104A4649460001", "FFD8FFEE", "FFD8FFE1[A-F0-9]{4,4}457869660000" ],
+        "image/gif": [ "474946383761", "474946383961" ],
+        "image/tiff": [ "49492A00", "4D4D002A" ],
+        "image/bmp": [ "424D" ],
+        "image/webp": [ "52494646[A-F0-9]{8,8}57454250" ],
+    };
+    //Read signature from binary
+    const binSign = ( new Uint8Array( arraybuffer.slice( 0, 24 ) ) ).reduce( ( hex, bin ) => hex + bin.toString( 16 ), "" ).toUpperCase();
+    //Compare signatures
+    for ( const [ category, sign ] of Object.entries( signatures ) ) {
+        if ( binSign.match( new RegExp( `^${sign.join( "|^" )}` ) ) ) return category;
+    }
+    return "application/octet-strem";
+}
+
+const uniqueSeed = new Uint8Array( 12 );
+function secureRandom () {
+    let randomValue = 0;
+    for ( let i = 0; i < 5; i++ ) {
+        crypto.getRandomValues( uniqueSeed );
+        randomValue += Number( uniqueSeed.join( "" ) ) / Number( uniqueSeed.reverse().join( "" ) );
+    }
+    
+    return randomValue.toString( 32 ).substr( 2 );
+}
+
+export { customEventTarget, HTMLExtender, HTML, CommicViewer, recognizeByFileSignature, secureRandom };
