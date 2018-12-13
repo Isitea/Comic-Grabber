@@ -225,23 +225,52 @@ class ImageGrabbler {
 
 }
 
+const recursiveProxy = {
+    set: function ( obj, prop, value ) {
+        let proxy;
+        if ( typeof value === "object" ) {
+            let container = new window[value.constructor.name]();
+            Object.defineProperties( container, { __parent: obj } );
+            proxy = Proxy.revocable( container, recursiveProxy );
+            for ( const [ key, value ] of Object.entries( value ) ) { proxy[key] = value; }
+        }
+        else {
+            proxy = value;
+        }
+        Reflect.set( obj, prop, proxy );
+    },
+    deleteProperty: function ( obj, prop ) {
+        obj[ prop ].revoke();
+        Reflect.defineProperty( obj, prop );
+    }
+}
+
 class StorageManager extends customEventTarget {
-    constructor ( area, id = secureRandom(), init = {} ) {
+    constructor ( area, id = secureRandom(), init ) {
         super();
-        Object.defineProperties( this, { area: { value: area }, id: { value: id }, _Stored: { value: init, writable: true } } );
-        this.storage = Object.assign( this._Stored, this.update );
+        Object.defineProperties( this, { area: { value: area }, id: { value: id } } );
+        this.init( init )
     }
 
-    get update () {
-        this._Stored = JSON.parse( this.area.getItem( this.id ) );
+    init ( init = {} ) {
+        let obj = {};
+        Object.defineProperties( obj, { __treeChanged: { value: () => this.storage() } } );
+        this._Stored = new Proxy( obj, recursiveProxy );
+        for ( const [ key, value ] of Object.entries( JSON.parse( this.area.getItem( this.id ) || init ) ) ) {
+            this._Stored[ key ] = value;
+        }
+    }
+
+    update () {
+
     }
 
     get storage () {
         return this._Stored;
     }
 
-    set storage ( json ) {
-        JSON.parse( this.area.getItem( this.id ) )
+    storage () {
+        this.area.setItem( this.id, JSON.stringify( this._Stored ) )
     }
 }
 
