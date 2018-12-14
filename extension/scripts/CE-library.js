@@ -145,6 +145,10 @@ class HTMLExtender {
 }
 
 class HTML {
+    static extend () {
+        HTMLExtender.extend( [ 'appendChildren', 'xhrImageLoader' ] );
+    }
+
     static render ( structure, preset = {} ) {
         if ( Node.appendChildren === undefined ) { HTMLExtender.appendChildren(); }
         if ( structure instanceof NodeList ) return structure;
@@ -217,15 +221,8 @@ class HTML {
     }
 }
 
-class ImageGrabbler {
-    constructor ( storage ) {
-        
-    }
-
-
-}
 class accumulator {
-    constructor ( compile = () => {}, init = {}, delay = 500 ) {
+    constructor ( compile = () => {}, init = {}, delay = 250 ) {
         Object.defineProperties( this, {
             __clock: { writable: true },
             __delay: { value: delay },
@@ -256,50 +253,8 @@ class accumulator {
     }
 }
 
-function tracedObject ( init, { changed = ( changed ) => console.log( changed ), removed = ( removed ) => console.log( removed ) } ) {
-    const recursiveProxy = {
-        set: function ( obj, prop, value, __Proxy ) {
-            let proxy;
-            if ( typeof value === "object" && value !== null ) {
-                let container = new window[value.constructor.name]();
-                Object.defineProperties( container, {
-                    __treeChanged: { value: function ( value ) {
-                        this.__parent.__treeChanged( { [[this.__key]]: value, __constructor: this.constructor.name } );
-                    } },
-                    __treeRemoved: { value: function ( value ) {
-                        this.__parent.__treeRemoved( { [[this.__key]]: value } );
-                    } },
-                    __key: { value: prop },
-                    __parent: { value: obj },
-                } );
-                proxy = new Proxy( container, recursiveProxy );
-                for ( const [ key, kayPair ] of Object.entries( value ) ) { proxy[ key ] = kayPair; }
-            }
-            else {
-                if ( value === undefined ) {
-                    obj.__treeRemoved( { [[prop]]: undefined } );
-                    return Reflect.deleteProperty( obj, prop );
-                }
-                if ( obj[ prop ] !== value ) obj.__treeChanged( { [[prop]]: value } );
-            }
-            return Reflect.set( obj, prop, proxy || value );
-        },
-        deleteProperty: function ( obj, prop ) {
-            obj.__treeRemoved( { [[prop]]: undefined } );
-            return Reflect.deleteProperty( obj, prop );
-        }
-    }
-    
-    Object.defineProperties( init, {
-        __treeChanged: { value: changed },
-        __treeRemoved: { value: removed },
-     } );
-
-     return new Proxy( init, recursiveProxy );
-}
-
 class StorageManager extends customEventTarget {
-    constructor ( area, id = secureRandom(), init = {} ) {
+    constructor ( area, id = secureRandom(), init = {}, cleanUp = true ) {
         super();
         Object.defineProperties( this, {
             area: { value: area },
@@ -307,10 +262,17 @@ class StorageManager extends customEventTarget {
             ACC: { value: new accumulator( data => this.update( data ) ) }
         } );
         this.constructor.init.call( this, init );
-        window.addEventListener( "beforeunload", () => {
+        if ( cleanUp ) window.addEventListener( "beforeunload", () => {
             this.area.removeItem( `${this.id}__UPDATE` );
             this.area.removeItem( this.id );
-        } )
+        } );
+        window.addEventListener( "storage", ( { key, newValue, oldValue, storageArea, url } ) => {
+            if ( storageArea === this.area && key === `${this.id}__UPDATE` && newValue && newValue.length ) {
+                for ( const [ key, value ] of Object.entries( JSON.parse( newValue ) ) ) {
+                    this._Stored[ key ] = value;
+                }
+            }
+        } );
     }
 
     static init ( init ) {
@@ -357,6 +319,47 @@ function recognizeByFileSignature ( arraybuffer ) {
     return "application/octet-strem";
 }
 
+function tracedObject ( init, { changed = ( changed ) => console.log( changed ), removed = ( removed ) => console.log( removed ) } ) {
+    const recursiveProxy = {
+        set: function ( obj, prop, value, __Proxy ) {
+            let proxy;
+            if ( typeof value === "object" && value !== null ) {
+                let container = new window[ value.constructor.name ]();
+                Object.defineProperties( container, {
+                    __treeChanged: { value: function ( value ) {
+                        this.__parent.__treeChanged( { [[this.__key]]: value, __constructor: this.constructor.name } );
+                    } },
+                    __treeRemoved: { value: function ( value ) {
+                        this.__parent.__treeRemoved( { [[this.__key]]: value } );
+                    } },
+                    __key: { value: prop },
+                    __parent: { value: obj },
+                } );
+                proxy = new Proxy( container, recursiveProxy );
+                for ( const [ key, kayPair ] of Object.entries( value ) ) { proxy[ key ] = kayPair; }
+            }
+            else {
+                if ( value === undefined ) {
+                    return this.deleteProperty( obj, prop );
+                }
+                if ( obj[ prop ] !== value ) obj.__treeChanged( { [[prop]]: value } );
+            }
+            return Reflect.set( obj, prop, proxy || value );
+        },
+        deleteProperty: function ( obj, prop ) {
+            obj.__treeRemoved( { [[prop]]: undefined } );
+            return Reflect.deleteProperty( obj, prop );
+        }
+    }
+    
+    Object.defineProperties( init, {
+        __treeChanged: { value: changed },
+        __treeRemoved: { value: removed },
+     } );
+
+     return new Proxy( init, recursiveProxy );
+}
+
 const uniqueSeed = new Uint8Array( 12 );
 function secureRandom () {
     let randomValue = 0;
@@ -368,4 +371,12 @@ function secureRandom () {
     return randomValue.toString( 32 ).substr( 2 );
 }
 
-export { customEventTarget, HTMLExtender, HTML, CommicViewer, recognizeByFileSignature, secureRandom };
+class ImageGrabbler {
+    constructor ( storage ) {
+        
+    }
+
+
+}
+
+export { customEventTarget, HTMLExtender, HTML, StorageManager, recognizeByFileSignature, secureRandom };

@@ -11,7 +11,7 @@
 		"webRequest",
 		"webRequestBlocking",
 		"downloads",
-		"tabs",
+		"activeTab",
 		"<all_urls>"
 	],
 	"web_accessible_resources": [
@@ -20,15 +20,17 @@
 	"content_scripts": [
 		{
 			"matches": [
+				"*://*/*"
 			],
 			"js": [
+				"scripts/loader.js"
 			],
 			"run_at": "document_end",
 			"all_frames": false
 		}
 	],
 	"background": {
-		"page": "background.html"
+		"page": "backend/beholder.html"
 	},
 	"content_security_policy": "default-src 'self' blob: filesystem: chrome-extension-resource: https://*.isitea.net https://cdnjs.cloudflare.com/ https://drive.google.com;",
 	"minimum_chrome_version": "61"
