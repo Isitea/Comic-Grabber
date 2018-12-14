@@ -224,53 +224,117 @@ class ImageGrabbler {
 
 
 }
+class accumulator {
+    constructor ( compile = () => {}, init = {}, delay = 500 ) {
+        Object.defineProperties( this, {
+            __clock: { writable: true },
+            __delay: { value: delay },
+            __log: { value: init },
+            __compile: { value: compile }
+        } );
+    }
+    
+    log ( object ) {
+        clearTimeout( this.__clock );
+        let pointer = this.__log;
+        let [ [ key, value ] ] = Object.entries( object );
+        let [ { __constructor } ] = [ object ];
+        while ( __constructor !== undefined ) {
+            if ( !( key in pointer && pointer[ key ] === value && __constructor === pointer[ key ].constructor.name ) ) {
+                pointer[ key ] = new window[ __constructor ]();
+            }
+            pointer = pointer[ key ];
+            [ { __constructor } ] = [ value ];
+            [ [ key, value ] ] = Object.entries( value );
+        }
+        pointer[ key ] = value;
+        this.__clock = setTimeout( () => this.compile(), this.__delay );
+    }
 
-const recursiveProxy = {
-    set: function ( obj, prop, value ) {
-        let proxy;
-        if ( typeof value === "object" ) {
-            let container = new window[value.constructor.name]();
-            Object.defineProperties( container, { __parent: obj } );
-            proxy = Proxy.revocable( container, recursiveProxy );
-            for ( const [ key, value ] of Object.entries( value ) ) { proxy[key] = value; }
-        }
-        else {
-            proxy = value;
-        }
-        Reflect.set( obj, prop, proxy );
-    },
-    deleteProperty: function ( obj, prop ) {
-        obj[ prop ].revoke();
-        Reflect.defineProperty( obj, prop );
+    compile () {
+        this.__compile( this.__log );
     }
 }
 
+function tracedObject ( init, { changed = ( changed ) => console.log( changed ), removed = ( removed ) => console.log( removed ) } ) {
+    const recursiveProxy = {
+        set: function ( obj, prop, value, __Proxy ) {
+            let proxy;
+            if ( typeof value === "object" && value !== null ) {
+                let container = new window[value.constructor.name]();
+                Object.defineProperties( container, {
+                    __treeChanged: { value: function ( value ) {
+                        this.__parent.__treeChanged( { [[this.__key]]: value, __constructor: this.constructor.name } );
+                    } },
+                    __treeRemoved: { value: function ( value ) {
+                        this.__parent.__treeRemoved( { [[this.__key]]: value } );
+                    } },
+                    __key: { value: prop },
+                    __parent: { value: obj },
+                } );
+                proxy = new Proxy( container, recursiveProxy );
+                for ( const [ key, kayPair ] of Object.entries( value ) ) { proxy[ key ] = kayPair; }
+            }
+            else {
+                if ( value === undefined ) {
+                    obj.__treeRemoved( { [[prop]]: undefined } );
+                    return Reflect.deleteProperty( obj, prop );
+                }
+                if ( obj[ prop ] !== value ) obj.__treeChanged( { [[prop]]: value } );
+            }
+            return Reflect.set( obj, prop, proxy || value );
+        },
+        deleteProperty: function ( obj, prop ) {
+            obj.__treeRemoved( { [[prop]]: undefined } );
+            return Reflect.deleteProperty( obj, prop );
+        }
+    }
+    
+    Object.defineProperties( init, {
+        __treeChanged: { value: changed },
+        __treeRemoved: { value: removed },
+     } );
+
+     return new Proxy( init, recursiveProxy );
+}
+
 class StorageManager extends customEventTarget {
-    constructor ( area, id = secureRandom(), init ) {
+    constructor ( area, id = secureRandom(), init = {} ) {
         super();
-        Object.defineProperties( this, { area: { value: area }, id: { value: id } } );
-        this.init( init )
+        Object.defineProperties( this, {
+            area: { value: area },
+            id: { value: id },
+            ACC: { value: new accumulator( data => this.update( data ) ) }
+        } );
+        this.constructor.init.call( this, init );
+        window.addEventListener( "beforeunload", () => {
+            this.area.removeItem( `${this.id}__UPDATE` );
+            this.area.removeItem( this.id );
+        } )
     }
 
-    init ( init = {} ) {
-        let obj = {};
-        Object.defineProperties( obj, { __treeChanged: { value: () => this.storage() } } );
-        this._Stored = new Proxy( obj, recursiveProxy );
-        for ( const [ key, value ] of Object.entries( JSON.parse( this.area.getItem( this.id ) || init ) ) ) {
+    static init ( init ) {
+        this._Stored = tracedObject( {}, {
+            changed: changed => this.ACC.log( changed ),
+            removed: removed => this.ACC.log( removed )
+        } );
+        for ( const [ key, value ] of Object.entries( JSON.parse( this.area.getItem( this.id ) || JSON.stringify( init ) ) ) ) {
             this._Stored[ key ] = value;
         }
     }
 
-    update () {
-
+    update ( data ) {
+        this.area.setItem( `${this.id}__UPDATE`, JSON.stringify( data ) );
+        this.area.setItem( this.id, JSON.stringify( this._Stored ) );
+        console.log( data );
     }
 
     get storage () {
         return this._Stored;
     }
 
-    storage () {
-        this.area.setItem( this.id, JSON.stringify( this._Stored ) )
+    set storage ( invalid ) {
+        return null;
     }
 }
 
