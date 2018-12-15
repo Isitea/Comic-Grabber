@@ -1,6 +1,5 @@
 "use strict";
-import { HTML, StorageManager } from './CE-library.js';
-HTML.extend();
+import { StorageManager } from './library.util.js';
 
 let storage = new StorageManager( localStorage, "extTest" );
 
