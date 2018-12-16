@@ -7,7 +7,7 @@ import { HTML } from './library.HTML.js';
  * @param {Array} array 
  * @returns {NodeList}
  */
-function cATN ( array ) {
+function cA2Nl ( array ) {
     let nodelist;
     { class NodeList extends Array {}; nodelist = new NodeList( ...array ); }
     Object.setPrototypeOf( nodelist, NodeList.prototype );
@@ -20,11 +20,11 @@ class ImageGrabbler {
         
     }
 
-    grabImages ( ancestorNode ) {
+    grabImages ( anchor ) {
         let list, xhrList = [];
-        if ( !( ancestorNode instanceof Node || ancestorNode instanceof NodeList ) ) return false;
-        if ( ancestorNode instanceof Node ) { list = [ ...ancestorNode.querySelectorAll( "img" ) ]; }
-        else if ( ancestorNode instanceof NodeList ) { list = [ ...ancestorNode ]; }
+        if ( !( anchor instanceof Node || anchor instanceof NodeList ) ) return false;
+        if ( anchor instanceof Node ) { list = [ ...anchor.querySelectorAll( "img" ) ]; }
+        else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
         else return false;
         
         for ( const originalItem of list ) {
@@ -39,7 +39,7 @@ class ImageGrabbler {
                 }
             } );
         }
-        cATN( xhrList );
+        cA2Nl( xhrList );
     }
 }
 
