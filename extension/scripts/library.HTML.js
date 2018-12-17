@@ -5,8 +5,9 @@ class HTMLExtender {
     }
 
    /**
-    * Extends Node method for multi appending child node.
-    * Node.appendChildren only accepts NodeList.
+    * @description Extends Node object for multi appending child node.
+    * @param {NodeList} children - Nodes which are append to the target.
+    * @returns {void}
     */
     static appendChildren () {
         if ( !Node.prototype.appendChildren ) {
@@ -21,71 +22,53 @@ class HTMLExtender {
     }
 
     /**
-     * Make progress event on Image tag via XMLHttpRequest.
-     * Following properties are enchanted to Image class.
-     * Image.xhrUri: get - Return XMLHttpRequest which was used for loading image.
-     * Image.xhrUri: get - Return XMLHttpRequest which was used for loading image.
-     * Image.binaryData: Blob form of image data. It is set when XMLHttpRequest is successfully done.
-     * Image.lengthComputable, Image.loaded, Image.total: Progress information. It is refreshed with Progress event.
+     * @description Implants fetchUri method on Image object. The fetch method is an async function which retruns Promise object.
+     * @param {String} uri - Image uri
+     * @return {Promise} - Promise object which represents Blob of the loaded image.
      * 
-     * Added events
-     * Image - Progress event: This event is a clone of one of XMLHttpRequest.
+     * @property {Blob} binaryData - This property is set when the image is successfully fetched.
+     * 
+     * @event Image#ProgressEvent:progress
+     * @type {Object}
+     * @property {Boolean} lengthComputable - Indicate whether is it available to show the target size.
+     * @property {Number} total - The target size as bits. 0 when the target size is unknown.
+     * @property {Number} loaded - Received target size as bits.
      */
-    static xhrImageLoader () {
-        if ( !Image.prototype.xhrUri ) {
-            Object.defineProperty( Image.prototype, "xhrUri", {
-                set: function ( uri ) {
-                    this.async = new Promise( ( resolve, reject ) => {
-                        this.addEventListener( "load", () => { resolve( this.binaryData ); }, { once: true } );
-                        this.addEventListener( "error", reject, { once: true } );
-                    } );
-                    let xhr = new XMLHttpRequest();
+    static fetchUri () {
+        if ( !Image.prototype.fetchUri ) {
+            Object.defineProperty( Image.prototype, "fetchUri", {
+                set: async function ( uri ) {
                     Object.defineProperties( this, {
-                        xhr: { value: xhr, writable: false, configurable: true },
-                        lengthComputable: { value: true, writable: false, configurable: true },
-                        loaded: { value: 0, writable: false, configurable: true },
-                        total: { value: 0, writable: false, configurable: true },
-                        binaryData: { writable: false, configurable: true },
+                        binaryData: { value: null, writable: false, configurable: true },
                     } );
-                    xhr.responseType = "blob";
-                    xhr.open( 'get', uri, true );
-                    xhr.addEventListener( "load", async () => {
-                        let blob;
-                        if ( xhr.response.type.match( 'image' ) ) { blob = xhr.response; }
-                        else {
-                            blob = await new Promise( resolve => {
-                                let fileReader = new FileReader();
-                                fileReader.addEventListener( "load", evt => {
-                                    const arraybuffer = evt.target.result;
-                                    resolve( new Blob( [ arraybuffer ], { type: recognizeByFileSignature( arraybuffer ) } ) );
-                                } );
-                                fileReader.readAsArrayBuffer( xhr.response );
-                            } );
+                    const response = await fetch( uri.replace( /^https?:/i, "" ), { redirect: "manual" } );
+                    const contentType = response.headers.get( 'Content-Type' );
+                    let total = Number( response.headers.get( 'Content-Length' ) );
+                    const reader = await response.body.getReader();
+                    let loaded = new Uint8Array( total ), cursor = 0;
+                    do {
+                        const { done, value: bin } = await reader.read();
+                        if ( !bin ) break;
+                        if ( cursor + bin.length > total ) total = 0;
+                        if ( total === 0 ) {
+                            let tmp = new Uint8Array( cursor + bin.length );
+                            tmp.set( loaded, 0 );
+                            tmp.set( bin, cursor );
+                            loaded = tmp;
                         }
-                        if ( blob.type.match( 'image' ) ) {
-                            Object.defineProperties( this, {
-                                binaryData: { value: blob },
-                            } );
-                            this.src = URL.createObjectURL( blob );
-                            this.addEventListener( "load", () => URL.revokeObjectURL( this.src ), { once: true } );
-                        }
-                        else {
-                            Object.defineProperties( this, { lengthComputable: { value: true }, loaded: { value: 0 }, total: { value: 0 } } );
-                            this.dispatchEvent( Object.assign( new Event( "error" ), { status: xhr.status, blob, statusText: "Content which URI indicated is not an image." } ) );
-                        }
-                    } );
-                    xhr.addEventListener( "progress", ( { lengthComputable, loaded, total } ) => {
-                        Object.defineProperties( this, {
-                            lengthComputable: { value: lengthComputable },
-                            loaded: { value: loaded },
-                            total: { value: total }
-                        } );
-                        this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable, loaded, total } ) );
-                    } );
-                    xhr.send();
-                },
-                get: function () {
-                    return this.xhr;
+                        else loaded.set( bin, cursor );
+                        cursor += bin.length;
+                        this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: cursor, total } ) );
+                        if ( done ) break;
+                    } while ( cursor < total || total === 0 );
+                    reader.releaseLock();
+            
+                    let blob = new Blob( [ loaded ], { type: contentType || recognizeByFileSignature( loaded ) } );
+                    this.src = URL.createObjectURL( blob );
+                    Object.defineProperties( this, { binaryData: { value: blob } } );
+                    this.addEventListener( "load", () => URL.revokeObjectURL( this.src ), { once: true } );
+            
+                    return blob;
                 }
             } );
         }
@@ -99,7 +82,8 @@ class HTMLExtender {
  * Method setProperties ( node, attributes ) returns passed node after set properties.
  * node: Node object.
  * attributes: {
- *  propertyName: propertyValue (When propertyValue is "", just made attribute node and add it on the node.),
+ *  propertyName: propertyValue,
+ *  style: String - CSS,
  *  _child: structure or Array of structure,
  *  _todo: Function or Array of Function (Any element which is not Function object is ignored.),
  *  Listeners: [
@@ -224,13 +208,15 @@ class HTML {
 
 function recognizeByFileSignature ( arraybuffer ) {
     //File signature information ( https://en.wikipedia.org/wiki/List_of_file_signatures )
+    //File signature information ( http://forensic-proof.com/archives/300 )
+    //File signature information ( https://www.filesignatures.net/ )
     const signatures = {
         "image/png": [ "89504E470D0A1A0A" ],
-        "image/jpeg": [ "FFD8FFDB", "FFD9FFE000104A4649460001", "FFD8FFEE", "FFD8FFE1[A-F0-9]{4,4}457869660000" ],
-        "image/gif": [ "474946383761", "474946383961" ],
-        "image/tiff": [ "49492A00", "4D4D002A" ],
+        "image/jpeg": [ "FFD8FFE[0-9]" ],
+        "image/gif": [ "47494638" ],
+        "image/tiff": [ "49492A00", "4D4D002[AB]", "492049" ],
         "image/bmp": [ "424D" ],
-        "image/webp": [ "52494646[A-F0-9]{8,8}57454250" ],
+        "image/webp": [ "52494646[0-9A-F]{6,6}57454250" ],
     };
     //Read signature from binary
     const binSign = ( new Uint8Array( arraybuffer.slice( 0, 24 ) ) ).reduce( ( hex, bin ) => hex + bin.toString( 16 ), "" ).toUpperCase();
@@ -238,6 +224,7 @@ function recognizeByFileSignature ( arraybuffer ) {
     for ( const [ category, sign ] of Object.entries( signatures ) ) {
         if ( binSign.match( new RegExp( `^${sign.join( "|^" )}` ) ) ) return category;
     }
+    //When none of the heading signatures was matched.
     return "application/octet-strem";
 }
 
