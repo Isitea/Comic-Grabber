@@ -4,13 +4,15 @@ class HTMLExtender {
         for ( let fn of fnList ) this[fn]();
     }
 
-   /**
-    * @description Extends Node object for multi appending child node.
-    * @param {NodeList} children - Nodes which are append to the target.
-    * @returns {void}
-    */
+    /**
+     * @description Extends Node object for multi appending child node.
+     */
     static appendChildren () {
         if ( !Node.prototype.appendChildren ) {
+            /**
+             * @param {NodeList} children - Nodes which are append to the target.
+             * @returns {void}
+             */
             Node.prototype.appendChildren = function ( children ) {
                 if ( children instanceof NodeList ) {
                     for ( let item of [ ...children ] ) this.appendChild( item );
@@ -23,23 +25,26 @@ class HTMLExtender {
 
     /**
      * @description Implants fetchUri method on Image object. The fetch method is an async function which retruns Promise object.
-     * @param {String} uri - Image uri
-     * @return {Promise} - Promise object which represents Blob of the loaded image.
-     * 
-     * @property {Blob} binaryData - This property is set when the image is successfully fetched.
-     * 
-     * @event Image#ProgressEvent:progress
-     * @type {Object}
-     * @property {Boolean} lengthComputable - Indicate whether is it available to show the target size.
-     * @property {Number} total - The target size as bits. 0 when the target size is unknown.
-     * @property {Number} loaded - Received target size as bits.
      */
     static fetchUri () {
         if ( !Image.prototype.fetchUri ) {
             Object.defineProperty( Image.prototype, "fetchUri", {
+                /**
+                 * @param {String} uri - Image uri
+                 * @return {Promise} - Promise object which represents Blob of the loaded image.
+                 * 
+                 * @property {Promise<Blob>} binaryData - This property is Promise object which represents Blob of the loaded image when the image is successfully fetched.
+                 * 
+                 * @event Image#ProgressEvent:progress
+                 * @type {Object}
+                 * @property {Boolean} lengthComputable - Indicate whether is it available to show the target size.
+                 * @property {Number} total - The target size as bits. 0 when the target size is unknown.
+                 * @property {Number} loaded - Received target size as bits.
+                 */
                 set: async function ( uri ) {
+                    let binaryData;
                     Object.defineProperties( this, {
-                        binaryData: { value: null, writable: false, configurable: true },
+                        binaryData: { value: new Promise( resolve => binaryData = resolve ), writable: false, configurable: true },
                     } );
                     const response = await fetch( uri.replace( /^https?:/i, "" ), { redirect: "manual" } );
                     const contentType = response.headers.get( 'Content-Type' );
@@ -65,8 +70,8 @@ class HTMLExtender {
             
                     let blob = new Blob( [ loaded ], { type: contentType || recognizeByFileSignature( loaded ) } );
                     this.src = URL.createObjectURL( blob );
-                    Object.defineProperties( this, { binaryData: { value: blob } } );
                     this.addEventListener( "load", () => URL.revokeObjectURL( this.src ), { once: true } );
+                    binaryData( blob );
             
                     return blob;
                 }
