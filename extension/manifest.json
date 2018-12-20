@@ -11,7 +11,7 @@
 		"webRequest",
 		"webRequestBlocking",
 		"downloads",
-		"activeTab",
+		"storage",
 		"<all_urls>"
 	],
 	"web_accessible_resources": [

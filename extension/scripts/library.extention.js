@@ -102,7 +102,7 @@ class ImageGrabbler {
         else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
         else return false;
         
-        return this.captured = list.reduce( ( captureList, item ) => {
+        Object.defineProperty( this, "captured", { value: list.reduce( ( captureList, item ) => {
             HTML.render( {
                 img: {
                     fetchUri: item.dataset.original || item.src,
@@ -113,7 +113,9 @@ class ImageGrabbler {
                     }
                 }
             } );
-        }, [] );
+        }, [] ) } );
+        return this.captured;
     }
 }
 
+export { ImageGrabbler }

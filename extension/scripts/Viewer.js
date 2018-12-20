@@ -1,7 +1,6 @@
 "use strict";
 import { StorageManager } from './library.util.js';
-
-let storage = new StorageManager( localStorage, "extTest" );
+import { ImageGrabbler } from './library.extention.js';
 
 function randomWrite( storage ) {
     setTimeout( () => {
@@ -10,5 +9,21 @@ function randomWrite( storage ) {
         randomWrite( storage );
     }, Math.random() * 5000 + 500 );
 }
+//randomWrite( ( new StorageManager( localStorage, "extTest" ) ).storage );
 
-//randomWrite( storage.storage );
+let grabbler = new ImageGrabbler();
+
+class ComicGrabbler {
+    constructor ( Preset ) {
+        if ( Preset ) {
+            Object.defineProperty( this, "subject", { value: grabbler.analyseInformation( Preset ), writable: true, configurable: false } ) ;
+            let { title, subTitle } = grabbler.analyseInformation( Preset );
+        }
+    }
+
+    saveToLocal () {
+        let zip = grabbler.solidateImages();
+        zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
+        
+    }
+}
