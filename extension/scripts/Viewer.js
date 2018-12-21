@@ -35,7 +35,7 @@ class ComicGrabbler {
 
     /**
      * Analyse title and sub-title of this page.
-     * @param {{ title: { selector: String, propertyChain: String, exp: String - Regular expression pattern }, subTitle: { selector: String, propertyChain: String, exp: String }, generalExp: String }}
+     * @param {{ title: { selector: String, propertyChain: String, exp: String }, subTitle: { selector: String, propertyChain: String, exp: String }, generalExp: String }}
      * @returns {{ title: string, subTitle: string }|null}
      */
     static analyseInformation ( { title, subTitle, generalExp } ) {

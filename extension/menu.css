@@ -1,0 +1,89 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    transition-duration: 500ms;
+}
+
+.menu {
+    position: fixed;
+    bottom: 1vh;
+    left: 1vw;
+    max-width: 64px;
+    max-height: 64px;
+    background: rgba(45, 255, 244, 0.5);
+}
+
+.menu > .list {
+    max-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    font-size: 32px;
+}
+
+.menu:hover {
+    max-height: 100vh;
+    max-width: 100vw;
+}
+
+.menu:hover > .list {
+    max-height: 100vh;
+    max-width: 100vw;
+}
+
+.menu > .list > .item {
+    background: rgba( 0, 0, 0, 0.75 );
+    color: rgba( 255, 255, 255, 1 );
+}
+
+.item {
+    position: relative;
+    width: calc( 128px + 256px );
+}
+
+.item > * {
+    float: left;
+    display: flex;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+}
+
+.item .label {
+    width: 128px;
+}
+.item .label label {
+    width: 100%;
+}
+
+.item .input {
+    width: 256px;
+}
+
+.item .input input {
+    width: 100%;
+}
+
+
+.menu > .bottom-padding {
+    height: 64px;
+    width: 100%px;
+}
+
+.menu-button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-radius: 50%;
+    background: rgba( 0, 0, 0, 0.75 );
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+    line-height: 64px;
+    color: rgba( 255, 255, 255, 1 );
+    text-align: center;
+}
+
+.menu:hover > .menu-button {
+    transform: rotateZ( 45deg );
+}
