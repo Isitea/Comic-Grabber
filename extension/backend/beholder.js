@@ -1,5 +1,12 @@
 "use strict";
-import 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.js';
+const client = ( function () {
+    try {
+        return browser;
+    }
+    catch ( e ) {
+        return chrome;
+    }
+} )();
 
 class Header {
     constructor ( httpHeader ) {
@@ -38,9 +45,9 @@ class Header {
 }
 
 class Downloader {
-    constructor ( downloadsAPI ) {
+    constructor () {
         Object.defineProperties( this, {
-            api: { value: downloadsAPI }
+            api: { value: client.downloads },
         } );
     }
 
@@ -175,3 +182,40 @@ class DownloadManager {
             } );
     }
 }
+
+let headerModifier = [
+//    {
+//        filter: ( details, header ) => ( header[ "content-type" ] ? header[ "content-type" ].match( "image" ) : false ),
+//        fields: [
+//            {
+//                name: "Access-Control-Allow-Origin",
+//                value: "*"
+//            }
+//        ]
+//    },
+    {
+        filter: () => true ,
+        fields: [
+            {
+                name: "Access-Control-Allow-Origin",
+                value: "*"
+            }
+        ]
+    },
+];
+client.webRequest.onHeadersReceived.addListener( ( details ) => {
+    let header = new Header( details.responseHeaders ), flag;
+
+    for ( const modifier of headerModifier ) {
+        if ( modifier.filter( details, header ) ) {
+            flag = true;
+            for ( const field of modifier.fields ) {
+                header.write( field );
+            }
+        }
+    }
+
+    if ( flag ) {
+        return { responseHeaders: header.arrayform };
+    }
+}, { urls: [ '*://*/*' ] }, [ 'blocking', 'responseHeaders' ] );

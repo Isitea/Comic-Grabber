@@ -1,6 +1,8 @@
 "use strict";
 import { StorageManager } from './library.util.js';
-import { ImageGrabbler } from './library.extention.js';
+import './library.extend.js';
+import { HTML } from './library.HTML.js';
+import { ImageGrabbler } from './ImageGrabbler.js';
 
 function randomWrite( storage ) {
     setTimeout( () => {
@@ -11,15 +13,51 @@ function randomWrite( storage ) {
 }
 //randomWrite( ( new StorageManager( localStorage, "extTest" ) ).storage );
 
-let grabbler = new ImageGrabbler();
+function getPropertyChain ( obj, chain ) {
+    let value = obj;
+    for ( let prop of chain.split( "." ) ) {
+        if ( prop in value ) value = value[prop];
+    }
+    return value;
+}
+
 
 class ComicGrabbler {
-    constructor ( Preset = {} ) {
-        Object.defineProperty( this, "subject", { writable: true, configurable: false } ) ;
-        if ( Preset.pattern ) {
-            this.subject = grabbler.analyseInformation( Preset.pattern );
+    constructor ( grabbler, Preset ) {
+        Object.defineProperties( this, {
+            grabbler: { value: grabbler },
+            subject: { value: {}, writable: true },
+        } );
+        if ( Preset.subject ) {
+            this.subject = this.constructor.analyseInformation( Preset.subject );
         }
-        if ( this.subject !== null && Preset.storage ) {}
+        if ( Preset.images ) {
+            grabbler.grabImages( document.querySelectorAll( Preset.images ) );
+        }
+        
+        console.log( this );
+    }
+
+    /**
+     * Analyse title and sub-title of this page.
+     * @param {{ title: { selector: String, propertyChain: String, exp: String }, subTitle: { selector: String, propertyChain: String, exp: String }, generalExp: String }}
+     * @returns {{ title: string, subTitle: string }|null}
+     */
+    static analyseInformation ( { title, subTitle, generalExp } ) {
+        let result = null;
+        try {
+            if ( title && subTitle ) {
+                result = {
+                    title: document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" ),
+                    subTitle: document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" )
+                };
+            }
+            else {
+                result = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().match( new RegExp( generalExp ) ).groups;
+            }
+        } catch ( e ) { console.log( e ) }
+        console.log( result );
+        return result;
     }
 
     async saveToLocal ( { localPath, onConflict } ) {
@@ -34,3 +72,18 @@ class ComicGrabbler {
         }
     }
 }
+
+let Preset = {
+    subject: {
+        title: {
+            selector: ".comicinfo .detail h2:first-child",
+            propertyChain: ".firstChild.textContent"
+        },
+        subTitle: {
+            selector: ".tit_area .view h3",
+            propertyChain: ".textContent"
+        }
+    },
+    images: ".view_area .wt_viewer img",
+};
+let comic = new ComicGrabbler( new ImageGrabbler(  ), Preset );
