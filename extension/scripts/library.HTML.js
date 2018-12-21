@@ -69,46 +69,19 @@ Object.defineProperties( Image.prototype, {
 } );
 
 /**
- * DOM creation helper. It has static method only.
- * Use HTML.extend() before using other method.
- * 
- * Method setProperties ( node, attributes ) returns passed node after set properties.
- * node: Node object.
- * attributes: {
- *  propertyName: propertyValue,
- *  style: String - CSS,
- *  _child: structure or Array of structure,
- *  _todo: Function or Array of Function (Any element which is not Function object is ignored.),
- *  Listeners: [
- *      {
- *          type: eventName,
- *          listener: Function ( event ) { something to do }
- *          options: eventOptions
- *      }
- *  ]
- * }
- * 
- * Method render( structure or Array of structure [, preset ] ) returns rendered structure as NodeList.
- * structure: {
- *  tagName: attributes
- * }
- * preset: {
- *  tagName: Function ( node ) {
- *      something to do after an element node is made.
- *      return node;
- *  }
- * }
- * 
- */
-/**
  * @description DOM creation helper. It has static method only.
- * @param 
+ * @typedef {String} propertyName - Property name of HTMLElement object.
+ * @typedef {String} tagName - Tag name for creation of HTMLElement object.
+ * @typedef {{ propertyName: (String|Number), _child: (Array<Node|HTMLStructure>|NodeList), _todo: (Function|Array<Function>) }} HTMLProperties
+ * @typedef {{ tagName: (HTMLProperties) }} HTMLStructure
+ * @typedef {{ tagName: Function}} HTMLPreset
  */
 class HTML {
     /**
-     * 
-     * @param {*} structure 
-     * @param {*} preset 
+     * Create HTMLElement as passed HTMLStructure object
+     * @param {HTMLStructure} structure
+     * @param {HTMLPreset} preset
+     * @returns {NodeList} Rendered DOM structure as NodeList
      */
     static render ( structure, preset = {} ) {
         if ( structure instanceof NodeList ) return structure;
@@ -141,9 +114,9 @@ class HTML {
     }
 
     /**
-     * 
-     * @param {Node} node 
-     * @param {*} properties 
+     * Set properties on passed Node object
+     * @param {Node} node
+     * @param {HTMLProperties} properties 
      * @returns {Node} Same as passed and it has properties.
      */
     static setProperties ( node, properties ) {
@@ -194,6 +167,10 @@ class HTML {
     }
 }
 
+/**
+ * Recognize file type based on magic number
+ * @param {ArrayBuffer} arraybuffer 
+ */
 function recognizeByFileSignature ( arraybuffer ) {
     //File signature information ( https://en.wikipedia.org/wiki/List_of_file_signatures )
     //File signature information ( http://forensic-proof.com/archives/300 )

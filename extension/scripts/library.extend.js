@@ -1,6 +1,23 @@
 "use strict";
 Object.defineProperties( Object.prototype, {
     readProperty: {
+        /**
+         * Follow propertyChain and return value. But when there is no matched property name, it is ignored.
+         * @example
+         * // returns document.body.innerHTML
+         * document.readProperty( "body.innerHTML" );
+         * @example
+         * // returns document.body.childNodes
+         * document.readProperty( ".body.childNodes" );
+         * @example
+         * // returns document.body.innerHTML
+         * document.readProperty( "body.innerHTML.IGNORED" );
+         * @example
+         * // returns document.body.childNodes
+         * document.readProperty( ".body.IGNORED.childNodes" );
+         * @param {String} propertyChain 
+         * @returns {*}
+         */
         value: function ( propertyChain = "" ) {
             let value = this;
             for ( let prop of propertyChain.split( "." ) ) {
@@ -13,7 +30,7 @@ Object.defineProperties( Object.prototype, {
 Object.defineProperties( Array.prototype, {
     toNodeList: {
         /**
-         * Converts Array object to NodeList object
+         * Converts Array object to NodeList object with filter.
          * @returns {NodeList}
          */
         value: function () {
@@ -34,6 +51,10 @@ Object.defineProperties( Array.prototype, {
 } );
 Object.defineProperties( String.prototype, {
     toFilename: {
+        /**
+         * Escape characters in String object for FileSystem
+         * @returns {String}
+         */
         value: function () {
             let decoder = document.createElement( "div" );
             decoder.innerHTML = this;
