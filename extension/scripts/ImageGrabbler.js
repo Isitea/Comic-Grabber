@@ -17,7 +17,7 @@ class ImageGrabbler {
      */
     async solidateImages ( targets = this.captured ) {
         return ( await targets.reduce( async ( list, item, index ) => {
-            let blob = await item.bninaryData;
+            let blob = await item.binaryData;
             ( await list ).push( {
                 blob,
                 name: `${index.toString().padStart( 3, "0" )}.${ blob.type.match( /image\/(?<extension>\w+);?/ ).groups.extension.replace( /jpeg/gi, 'jpg' ) }`

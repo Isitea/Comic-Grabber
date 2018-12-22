@@ -1,12 +1,5 @@
 "use strict";
-const client = ( function () {
-    try {
-        return browser;
-    }
-    catch ( e ) {
-        return chrome;
-    }
-} )();
+const $client = ( function () { try { return browser; } catch ( e ) { return chrome; } } )();
 
 class Header {
     constructor ( httpHeader ) {
@@ -47,139 +40,22 @@ class Header {
 class Downloader {
     constructor () {
         Object.defineProperties( this, {
-            api: { value: client.downloads },
+            api: { value: $client.downloads },
         } );
     }
 
-    getMedia ( url ) {
-        return new Promise( ( resolve, reject ) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open( "GET", url, true );
-            xhr.responseType = "blob";
-            xhr.addEventListener( "load", e => { this.downloading--; resolve( xhr.response ); } );
-            xhr.addEventListener( "error", e => { console.log( e ); reject( new Blob( [ url ], { type: "plain/text" } ) ); } );
-            this.downloading++;
-            xhr.send();
-        } );
-    }
-
-    filename ( name, type ) {
-        let extension = type.split( "/" ).pop();
-        if ( name.match( RegExp( `(?<name>.+)\.${extension}\$` ) ) ) {
-            
-        }
-    }
-
-    makeArchive ( mediaList, archiveName ) {
-        let Zip = new JSZip(), list = [];
-        Zip.file( 'Media origin.json', new Blob( [ JSON.stringify( mediaList ) ], { type: 'text/plain' } ) );
-        for ( let media of mediaList ) {
-            list.push( this.getMedia( media ).then( blob => Zip.file( media.match( /.+\/(?<uri>.+)/ ).groups.uri, blob ) ) );
-        }
-        Promise.all( list ).then( () => {} )
-        Zip.generateAsync( { type: "blob" } )
-        .then( blob => this.save( {
-            url: URL.createObjectURL( blob ),
-            filename: `${archiveName}.zip`.replace( /\/+/g, "/" ),
-            conflictAction: "overwrite",
-            retainList: archive.retainList
-        } ) )
-    }
-
-    save ( info ) {
-        if ( info.blob ) {
-            if ( info.blob instanceof Blob && blob.size ) {
-                info.url = URL.createObjectURL( info.blob );
+    save ( download ) {
+        const $api = ( () => {
+            try { browser; return this.api.download; }
+            catch ( e ) { return ( download ) => new Promise( resolve => this.api.download( download, resolve ) ) }
+        } )();
+        if ( download.blob ) {
+            if ( download.blob instanceof Blob && blob.size ) {
+                download.url = URL.createObjectURL( download.blob );
             }
-            delete info.blob;
+            delete download.blob;
         }
-        let download;
-        try {
-            browser;
-            download = api.download( info );
-        } catch ( e ) {
-            download = new Promise( resolve => this.api.download( info, resolve ) );
-        }
-        return download.then( () => URL.revokeObjectURL( info.url ) );
-    }
-}
-
-class DownloadManager {
-    constructor ( downloads ) {
-        this._api = downloads;
-        this.downloading = 0;
-        this._path = "Downloaded images";
-    }
-
-    static ajax ( url ) {
-        return new Promise( ( resolve, reject ) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open( "GET", url, true );
-            xhr.responseType = "blob";
-            xhr.addEventListener( "load", event => resolve( xhr.response ) );
-
-            xhr.send();
-        } );
-    }
-
-    set setDownloadPath ( path ) {
-        this._path = path;
-    }
-
-    batchDownload ( archive ) {
-        this.downloading++;
-        let Zip = new JSZip();
-        let promises = [];
-        if ( archive.downloadPath ) this.setDownloadPath = archive.downloadPath;
-        Zip.file( 'Downloaded from.txt', new Blob( [ archive.downloadFrom ], { type: 'text/plain' } ) );
-        for ( const item of archive.list ) {
-            if ( item.blob && item.blob.size ) promises.push( Promise.resolve( Zip.file( item.name, item.blob ) ) );
-            else promises.push( this.constructor.ajax( item.url ).then( blob => Zip.file( item.name, blob ) ) );
-        }
-        return Promise.all( promises )
-            .then( () =>  Zip.generateAsync( { type: "blob" } )
-            .then( blob => this.download( {
-                url: URL.createObjectURL( blob ),
-                filename: `${this._path}/${archive.title}/${archive.episode || archive.title}.zip`.replace( /\/+/g, "/" ),
-                conflictAction: "overwrite",
-                retainList: archive.retainList
-            } ) ) );
-    }
-
-    download ( info ) {
-        let api = this._api, retainList = info.retainList;
-        delete info.retainList;
-        let download = function ( info ) {
-            let download, blob = info.blob;
-            delete info.blob;
-            try {
-                browser;
-                if ( blob instanceof Blob && blob.size ) {
-                    info.url = URL.createObjectURL( blob );
-                }
-                download = api.download( info );
-            }
-            catch ( e ) {
-                download = new Promise( ( resolve, reject ) => api.download( info, resolve ) );
-            }
-
-            return download;
-        };
-        return download( info )
-            .then( id => new Promise( ( resolve, reject ) => {
-                    function onComplete ( item ) {
-                        if ( item.id === id && item.state && item.state.current === "complete" ) {
-                            api.onChanged.removeListener( onComplete );
-                            if ( !retainList ) api.erase( { id } );
-                            resolve( info.url );
-                        }
-                    }
-                    api.onChanged.addListener( onComplete );
-                } ) )
-            .then( url => {
-                URL.revokeObjectURL( url );
-                this.downloading--;
-            } );
+        return $api( download ).then( () => URL.revokeObjectURL( download.url ) );
     }
 }
 
@@ -194,23 +70,23 @@ let headerModifier = [
 //        ]
 //    },
     {
-        filter: () => true ,
+        filter: ( details, header ) => true ,
         fields: [
-            {
+            ( { initiator, originUrl } ) => ( {
                 name: "Access-Control-Allow-Origin",
-                value: "*"
-            }
+                value: ( initiator || originUrl || "" )
+            } ),
         ]
     },
 ];
-client.webRequest.onHeadersReceived.addListener( ( details ) => {
+$client.webRequest.onHeadersReceived.addListener( ( details ) => {
     let header = new Header( details.responseHeaders ), flag;
 
     for ( const modifier of headerModifier ) {
         if ( modifier.filter( details, header ) ) {
             flag = true;
             for ( const field of modifier.fields ) {
-                header.write( field );
+                header.write( ( field instanceof Function ? field( details, header ) : field ) );
             }
         }
     }
@@ -219,3 +95,15 @@ client.webRequest.onHeadersReceived.addListener( ( details ) => {
         return { responseHeaders: header.arrayform };
     }
 }, { urls: [ '*://*/*' ] }, [ 'blocking', 'responseHeaders' ] );
+
+const $downloader = new Downloader();
+$client.runtime.onMessage.addListener( ( message, sender, sendResponse ) => {
+    console.log( message );
+    switch ( message.type ) {
+        case "saveToLocal": {
+            $downloader.save( message.download )
+                .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabbler.archiveSaved" } ) );
+            break;
+        }
+    }
+} )

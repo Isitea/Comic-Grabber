@@ -60,7 +60,10 @@ Object.defineProperties( Image.prototype, {
 
             let blob = new Blob( [ loaded ], { type: contentType || recognizeByFileSignature( loaded ) } );
             this.src = URL.createObjectURL( blob );
-            this.addEventListener( "load", () => URL.revokeObjectURL( this.src ), { once: true } );
+            this.addEventListener( "load", () => {
+                this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: blob.size, total: blob.size } ) );
+                URL.revokeObjectURL( this.src );
+            }, { once: true } );
             binaryData( blob );
 
             return blob;
