@@ -74,7 +74,7 @@ Object.defineProperties( String.prototype, {
                 .replace( /？⁉|(？！)+/g, "⁈" )
                 .replace( /[\r\n\s]+/g, " " )
                 .replace( /\u200b+/g, "" )
-                .replace( /^[.\s]*|[.\s]*$/g, "" )
+                .replace( /^[.\-~\s]*|[.\s]*$/g, "" )
         }
     }
 } );

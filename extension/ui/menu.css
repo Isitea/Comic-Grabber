@@ -1,4 +1,4 @@
-.ComicGrabbler.menu, .ComicGrabbler .menu * {
+.ComicGrabbler.menu-CG, .ComicGrabbler .menu-CG * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
@@ -9,7 +9,7 @@
   text-align: center;
 }
 
-.ComicGrabbler.menu {
+.ComicGrabbler.menu-CG {
   position: fixed;
   z-index: 999999;
   bottom: 1vh;
@@ -18,13 +18,13 @@
   max-height: 48px;
 }
 
-.ComicGrabbler.menu > .list {
+.ComicGrabbler.menu-CG > .list-CG {
   max-height: 0;
   max-width: 0;
   overflow: hidden;
 }
 
-.ComicGrabbler.menu > .list > .item {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG {
   position: relative;
   width: calc( 256px * 1.2);
   display: flex;
@@ -34,26 +34,26 @@
   color: white;
 }
 
-.ComicGrabbler.menu > .list > .item * {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG * {
   height: 24px;
   width: 100%;
   display: inline-block;
   color: white;
 }
 
-.ComicGrabbler.menu > .list > .item > .label {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .label-CG {
   width: calc( 100% * 2 / 5);
 }
 
-.ComicGrabbler.menu > .list > .item > .label > label {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .label-CG > label {
   cursor: pointer;
 }
 
-.ComicGrabbler.menu > .list > .item > .textInput {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .text-CG {
   width: calc( 100% * 3 / 5);
 }
 
-.ComicGrabbler.menu > .list > .item > .textInput > input, .ComicGrabbler.menu > .list > .item > .textInput > select {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .text-CG > input, .ComicGrabbler.menu-CG > .list-CG > .item-CG > .text-CG > select {
   caret-color: white;
   text-align: center;
   display: block;
@@ -62,17 +62,17 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
-.ComicGrabbler.menu > .list > .item > .row .checkbox {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG .checkbox-CG {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   cursor: pointer;
 }
 
-.ComicGrabbler.menu > .list > .item > .row .checkbox.checked {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG .checkbox-CG.checked {
   color: lime;
 }
 
-.ComicGrabbler.menu > .list > .item > .row .checkbox.checked:before {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG .checkbox-CG.checked:before {
   content: "";
   width: calc( 16px / 2);
   height: 16px;
@@ -83,12 +83,30 @@
   display: inline-flex;
 }
 
-.ComicGrabbler.menu > .bottom-padding, .ComicGrabbler.menu > .menu-button {
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG > .moveChapter-CG {
+  width: 50%;
+}
+
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG > .moveChapter-CG:first-child {
+  border-width: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG > .moveChapter-CG:last-child {
+  border-width: 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.ComicGrabbler.menu-CG > .list-CG > .item-CG > .row-CG > .moveChapter-CG:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.ComicGrabbler.menu-CG > .bottom-padding-CG, .ComicGrabbler.menu-CG > .menu-button-CG {
   height: 48px;
   width: 48px;
 }
 
-.ComicGrabbler.menu > .menu-button {
+.ComicGrabbler.menu-CG > .menu-button-CG {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -96,7 +114,7 @@
   background: rgba(0, 0, 0, 0.75);
 }
 
-.ComicGrabbler.menu > .menu-button::before {
+.ComicGrabbler.menu-CG > .menu-button-CG::before {
   color: white;
   font-size: 48px;
   line-height: 48px;
@@ -105,31 +123,31 @@
   content: "+";
 }
 
-.ComicGrabbler.menu > .menu-button.alert {
+.ComicGrabbler.menu-CG > .menu-button-CG.alert {
   transform: rotateZ(0deg) !important;
 }
 
-.ComicGrabbler.menu > .menu-button.alert::before {
+.ComicGrabbler.menu-CG > .menu-button-CG.alert::before {
   content: "!";
   color: rgba(255, 0, 0, 0.9);
 }
 
-.ComicGrabbler.menu > .load-progress {
+.ComicGrabbler.menu-CG > .load-progress-CG {
   position: absolute;
   bottom: 0;
   left: 0;
 }
 
-.ComicGrabbler.menu:hover {
+.ComicGrabbler.menu-CG:hover {
   max-height: 100vh;
   max-width: 100vw;
 }
 
-.ComicGrabbler.menu:hover > .menu-button {
+.ComicGrabbler.menu-CG:hover > .menu-button-CG {
   transform: rotateZ(45deg);
 }
 
-.ComicGrabbler.menu:hover > .list {
+.ComicGrabbler.menu-CG:hover > .list-CG {
   max-height: 100vh;
   max-width: 100vw;
 }

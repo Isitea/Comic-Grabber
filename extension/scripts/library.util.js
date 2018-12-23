@@ -41,7 +41,7 @@ class customEventTarget {
     }
 
     dispatchEvent ( event ) {
-        if ( !( event instanceof Event || event instanceof iEvent ) ) throw Error( "TypeError" );
+        if ( !( event instanceof Event ) ) throw Error( "TypeError" );
         if ( event.type in this.listeners ) {
             let stack = this.listeners[ event.type ];
             const preventDefault = event.defaultPrevented;
@@ -100,11 +100,12 @@ class accumulator {
 }
 
 class StorageManager extends customEventTarget {
-    constructor ( area, id = secureRandom(), init = {}, cleanUp = true ) {
+    constructor ( area, id = secureRandom(), init = {}, cleanUp = false ) {
         super();
         Object.defineProperties( this, {
             area: { value: area },
             id: { value: id },
+            response: { value: false, writable: true },
             ACC: { value: new accumulator( data => this.update( data ) ) }
         } );
         this.constructor.init.call( this, init );
@@ -115,6 +116,7 @@ class StorageManager extends customEventTarget {
         window.addEventListener( "storage", ( { key, newValue, oldValue, storageArea, url } ) => {
             if ( storageArea === this.area && key === `${this.id}__UPDATE` && newValue && newValue.length ) {
                 for ( const [ key, value ] of Object.entries( JSON.parse( newValue ) ) ) {
+                    this.response = true;
                     this._Stored[ key ] = value;
                 }
             }
@@ -129,12 +131,16 @@ class StorageManager extends customEventTarget {
         for ( const [ key, value ] of Object.entries( JSON.parse( this.area.getItem( this.id ) || JSON.stringify( init ) ) ) ) {
             this._Stored[ key ] = value;
         }
+        this.dispatchEvent( Object.assign( new Event( "initialized" ), { storage: this._Stored } ) );
     }
 
-    update ( data ) {
-        this.area.setItem( `${this.id}__UPDATE`, JSON.stringify( data ) );
+    update ( storage ) {
+        this.area.setItem( `${this.id}__UPDATE`, JSON.stringify( storage ) );
         this.area.setItem( this.id, JSON.stringify( this._Stored ) );
-        console.log( data );
+        if ( this.response ) {
+            this.response = false;
+            this.dispatchEvent( Object.assign( new Event( "updated" ), { storage } ) );
+        }
     }
 
     get storage () {

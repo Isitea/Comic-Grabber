@@ -1,5 +1,7 @@
 "use strict";
-const $log =  `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`;
+const $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`;
+const $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`;
+const $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
 const $client = ( () => { try { return browser; } catch ( e ) { return chrome; } } )();
 const $baseUri = chrome.runtime.getURL( "" );
 
@@ -69,41 +71,49 @@ console.log( `%cLoading components`, $log );
 moduleLoader( [ `scripts/comicGrabbler.js`, `ui/menu.css` ] );
 
 const $tunnel = new CommunicationTunnel();
-console.log( `%cUnder developing - extention id: ${chrome.runtime.id}`, $log.replace( /rgba\([\d\s,.]+\)/, "rgba( 114, 20, 214, 0.75 )" ) );
+console.log( `%cUnder developing - extension id: ${chrome.runtime.id}`, $log.replace( /rgba\([\d\s,.]+\)/, "rgba( 114, 20, 214, 0.75 )" ) );
 $tunnel.addListener( "ComicGrabbler.saveArchive", function ( download ) {
     $client.runtime.sendMessage( { type: "saveToLocal", download } );
 } );
+/**
+ * @description Just pass through messages from extension background to front page via content script.
+ */
 $client.runtime.onMessage.addListener(
     ( message, sender, sendResponse ) =>
     ( ( sender.id === $client.runtime.id ) ? window.postMessage( message, "*" ) : null )
 );
-
-/** Variable declaration(Preset) for test */
-{
-    let Preset = {
-        lang: "ko-kr",
-        savePath: "Downloaded comicsT",
-        saveOnLoad: false,
-        moveOnSave: true,
-        onConflict: "overwrite",
-        moveNext: ".next a",
-        movePrev: ".pre a",
-        subject: {
-            title: {
-                selector: ".comicinfo .detail h2:first-child",
-                propertyChain: ".firstChild.textContent"
-            },
-            subTitle: {
-                selector: ".tit_area .view h3",
-                propertyChain: ".textContent"
-            }
-        },
-        images: ".view_area .wt_viewer img",
-    };
-    $tunnel.addListener( "ComicGrabbler.readyExtention", ( event ) => {
-        if ( document.URL.match( /comic.naver.com/ ) ) {
-            $tunnel.broadcast( "ComicGrabbler.activateExtention", Preset );
+async function retrieveRules () {
+    console.log( `%cRetrieve rules from extension storage.`, $log );
+    const $memory = await new Promise( resolve => $client.storage.local.get( null, resolve ) );
+    console.log( `%cSuccessfully retrieved.`, $log );
+    let { keyboard, session, local, lang, rules } = $memory;
+    for ( const rule of rules ) {
+        if ( document.URL.match( RegExp( rule.RegExp ) ) ) {
+            console.log( `%cRule matched: ${rule.name} - /${rule.RegExp}/`, $inform );
+            return ( {
+                keyboard,
+                session,
+                local,
+                configuration: {
+                    lang,
+                    ...rule.rule
+                }
+            } );
+        }
+    }
+    return ( {
+        keyboard,
+        session,
+        local,
+        configuration: {
+            lang,
         }
     } );
 }
-
+retrieveRules().then(
+    preset => 
+    $tunnel.addListener(
+        "ComicGrabbler.readyExtension",
+        ( event ) => $tunnel.broadcast( "ComicGrabbler.activateExtension", preset )
+    )
+);

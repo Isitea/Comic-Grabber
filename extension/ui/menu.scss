@@ -9,7 +9,7 @@
     $letterSize: 16px;
     $border: 8px;
     
-    &.menu, .menu * {
+    &.menu-CG, .menu-CG * {
         box-sizing: border-box;
         padding: 0;
         margin: 0;
@@ -20,18 +20,18 @@
         text-align: center;
     }
     
-    &.menu {
+    &.menu-CG {
         position: fixed;
         z-index: 999999;
         bottom: 1vh;
         left: 1vw;
         max-width: $square-Button;
         max-height: $square-Button;
-        > .list {
+        > .list-CG {
             max-height: 0;
             max-width: 0;
             overflow: hidden;
-            > .item {
+            > .item-CG {
                 position: relative;
                 width: calc( 256px * 1.2 );
                 display: flex;
@@ -45,13 +45,13 @@
                     display: inline-block;
                     color: $white;
                 }
-                > .label {
+                > .label-CG {
                     width: calc( 100% * 2 / 5 );
                     > label {
                         cursor: pointer;
                     }
                 }
-                > .textInput {
+                > .text-CG {
                     width: calc( 100% * 3 / 5 );
                     > input, > select {
                         caret-color: $white;
@@ -64,37 +64,55 @@
                         background: $black-50;
                     }
                 }
-                > .row {
-                    .checkbox {
+                > .row-CG {
+                    .checkbox-CG {
                         background: $black-50;
                         border: {
                             radius: $border;
                         }
                         cursor: pointer;
+                        &.checked {
+                            color: $green;
+                            &:before {
+                                content: "";
+                                width: calc( #{$letterSize} / 2 );
+                                height: $letterSize;
+                                border: solid $green {
+                                    width: 0 3px 3px 0;
+                                };
+                                transform: rotate( 45deg ) {
+                                    origin: top;
+                                };
+                                display: inline-flex;
+                            }
+                        }
                     }
-                    .checkbox.checked {
-                        color: $green;
-                        &:before {
-                            content: "";
-                            width: calc( #{$letterSize} / 2 );
-                            height: $letterSize;
-                            border: solid $green {
-                                width: 0 3px 3px 0;
-                            };
-                            transform: rotate( 45deg ) {
-                                origin: top;
-                            };
-                            display: inline-flex;
+                    > .moveChapter-CG {
+                        width: 50%;
+                        &:first-child {
+                            border: {
+                                width: 0;
+                                radius: $border 0 0 $border;
+                            }
+                        }
+                        &:last-child {
+                            border: {
+                                width: 0;
+                                radius: 0 $border $border 0;
+                            }
+                        }
+                        &:hover {
+                            background: $black-50;
                         }
                     }
                 }
             }
         }
-        > .bottom-padding, > .menu-button {
+        > .bottom-padding-CG, > .menu-button-CG {
             height: $square-Button;
             width: $square-Button;
         }
-        > .menu-button {
+        > .menu-button-CG {
             position: absolute;
             bottom: 0;
             left: 0;
@@ -116,20 +134,20 @@
                 }
             }
         }
-        > .load-progress {
+        > .load-progress-CG {
             position: absolute;
             bottom: 0;
             left: 0;
         }
     }
     
-    &.menu:hover {
+    &.menu-CG:hover {
         max-height: 100vh;
         max-width: 100vw;
-        > .menu-button {
+        > .menu-button-CG {
             transform: rotateZ( 45deg );
         }
-        > .list {
+        > .list-CG {
             max-height: 100vh;
             max-width: 100vw;
         }

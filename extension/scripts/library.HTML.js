@@ -36,7 +36,7 @@ Object.defineProperties( Image.prototype, {
             Object.defineProperties( this, {
                 binaryData: { value: new Promise( resolve => binaryData = resolve ), writable: false, configurable: true },
             } );
-            const response = await fetch( uri.replace( /^https?:/i, "" ), { redirect: "manual" } );
+            const response = await fetch( uri.replace( /^https?:/i, "" ) );
             const contentType = response.headers.get( 'Content-Type' );
             let total = Number( response.headers.get( 'Content-Length' ) );
             const reader = await response.body.getReader();

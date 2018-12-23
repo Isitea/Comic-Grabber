@@ -3,50 +3,29 @@ import { StorageManager } from './library.util.js';
 import './library.extend.js';
 import { HTML } from './library.HTML.js';
 import { ImageGrabbler } from './ImageGrabbler.js';
-
-const Locale = {
-    "ko-kr": {
-        savePath: "저장 위치",
-        comicTitle: "제목",
-        comicSubTitle: "부제목",
-        saveToLocal: "저장하기 (D)",
-        saveOnLoad: "자동 저장",
-        moveOnSave: "자동 이동",
-        fillTextboxes: "입력 상자를 모두 채워주세요.",
-        download: {
-            onDuplicated: "이름 겹칠 때,",
-            uniquify: "자동 수정",
-            overwrite: "덮어 쓰기",
-        }
-    }
-}
-
-function randomWrite( storage ) {
-    setTimeout( () => {
-        storage[ crypto.getRandomValues( new Uint8Array(1) )[0].toString( 16 ) ] = crypto.getRandomValues( new Uint8Array(1) )[0].toString( 8 );
-        console.log( JSON.stringify( storage ) );
-        randomWrite( storage );
-    }, Math.random() * 5000 + 500 );
-}
-//randomWrite( ( new StorageManager( localStorage, "extTest" ) ).storage );
+import { Locale } from './ImageGrabbler.locale.js';
 
 class ComicGrabbler {
-    constructor ( grabbler, Preset ) {
+    constructor ( grabbler, { $session, $local, configuration } ) {
         Object.defineProperties( this, {
             grabbler: { value: grabbler },
-            text: { value: { savePath: Preset.savePath, onConflict: Preset.onConflict }, writable: true },
-            checkbox: { value: { saveOnLoad: Preset.saveOnLoad, moveOnSave: Preset.moveOnSave }, writable: true },
-            move: { value: { next: Preset.moveNext, prev: Preset.movePrev }, writable: true },
+            $session: { value: $session.storage },
+            $local: { value: $local.storage },
+            $memory: { value: { title: "", subTitle: "" }, writable: true },
+            checkbox: { value: { saveOnLoad: configuration.saveOnLoad, moveOnSave: configuration.moveOnSave }, writable: true },
+            move: { value: { next: configuration.moveNext, prev: configuration.movePrev }, writable: true },
         } );
-        if ( Preset instanceof Object ) {
-            this.injectController( Preset.lang );
-            if ( Preset.subject ) {
-                Object.assign( this.text, this.constructor.analyseInformation( Preset.subject ) );
+        if ( configuration instanceof Object ) {
+            this.injectController( configuration.lang );
+            if ( configuration.subject ) {
+                Object.assign( this.$memory, this.constructor.analyseInformation( configuration.subject ) );
             }
-            if ( Preset.images ) {
-                this.attachProgressEvent( grabbler.grabImages( document.querySelectorAll( Preset.images ) ) );
+            if ( configuration.images ) {
+                this.attachProgressEvent( grabbler.grabImages( document.querySelectorAll( configuration.images ) ) );
             }
         }
+        $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
+        $session.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
         this.syncModelView( "MtV" );
     }
 
@@ -56,52 +35,52 @@ class ComicGrabbler {
     }
 
     attachProgressEvent ( images ) {
+        function showProgress ( images ) {
+            let ref = {
+                count: { loaded: 0, total: images.length },
+                size: { loaded: 0, total: 0 },
+                computable: { size: 0, count: 0 }
+            };
+            for ( let image of images ) {
+                let p;
+                if ( p = image.progressEvent ) {
+                    ref.size.loaded += p.loaded;
+                    ref.size.total += p.total;
+                    if ( p.loaded === p.total ) {
+                        ref.count.loaded++;
+                        ref.computable.count++;
+                        ref.computable.size += p.total;
+                    }
+                    else {
+                        if ( p.lengthComputable ) {
+                            ref.computable.count++;
+                            ref.computable.size += p.total;
+                        }
+                    }
+                }
+            }
+            if ( ref.count.total === ref.computable.count ) this.drawProgressCircle( ref.size.loaded / ref.size.total );
+            else this.drawProgressCircle( ref.size.loaded / ( ( ref.computable.size / ref.computable.count ) * ref.count.total ) );
+    
+            if ( ref.size.loaded === ref.size.total ) {
+                console.log( `%cEvery image was loaded.`, $log );
+                console.log( `%cNow you can save images immediately.`, $inform );
+                if ( this.$session.saveOnLoad ) {
+                    this.element.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).click();
+                }
+            }
+        }
+    
         let grabbler = this;
         let fn = function ( { lengthComputable, loaded, total } ) {
             Object.defineProperties( this, { progressEvent: { value: { lengthComputable, loaded, total }, writable: false, configurable: true }, } );
-            grabbler.showProgress( images );
+            showProgress.call( grabbler, images );
         };
         for ( let image of images ) image.addEventListener( "progress", fn );
     }
 
-    showProgress ( images ) {
-        let ref = {
-            count: { loaded: 0, total: images.length },
-            size: { loaded: 0, total: 0 },
-            computable: { size: 0, count: 0 }
-        };
-        for ( let image of images ) {
-            let p;
-            if ( p = image.progressEvent ) {
-                ref.size.loaded += p.loaded;
-                ref.size.total += p.total;
-                if ( p.loaded === p.total ) {
-                    ref.count.loaded++;
-                    ref.computable.count++;
-                    ref.computable.size += p.total;
-                }
-                else {
-                    if ( p.lengthComputable ) {
-                        ref.computable.count++;
-                        ref.computable.size += p.total;
-                    }
-                }
-            }
-        }
-        if ( ref.count.total === ref.computable.count ) this.drawProgressCircle( ref.size.loaded / ref.size.total );
-        else this.drawProgressCircle( ref.size.loaded / ( ( ref.computable.size / ref.computable.count ) * ref.count.total ) );
-
-        if ( ref.size.loaded === ref.size.total ) {
-            console.log( `%cEvery image was loaded.`, $log );
-            console.log( `%cNow you can save images immediately.`, $inform );
-            if ( this.checkbox.saveOnLoad ) {
-                this.element.querySelector( ".row .checkbox#saveToLocal" ).click();
-            }
-        }
-    }
-
     drawProgressCircle ( progress ) {
-        let canvas = this.element.querySelector( ".load-progress" );
+        let canvas = this.element.querySelector( ".load-progress-CG" );
         let context = canvas.getContext( "2d" );
         context.strokeStyle = "rgba( 0, 255, 0, 0.75 )";
         context.lineWidth = 4;
@@ -111,40 +90,43 @@ class ComicGrabbler {
         context.stroke();
     }
 
-    syncModelView ( syncWay ) {
+    syncModelView ( syncWay, { cK, cV } = {} ) {
         let el = this.element;
         switch ( syncWay ) {
             case "MtV": {
-                for ( let [ key, value ] of Object.entries( this.text ) ) {
-                    el.querySelector( `.menu #${key}` ).value = value;
+                for ( const item of el.querySelectorAll( '.menu-CG .item-CG .text-CG [id]' ) ) {
+                    if ( item.id in this.$memory ) item.value = this.$memory[ item.id ];
+                    else if ( item.id in this.$session ) item.value = this.$session[ item.id ];
+                    else if ( item.id in this.$local ) item.value = this.$local[ item.id ];
                 }
-                for ( let [ key, value ] of Object.entries( this.checkbox ) ) {
-                    if ( value ) el.querySelector( `.menu .row .checkbox#${key}` ).classList.add( "checked" );
-                    else el.querySelector( `.menu .row .checkbox#${key}` ).classList.remove( "checked" );
+                for ( const item of el.querySelectorAll( '.menu-CG .item-CG .checkbox-CG[id]' ) ) {
+                    let value;
+                    if ( item.id in this.$memory ) value = this.$memory[ item.id ];
+                    else if ( item.id in this.$session ) value = this.$session[ item.id ];
+                    else if ( item.id in this.$local ) value = this.$local[ item.id ];
+                    else continue;
+
+                    if ( value ) item.classList.add( "checked" );
+                    else item.classList.remove( "checked" );
                 }
                 break;
             }
             case "VtM": {
-                for ( let [ key, value ] of Object.entries( this.text ) ) {
-                    this.text[ key ] = el.querySelector( `.menu #${key}` ).value;
-                }
-                for ( let [ key, value ] of Object.entries( this.checkbox ) ) {
-                    this.checkbox[ key ] = el.querySelector( `.menu .row .checkbox#${key}` ).classList.contains( "checked" );
-                }
+                if ( cK in this.$memory ) this.$memory[ cK ] = cV;
+                else if ( cK in this.$session ) this.$session[ cK ] = cV;
+                else if ( cK in this.$local ) this.$local[ cK ] = cV;
                 break;
             }
         }
-        this.toggleAlert();
-    }
 
-    toggleAlert () {
-        if ( !( this.text.savePath && this.text.title && this.text.subTitle ) ) {
+        //Toggle alert
+        if ( !( this.$local.savePath && this.$memory.title && this.$memory.subTitle ) ) {
             console.log( `%cSome configuration has an error.`, $alert );
-            this.element.querySelector( ".menu-button" ).classList.add( "alert" );
+            this.element.querySelector( ".menu-button-CG" ).classList.add( "alert" );
         }
         else {
             console.log( `%cAll configuration is correct.`, $inform );
-            this.element.querySelector( ".menu-button" ).classList.remove( "alert" );
+            this.element.querySelector( ".menu-button-CG" ).classList.remove( "alert" );
         }
     }
 
@@ -154,19 +136,19 @@ class ComicGrabbler {
         let localized = Locale[lang];
         let [ node ] = HTML.render( {
             div: {
-                className: "ComicGrabbler menu",
+                className: "ComicGrabbler menu-CG",
                 _child: [
                     {
                         div: {
-                            className: "list",
+                            className: "list-CG",
                             _child: [
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label",
+                                                    className: "label-CG",
                                                     _child: [
                                                         {
                                                             label: {
@@ -179,7 +161,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "textInput",
+                                                    className: "text-CG",
                                                     _child: [
                                                         {
                                                             input: {
@@ -195,11 +177,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label",
+                                                    className: "label-CG",
                                                     _child: [
                                                         {
                                                             label: {
@@ -212,7 +194,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "textInput",
+                                                    className: "text-CG",
                                                     _child: [
                                                         {
                                                             input: {
@@ -228,11 +210,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label",
+                                                    className: "label-CG",
                                                     _child: [
                                                         {
                                                             label: {
@@ -245,7 +227,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "textInput",
+                                                    className: "text-CG",
                                                     _child: [
                                                         {
                                                             input: {
@@ -261,15 +243,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row",
+                                                    className: "row-CG",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox",
+                                                                className: "checkbox-CG",
                                                                 id: "saveToLocal",
                                                                 textContent: localized.saveToLocal
                                                             }
@@ -282,15 +264,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row",
+                                                    className: "row-CG",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox",
+                                                                className: "checkbox-CG",
                                                                 id: "saveOnLoad",
                                                                 textContent: localized.saveOnLoad
                                                             }
@@ -303,15 +285,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row",
+                                                    className: "row-CG",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox",
+                                                                className: "checkbox-CG",
                                                                 id: "moveOnSave",
                                                                 textContent: localized.moveOnSave
                                                             }
@@ -324,11 +306,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item",
+                                        className: "item-CG",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label",
+                                                    className: "label-CG",
                                                     _child: [
                                                         {
                                                             label: {
@@ -341,11 +323,11 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "textInput",
+                                                    className: "text-CG",
                                                     _child: [
                                                         {
                                                             select: {
-                                                                className: "select",
+                                                                className: "select-CG",
                                                                 id: "onConflict",
                                                                 _child: [
                                                                     {
@@ -369,50 +351,87 @@ class ComicGrabbler {
                                         ]
                                     }
                                 },
+                                {
+                                    div: {
+                                        className: "item-CG",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "row-CG",
+                                                    _child: [
+                                                        {
+                                                            label: {
+                                                                className: "moveChapter-CG",
+                                                                id: "movePrev",
+                                                                textContent: localized.movePrev
+                                                            }
+                                                        },
+                                                        {
+                                                            label: {
+                                                                className: "moveChapter-CG",
+                                                                id: "moveNext",
+                                                                textContent: localized.moveNext
+                                                            }
+                                                        },
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
                             ]
                         }
                     },
-                    { div: { className: "bottom-padding" } },
-                    { div: { className: "menu-button" } },
-                    { canvas: { className: "load-progress" } },
+                    { div: { className: "bottom-padding-CG" } },
+                    { div: { className: "menu-button-CG" } },
+                    { canvas: { className: "load-progress-CG" } },
                 ],
                 _todo: node => {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
-                        item.addEventListener( "change", () => this.syncModelView( "VtM" ) );
+                        item.addEventListener( "change", () => this.syncModelView( "VtM", { cK: item.id, cV: item.value } ) );
                     }
-                    for ( const item of node.querySelectorAll( ".row .checkbox:not(#saveToLocal)" ) ) {
+                    for ( const item of node.querySelectorAll( ".row-CG .checkbox-CG:not(#saveToLocal)" ) ) {
                         item.addEventListener( "click", () => {
                             item.classList.toggle( "checked" );
-                            this.syncModelView( "VtM" );
+                            this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
                         } );
                     }
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
-                        if ( this.element.querySelector( ".menu-button" ).classList.contains( "alert" ) ) return alert( localized.fillTextboxes );
-                        node.querySelector( ".row .checkbox#saveToLocal" ).classList.toggle( "checked" );
-                        node.querySelector( ".row .checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
-                        this.saveToLocal( { localPath: this.text.savePath, onConflict: this.text.onConflict } )
-                            .then( download => {
-                                console.log( `%cSend download information to downloader.`, $log );
-                                $tunnel.broadcast( "ComicGrabbler.saveArchive", download );
+                        if ( this.element.querySelector( ".menu-button-CG" ).classList.contains( "alert" ) ) return alert( localized.fillTextboxes );
+                        node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).classList.toggle( "checked" );
+                        node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).removeEventListener( "click", saveToLocal );
+                        this.saveToLocal(
+                            {
+                                localPath: this.$local.savePath,
+                                onConflict: this.$local.onConflict,
+                                title: this.$memory.title,
+                                subTitle: this.$memory.subTitle
+                            }
+                        )
+                        .then( download => {
+                            console.log( `%cSend download information to downloader.`, $log );
+                            $tunnel.broadcast( "ComicGrabbler.saveArchive", download );
 
-                                return new Promise( resolve => $tunnel.addListener( "ComicGrabbler.archiveSaved", resolve ) );
-                            } )
-                            .then( () => {
-                                console.log( `%cArchive saved.`, $inform );
-                                if ( this.checkbox.moveOnSave ) this.moveChapter( this.move.next );
-                            } );
+                            return new Promise( resolve => $tunnel.addListener( "ComicGrabbler.archiveSaved", resolve ) );
+                        } )
+                        .then( () => {
+                            console.log( `%cArchive saved.`, $inform );
+                            if ( this.$session.moveOnSave ) this.moveChapter( this.move.next );
+                        } );
                     };
-                    node.querySelector( ".row .checkbox#saveToLocal" ).addEventListener( "click", saveToLocal );
+                    node.querySelector( ".row-CG #moveNext" ).addEventListener( "click", () => this.moveChapter( this.move.next ) );
+                    node.querySelector( ".row-CG #movePrev" ).addEventListener( "click", () => this.moveChapter( this.move.prev ) );
+                    node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).addEventListener( "click", saveToLocal );
                     return node;
                 },
             }
         } );
         document.body.appendChild( node );
         let getRealSize = () => {
-            let menu = node.querySelector( ".menu-button" );
+            let menu = node.querySelector( ".menu-button-CG" );
             if ( menu.clientHeight && menu.clientWidth ) {
-                let canvas = node.querySelector( ".load-progress" );
+                let canvas = node.querySelector( ".load-progress-CG" );
                 canvas.width = menu.clientWidth;
                 canvas.height = menu.clientHeight;
             }
@@ -433,9 +452,10 @@ class ComicGrabbler {
         let result = {};
         try {
             if ( title && subTitle ) {
+                let $subTitle = document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" );
                 result = {
-                    title: document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" ),
-                    subTitle: document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" )
+                    title: document.querySelector( title.selector ).readProperty( title.propertyChain ).replace( $subTitle, "" ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" ),
+                    subTitle: $subTitle
                 };
             }
             else {
@@ -443,6 +463,7 @@ class ComicGrabbler {
             }
             console.log( `%cSuccessfully recognized.`, $log );
         } catch ( e ) {
+            console.log( e );
             console.log( `%cRecognition failed.`, $alert );
         }
 
@@ -450,11 +471,11 @@ class ComicGrabbler {
     }
 
     /**
-     * 
-     * @param {{ localPath: String, onConflict: String }}
+     * Make download option object for download api.
+     * @param {{ localPath: String, onConflict: String, title: String, subTitle: String }}
      * @returns {Promise<Object>}
      */
-    async saveToLocal ( { localPath, onConflict } ) {
+    async saveToLocal ( { localPath, onConflict, title, subTitle } ) {
         console.log( `%cSolidates image data as a zip archive.`, $log );
         let zip = await this.grabbler.solidateImages();
         zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
@@ -464,13 +485,16 @@ class ComicGrabbler {
         return {
             blob,
             url: URL.createObjectURL( blob ),
-            filename: `${localPath}/${this.text.title}/${this.text.subTitle}.zip`,
+            filename: `${localPath}/${title}/${subTitle}.zip`,
             conflictAction: onConflict
         }
     }
 }
 
 class CommunicationTunnel {
+    /**
+     * @param {*} client - Browser specific global object like 'chrome' in Chrome or 'browser' in Firefox.
+     */
     constructor ( client ) {
         Object.defineProperties( this, {
             listener: { value: [] },
@@ -519,25 +543,47 @@ class CommunicationTunnel {
     }
 }
 
-function activateExtension ( config ) {
+function activateExtension ( { keyboard, configuration, session, local } ) {
+    console.log( `%cRead previous configuration from sessionStorage.`, $log );
+    const $session = new StorageManager(
+        sessionStorage,
+        "ComicGrabbler",
+        session
+    );
+    console.log( `%cRead previous configuration from localStorage.`, $log );
+    const $local = new StorageManager(
+        localStorage,
+        "ComicGrabbler",
+        local
+    );
     console.log( `%cRecognition data received.`, $log );
-    const comic = new ComicGrabbler( new ImageGrabbler(  ), config );
+    const comic = new ComicGrabbler( new ImageGrabbler(), { $session, $local, configuration } );
+    return;
     window.addEventListener( "keydown", function ( { code, altKey, ctrlKey, shiftKey } ) {
-        console.log( arguments );
         switch ( code ) {
-            case "KeyD": {
+            case keyboard.download: {
                 if ( !( altKey || ctrlKey || shiftKey ) ) comic.element.querySelector( "#saveToLocal" ).click();
+                break;
+            }
+            case keyboard.moveNext: {
+                if ( !( altKey || ctrlKey || shiftKey ) ) comic.element.querySelector( "#moveNext" ).click();
+                break;
+            }
+            case keyboard.movePrev: {
+                if ( !( altKey || ctrlKey || shiftKey ) ) comic.element.querySelector( "#movePrev" ).click();
+                break;
             }
         }
-    } );
+    }, { passive: true } );
 }
 
 const $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`;
 const $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`;
-const $inform = `font-size: 12px; color: rgba( 32, 255, 64, 1 );`;
+const $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
 console.log( `%cAll components loaded.`, $log );
+
 const $tunnel = new CommunicationTunnel( ( () => { try { return browser; } catch ( e ) { return chrome; } } )() );
-$tunnel.addListener( "ComicGrabbler.activateExtention", activateExtension );
+$tunnel.addListener( "ComicGrabbler.activateExtension", activateExtension );
 console.log( `%cRequest recognition data.`, $log );
-$tunnel.broadcast( "ComicGrabbler.readyExtention" );
+$tunnel.broadcast( "ComicGrabbler.readyExtension" );
 
