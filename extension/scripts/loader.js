@@ -88,6 +88,7 @@ async function retrieveRules () {
     console.log( `%cSuccessfully retrieved.`, $log );
     let { keyboard, session, local, lang, rules } = $memory;
     for ( const rule of rules ) {
+        console.log( `%cRule test: ${rule.name} - /${rule.RegExp}/: ${document.URL}`, $inform );
         if ( document.URL.match( RegExp( rule.RegExp ) ) ) {
             console.log( `%cRule matched: ${rule.name} - /${rule.RegExp}/`, $inform );
             return ( {
@@ -101,7 +102,7 @@ async function retrieveRules () {
             } );
         }
     }
-    return ( {
+    ( {
         keyboard,
         session,
         local,
@@ -109,11 +110,19 @@ async function retrieveRules () {
             lang,
         }
     } );
+    return null;
 }
 retrieveRules().then(
-    preset => 
-    $tunnel.addListener(
-        "ComicGrabbler.readyExtension",
-        ( event ) => $tunnel.broadcast( "ComicGrabbler.activateExtension", preset )
-    )
+    preset => {
+        if ( preset ) {
+            $tunnel.addListener(
+                "ComicGrabbler.readyExtension",
+                ( event ) => $tunnel.broadcast( "ComicGrabbler.activateExtension", preset )
+            )
+        }
+        else {
+
+        }
+    }
+    
 );

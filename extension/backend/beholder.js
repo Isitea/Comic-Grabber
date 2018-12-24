@@ -149,14 +149,14 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                 moveOnSave: false,
             },
             local: {
-                savePath: "Downloaded comicsT",
+                savePath: "Downloaded comics",
                 onConflict: "overwrite",
             },
             lang: "ko-kr",
             rules: [
                 {
                     name: "Naver comic",
-                    RegExp: "comic.naver.com",
+                    RegExp: "comic\\.naver\\.com/.+?/detail\\.nhn.+?titleId",
                     rule: {
                         moveNext: ".next a",
                         movePrev: ".pre a",
@@ -177,26 +177,26 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                 },
                 {
                     name: "001",
-                    RegExp: "brotoon.com|newtoki.com",
+                    RegExp: "brotoon\\.com/.+?/\\d+|newtoki\\.com/.+?/\\d+",
                     rule: {
-                        moveNext: "a[alt=다음화]",
-                        movePrev: "a[alt=이전화]",
+                        moveNext: "a[title=다음글]",
+                        movePrev: "a[title=이전글]",
                         subject: {
                             title: {
-                                selector: ".page-desc",
+                                selector: "article h1[content]",
                                 propertyChain: ".textContent"
                             },
-                            generalExp: "(?<title>.+?)[~-\s]+(?<episode>(\d[\d.~-\s]*화)|(단편)|(\d[\d.~-\s]*권.*))",
+                            generalExp: "(?<title>.+?)[~\\-\\s]+(?<episode>(\\d[\\d.~\\-\\s]*화)|(단편)|(\\d[\\d.~\\-\\s]*권.*))",
                         },
-                        images: ".view-padding img",
+                        images: ".view-padding .view-content img",
                     }
                 },
                 {
                     name: "002",
-                    RegExp: "mangashow.me/bbs/board.php.+?msm_manga",
+                    RegExp: "mangashow.me/bbs/board.php.+?wr_id",
                     rule: {
-                        moveNext: "a[alt=다음화]",
-                        movePrev: "a[alt=이전화]",
+                        moveNext: ".chapter_next",
+                        movePrev: ".chapter_prev",
                         subject: {
                             title: {
                                 selector: ".head .subject h1",
@@ -221,7 +221,7 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                                 selector: "h3.post-title.entry-title",
                                 propertyChain: ".firstChild.textContent"
                             },
-                            generalExp: "(?<title>.+?)[~-\s]+(?<episode>(\d[\d.~-\s]*화)|(단편)|(\d[\d.~-\s]*권.*))",
+                            generalExp: "(?<title>.+?)[~\\-\\s]+(?<episode>(\\d[\\d.~\\-\\s]*화)|(단편)|(\\d[\\d.~\\-\\s]*권.*))",
                         },
                         images: "a[imageanchor] > img",
                     }

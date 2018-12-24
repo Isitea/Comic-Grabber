@@ -66,7 +66,7 @@ class ComicGrabbler {
                 console.log( `%cEvery image was loaded.`, $log );
                 console.log( `%cNow you can save images immediately.`, $inform );
                 if ( this.$session.saveOnLoad ) {
-                    this.element.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).click();
+                    this.element.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).click();
                 }
             }
         }
@@ -77,10 +77,11 @@ class ComicGrabbler {
             showProgress.call( grabbler, images );
         };
         for ( let image of images ) image.addEventListener( "progress", fn );
+        window.addEventListener( "focus", () => showProgress.call( grabbler, images ) );
     }
 
     drawProgressCircle ( progress ) {
-        let canvas = this.element.querySelector( ".load-progress-CG" );
+        let canvas = this.element.querySelector( ".CG-load-progress" );
         let context = canvas.getContext( "2d" );
         context.strokeStyle = "rgba( 0, 255, 0, 0.75 )";
         context.lineWidth = 4;
@@ -94,12 +95,12 @@ class ComicGrabbler {
         let el = this.element;
         switch ( syncWay ) {
             case "MtV": {
-                for ( const item of el.querySelectorAll( '.menu-CG .item-CG .text-CG [id]' ) ) {
+                for ( const item of el.querySelectorAll( '.CG-menu .CG-item .CG-text [id]' ) ) {
                     if ( item.id in this.$memory ) item.value = this.$memory[ item.id ];
                     else if ( item.id in this.$session ) item.value = this.$session[ item.id ];
                     else if ( item.id in this.$local ) item.value = this.$local[ item.id ];
                 }
-                for ( const item of el.querySelectorAll( '.menu-CG .item-CG .checkbox-CG[id]' ) ) {
+                for ( const item of el.querySelectorAll( '.CG-menu .CG-item .CG-checkbox[id]' ) ) {
                     let value;
                     if ( item.id in this.$memory ) value = this.$memory[ item.id ];
                     else if ( item.id in this.$session ) value = this.$session[ item.id ];
@@ -122,11 +123,11 @@ class ComicGrabbler {
         //Toggle alert
         if ( !( this.$local.savePath && this.$memory.title && this.$memory.subTitle ) ) {
             console.log( `%cSome configuration has an error.`, $alert );
-            this.element.querySelector( ".menu-button-CG" ).classList.add( "alert" );
+            this.element.querySelector( ".CG-menu-button" ).classList.add( "CG-alert" );
         }
         else {
             console.log( `%cAll configuration is correct.`, $inform );
-            this.element.querySelector( ".menu-button-CG" ).classList.remove( "alert" );
+            this.element.querySelector( ".CG-menu-button" ).classList.remove( "CG-alert" );
         }
     }
 
@@ -136,19 +137,19 @@ class ComicGrabbler {
         let localized = Locale[lang];
         let [ node ] = HTML.render( {
             div: {
-                className: "ComicGrabbler menu-CG",
+                className: "ComicGrabbler CG-menu",
                 _child: [
                     {
                         div: {
-                            className: "list-CG",
+                            className: "CG-list",
                             _child: [
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label-CG",
+                                                    className: "CG-label",
                                                     _child: [
                                                         {
                                                             label: {
@@ -161,7 +162,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "text-CG",
+                                                    className: "CG-text",
                                                     _child: [
                                                         {
                                                             input: {
@@ -177,11 +178,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label-CG",
+                                                    className: "CG-label",
                                                     _child: [
                                                         {
                                                             label: {
@@ -194,7 +195,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "text-CG",
+                                                    className: "CG-text",
                                                     _child: [
                                                         {
                                                             input: {
@@ -210,11 +211,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label-CG",
+                                                    className: "CG-label",
                                                     _child: [
                                                         {
                                                             label: {
@@ -227,7 +228,7 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "text-CG",
+                                                    className: "CG-text",
                                                     _child: [
                                                         {
                                                             input: {
@@ -243,15 +244,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row-CG",
+                                                    className: "CG-row",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox-CG",
+                                                                className: "CG-checkbox",
                                                                 id: "saveToLocal",
                                                                 textContent: localized.saveToLocal
                                                             }
@@ -264,15 +265,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row-CG",
+                                                    className: "CG-row",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox-CG",
+                                                                className: "CG-checkbox",
                                                                 id: "saveOnLoad",
                                                                 textContent: localized.saveOnLoad
                                                             }
@@ -285,15 +286,15 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row-CG",
+                                                    className: "CG-row",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "checkbox-CG",
+                                                                className: "CG-checkbox",
                                                                 id: "moveOnSave",
                                                                 textContent: localized.moveOnSave
                                                             }
@@ -306,11 +307,11 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "label-CG",
+                                                    className: "CG-label",
                                                     _child: [
                                                         {
                                                             label: {
@@ -323,11 +324,11 @@ class ComicGrabbler {
                                             },
                                             {
                                                 div: {
-                                                    className: "text-CG",
+                                                    className: "CG-text",
                                                     _child: [
                                                         {
                                                             select: {
-                                                                className: "select-CG",
+                                                                className: "CG-select",
                                                                 id: "onConflict",
                                                                 _child: [
                                                                     {
@@ -353,22 +354,22 @@ class ComicGrabbler {
                                 },
                                 {
                                     div: {
-                                        className: "item-CG",
+                                        className: "CG-item",
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "row-CG",
+                                                    className: "CG-row",
                                                     _child: [
                                                         {
                                                             label: {
-                                                                className: "moveChapter-CG",
+                                                                className: "CG-moveChapter",
                                                                 id: "movePrev",
                                                                 textContent: localized.movePrev
                                                             }
                                                         },
                                                         {
                                                             label: {
-                                                                className: "moveChapter-CG",
+                                                                className: "CG-moveChapter",
                                                                 id: "moveNext",
                                                                 textContent: localized.moveNext
                                                             }
@@ -382,15 +383,15 @@ class ComicGrabbler {
                             ]
                         }
                     },
-                    { div: { className: "bottom-padding-CG" } },
-                    { div: { className: "menu-button-CG" } },
-                    { canvas: { className: "load-progress-CG" } },
+                    { div: { className: "CG-bottom-padding" } },
+                    { div: { className: "CG-menu-button" } },
+                    { canvas: { className: "CG-load-progress" } },
                 ],
                 _todo: node => {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
                         item.addEventListener( "change", () => this.syncModelView( "VtM", { cK: item.id, cV: item.value } ) );
                     }
-                    for ( const item of node.querySelectorAll( ".row-CG .checkbox-CG:not(#saveToLocal)" ) ) {
+                    for ( const item of node.querySelectorAll( ".CG-row .CG-checkbox:not(#saveToLocal)" ) ) {
                         item.addEventListener( "click", () => {
                             item.classList.toggle( "checked" );
                             this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
@@ -398,9 +399,9 @@ class ComicGrabbler {
                     }
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
-                        if ( this.element.querySelector( ".menu-button-CG" ).classList.contains( "alert" ) ) return alert( localized.fillTextboxes );
-                        node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).classList.toggle( "checked" );
-                        node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).removeEventListener( "click", saveToLocal );
+                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return alert( localized.fillTextboxes );
+                        node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).classList.toggle( "checked" );
+                        node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
                         this.saveToLocal(
                             {
                                 localPath: this.$local.savePath,
@@ -420,18 +421,18 @@ class ComicGrabbler {
                             if ( this.$session.moveOnSave ) this.moveChapter( this.move.next );
                         } );
                     };
-                    node.querySelector( ".row-CG #moveNext" ).addEventListener( "click", () => this.moveChapter( this.move.next ) );
-                    node.querySelector( ".row-CG #movePrev" ).addEventListener( "click", () => this.moveChapter( this.move.prev ) );
-                    node.querySelector( ".row-CG .checkbox-CG#saveToLocal" ).addEventListener( "click", saveToLocal );
+                    node.querySelector( ".CG-row #moveNext" ).addEventListener( "click", () => this.moveChapter( this.move.next ) );
+                    node.querySelector( ".CG-row #movePrev" ).addEventListener( "click", () => this.moveChapter( this.move.prev ) );
+                    node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).addEventListener( "click", saveToLocal );
                     return node;
                 },
             }
         } );
         document.body.appendChild( node );
         let getRealSize = () => {
-            let menu = node.querySelector( ".menu-button-CG" );
+            let menu = node.querySelector( ".CG-menu-button" );
             if ( menu.clientHeight && menu.clientWidth ) {
-                let canvas = node.querySelector( ".load-progress-CG" );
+                let canvas = node.querySelector( ".CG-load-progress" );
                 canvas.width = menu.clientWidth;
                 canvas.height = menu.clientHeight;
             }
@@ -449,21 +450,22 @@ class ComicGrabbler {
      */
     static analyseInformation ( { title, subTitle, generalExp } ) {
         console.log( `%cTry to recognize title and sub-title.`, $log );
-        let result = {};
+        let result = { title: "", subTitle: "" };
         try {
             if ( title && subTitle ) {
                 let $subTitle = document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" );
-                result = {
-                    title: document.querySelector( title.selector ).readProperty( title.propertyChain ).replace( $subTitle, "" ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" ),
-                    subTitle: $subTitle
-                };
+                result.subTitle = $subTitle || "";
+                let $title = document.querySelector( title.selector ).readProperty( title.propertyChain ).replace( $subTitle, "" ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" );
+                result.title = $title || "";
             }
             else {
-                result = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().match( new RegExp( generalExp ) ).groups;
+                console.log( `%c`, $inform );
+                let { title: $title, subTitle: $subTitle } = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().match( new RegExp( generalExp ) ).groups;
+                result.title = $title || "";
+                result.subTitle = $subTitle || "";
             }
             console.log( `%cSuccessfully recognized.`, $log );
         } catch ( e ) {
-            console.log( e );
             console.log( `%cRecognition failed.`, $alert );
         }
 
