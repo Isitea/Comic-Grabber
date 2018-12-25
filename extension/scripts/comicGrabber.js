@@ -11,9 +11,11 @@ class ComicGrabber {
             grabber: { value: grabber },
             $session: { value: $session.storage },
             $local: { value: $local.storage },
+            $localized: { value: Locale[ configuration.lang || "ko-kr" ] },
             $memory: { value: { title: "", subTitle: "", complete: false } },
             move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
         } );
+        this.injectController();
         if ( configuration instanceof Object ) {
             if ( configuration.subject ) {
                 Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
@@ -21,7 +23,6 @@ class ComicGrabber {
             if ( configuration.images ) {
                 this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
             }
-            this.injectController( configuration.lang );
         }
         $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
         $session.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
@@ -60,7 +61,8 @@ class ComicGrabber {
             }
             if ( ref.count.total === ref.computable.count ) this.drawProgressCircle( ref.size.loaded / ref.size.total );
             else this.drawProgressCircle( ref.size.loaded / ( ( ref.computable.size / ref.computable.count ) * ref.count.total ) );
-    
+            this.element.querySelector( "#saveToLocal" ).textContent = `${this.$localized.saveToLocal} (${ref.count.loaded}/${ref.count.total})`;
+            
             if ( ref.count.loaded === ref.count.total && !this.$memory.complete ) {
                 this.$memory.complete = !this.$memory.complete;
                 console.log( `%cEvery image was loaded.`, $log );
@@ -132,10 +134,9 @@ class ComicGrabber {
         }
     }
 
-    injectController ( lang = "ko-kr" ) {
+    injectController () {
         if ( this.element ) throw "Already inserted";
         console.log( `%cBuild controller.`, $log );
-        let localized = Locale[lang];
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
@@ -155,7 +156,7 @@ class ComicGrabber {
                                                         {
                                                             label: {
                                                                 htmlFor: "savePath",
-                                                                textContent: localized.savePath
+                                                                textContent: this.$localized.savePath
                                                             }
                                                         }
                                                     ]
@@ -188,7 +189,7 @@ class ComicGrabber {
                                                         {
                                                             label: {
                                                                 htmlFor: "title",
-                                                                textContent: localized.comicTitle
+                                                                textContent: this.$localized.comicTitle
                                                             }
                                                         }
                                                     ]
@@ -221,7 +222,7 @@ class ComicGrabber {
                                                         {
                                                             label: {
                                                                 htmlFor: "subTitle",
-                                                                textContent: localized.comicSubTitle
+                                                                textContent: this.$localized.comicSubTitle
                                                             }
                                                         }
                                                     ]
@@ -254,7 +255,7 @@ class ComicGrabber {
                                                         {
                                                             label: {
                                                                 htmlFor: "onConflict",
-                                                                textContent: localized.download.onDuplicated
+                                                                textContent: this.$localized.download.onDuplicated
                                                             }
                                                         }
                                                     ]
@@ -272,13 +273,13 @@ class ComicGrabber {
                                                                     {
                                                                         option: {
                                                                             value: "uniquify",
-                                                                            textContent: localized.download.uniquify
+                                                                            textContent: this.$localized.download.uniquify
                                                                         }
                                                                     },
                                                                     {
                                                                         option: {
                                                                             value: "overwrite",
-                                                                            textContent: localized.download.overwrite
+                                                                            textContent: this.$localized.download.overwrite
                                                                         }
                                                                     },
                                                                 ]
@@ -302,7 +303,7 @@ class ComicGrabber {
                                                             label: {
                                                                 className: "CG-checkbox",
                                                                 id: "saveToLocal",
-                                                                textContent: `${localized.saveToLocal} (${this.grabber.captured.length})`
+                                                                textContent: `${this.$localized.saveToLocal} (0/${this.grabber.captured.length})`
                                                             }
                                                         }
                                                     ]
@@ -323,7 +324,7 @@ class ComicGrabber {
                                                             label: {
                                                                 className: "CG-checkbox",
                                                                 id: "saveOnLoad",
-                                                                textContent: localized.saveOnLoad
+                                                                textContent: this.$localized.saveOnLoad
                                                             }
                                                         }
                                                     ]
@@ -344,7 +345,7 @@ class ComicGrabber {
                                                             label: {
                                                                 className: "CG-checkbox",
                                                                 id: "moveOnSave",
-                                                                textContent: localized.moveOnSave
+                                                                textContent: this.$localized.moveOnSave
                                                             }
                                                         }
                                                     ]
@@ -365,14 +366,14 @@ class ComicGrabber {
                                                             label: {
                                                                 className: "CG-moveChapter",
                                                                 id: "movePrev",
-                                                                textContent: localized.movePrev
+                                                                textContent: this.$localized.movePrev
                                                             }
                                                         },
                                                         {
                                                             label: {
                                                                 className: "CG-moveChapter",
                                                                 id: "moveNext",
-                                                                textContent: localized.moveNext
+                                                                textContent: this.$localized.moveNext
                                                             }
                                                         },
                                                     ]
@@ -400,7 +401,7 @@ class ComicGrabber {
                     }
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
-                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return alert( localized.fillTextboxes );
+                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return alert( this.$localized.fillTextboxes );
                         node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).classList.toggle( "checked" );
                         node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
                         this.saveToLocal(

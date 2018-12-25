@@ -5,7 +5,7 @@ import { HTML } from './library.HTML.js';
 class ImageGrabber {
     constructor (  ) {
         Object.defineProperties( this, {
-            captured: { writable: false, configurable: true },
+            captured: { value: [], writable: false, configurable: true },
         } );
     }
 
@@ -17,11 +17,16 @@ class ImageGrabber {
      */
     async solidateImages ( targets = this.captured ) {
         return ( await targets.reduce( async ( list, item, index ) => {
-            let blob = await item.binaryData;
-            ( await list ).push( {
-                blob,
-                name: `${index.toString().padStart( 3, "0" )}.${ blob.type.match( /image\/(?<extension>\w+);?/ ).groups.extension.replace( /jpeg/gi, 'jpg' ) }`
-            } );
+            let blob = await item.binaryData, type;
+            if ( type = blob.type.match( /image\/(?<extension>\w+);?/ ) ) {
+                ( await list ).push( {
+                    blob,
+                    name: `${index.toString().padStart( 3, "0" )}.${ type.groups.extension.replace( /jpeg/gi, 'jpg' ) }`
+                } );
+            }
+            else {
+                console.log( blob, item.src );
+            }
             return list;
         }, [] ) ).reduce( ( zip, { blob, name } ) => zip.file( name, blob ), new JSZip() );
     }
@@ -43,8 +48,11 @@ class ImageGrabber {
                     img: {
                         fetchUri: item.dataset.original || item.src,
                         _todo: function ( node ) {
-                            captureList.push( node );
-                            return node;
+                            if ( item.src === document.URL ) return null;
+                            else {
+                                captureList.push( node );
+                                return node;
+                            }
                         }
                     }
                 } ) );

@@ -64,48 +64,25 @@ class Downloader {
     }
 }
 
+const redirections = [
+];
 $client.webRequest.onBeforeRequest.addListener(
-    ( { url, initiator, originUrl } ) => {
-        const origin = initiator || originUrl;
-        if ( origin ) {
-            try {
-                const host = origin.match( /https?:/ )[0].toLowerCase();
-                if ( host === "https:" && host !== url.match( /https?:/ )[0].toLowerCase() ) {
-                    return { redirectUrl: url.replace( /https?:/, "https:" ) };
-                }
-            }
-            catch ( e ) {
-                console.log( `%c${origin}`, $alert );
-            }
+    ( details ) => {
+        for ( const item of redirections ) {
+            if ( item.filter( details ) ) return { redirectUrl: item.redirectTo( details ) }
         }
     },
     { urls: [ '*://*/*' ] },
     [ 'blocking' ]
 );
 
-$client.webRequest.onBeforeSendHeaders.addListener(
-    ( details ) => {
-		const header = new Header( details.requestHeaders );
-		for ( const modifier of headerModifier ) {
-			if ( modifier.filter( details, header ) ) {
-				for ( const field of modifier.fields ) {
-					header.write( ( field instanceof Function ? field( details, header ) : field ) );
-				}
-			}
-		}
-		if ( header.modified ) return { requestHeaders: header.arrayform };
-    },
-    { urls: [ '*://*/*' ] },
-    [ 'blocking', 'requestHeaders' ]
-);
-
-const headerModifier = [
+const responseHeadersModifier = [
     {
         filter: ( details, header ) => true ,
         fields: [
             ( { initiator, originUrl }, header ) => {
                 let value;
-                if ( "access-control-allow-credentials" in header ) value = ( initiator || originUrl || "" );
+                if ( header[ "access-control-allow-credentials" ].match( /true/i ) ) value = ( initiator || originUrl || "" );
                 else value = "*";
                 return { name: "Access-Control-Allow-Origin", value };
             },
@@ -129,7 +106,7 @@ const headerModifier = [
 $client.webRequest.onHeadersReceived.addListener(
     ( details ) => {
 		const header = new Header( details.responseHeaders );
-		for ( const modifier of headerModifier ) {
+		for ( const modifier of responseHeadersModifier ) {
 			if ( modifier.filter( details, header ) ) {
 				for ( const field of modifier.fields ) {
 					header.write( ( field instanceof Function ? field( details, header ) : field ) );
@@ -233,9 +210,12 @@ function loadDefault ( { reason, previousVersion, id } ) {
                 },
                 {
                     name: "jmana",
-                    RegExp: "jmana2.com/book/\\d+/\\d+",
+                    RegExp: "jmana2.com\\/book2\\/",
                     HTTPMod: {
-                        onBeforeSendHeaders: {}
+                        redirections: {
+                            filter: "jmana3.com\\/book\\/",
+                            redirectTo: [ "jmana3.com\\/book\\/", "jmana2.com/book2/" ]
+                        }
                     },
                     rule: {
                         moveNext: ".col-12 .pull-left a",
@@ -323,6 +303,30 @@ addEventListener( "message", async ( { data: uri } ) => {
     }
 }
 
+async function retrieveRules () {
+    console.log( `%cRetrieve http request modification rules from extension storage.`, $log );
+    const $memory = await new Promise( resolve => $client.storage.local.get( null, resolve ) );
+    console.log( `%cSuccessfully retrieved.`, $log );
+    console.log( `%cApply rules.`, $log );
+    for ( const site of $memory.rules ) {
+        if ( "HTTPMod" in site ) {
+            for ( const [ key, value ] of Object.entries( site.HTTPMod ) ) {
+                switch ( key ) {
+                    case "redirections": {
+                        redirections.push( {
+                            filter: ( { url } ) => url.match( new RegExp( value.filter ) ),
+                            redirectTo: ( { url } ) => url.replace( new RegExp( value.redirectTo[0] ), value.redirectTo[1] )
+                        } );
+                    }
+                }
+            }
+        }
+    }
+}
+
+$client.runtime.onInstalled.addListener( loadDefault );
+retrieveRules()
+
 const $downloader = new Downloader();
 $client.runtime.onMessage.addListener(
     ( message, sender, sendResponse ) => {
@@ -339,5 +343,3 @@ $client.runtime.onMessage.addListener(
         }
     }
 );
-
-$client.runtime.onInstalled.addListener( loadDefault );
