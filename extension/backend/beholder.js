@@ -94,7 +94,7 @@ const responseHeadersModifier = [
             ( { url, initiator, originUrl, requestId }, { location } ) => {
                 const origin = initiator || originUrl;
                 let value = location;
-                if ( origin ) {
+                if ( origin && origin.match( /https?:/ ) ) {
                     const host = origin.match( /https?:/ )[0].toLowerCase();
                     if ( host === "https:" ) value = location.replace( /https?:/i, "https:" );
                 }
