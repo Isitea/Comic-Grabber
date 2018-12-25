@@ -82,7 +82,7 @@ const responseHeadersModifier = [
         fields: [
             ( { initiator, originUrl }, header ) => {
                 let value;
-                if ( header[ "access-control-allow-credentials" ].match( /true/i ) ) value = ( initiator || originUrl || "" );
+                if ( header[ "access-control-allow-credentials" ] && header[ "access-control-allow-credentials" ].match( /true/i ) ) value = ( initiator || originUrl || "" );
                 else value = "*";
                 return { name: "Access-Control-Allow-Origin", value };
             },
@@ -161,10 +161,10 @@ function loadDefault ( { reason, previousVersion, id } ) {
                 },
                 {
                     name: "newtoki/brotoon",
-                    RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+$|(brotoon|newtoki)\\.com/.+?\\?.+?spage",
+                    RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+(?:[^\/]+)?|(brotoon|newtoki)\\.com/.+?\\?.+?spage",
                     rule: {
-                        moveNext: "a[title*=다음]",
-                        movePrev: "a[title*=이전]",
+                        moveNext: "a[alt*=다음]",
+                        movePrev: "a[alt*=이전]",
                         subject: {
                             title: {
                                 selector: ".page-desc",
@@ -289,6 +289,7 @@ function loadDefault ( { reason, previousVersion, id } ) {
                         },
                         images: ".cont_view#imgView > img",
                     },
+                    $delay: 625,
                     $await: 
 `"use strict";
 addEventListener( "message", async ( { data: uri } ) => {

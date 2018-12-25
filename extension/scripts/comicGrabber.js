@@ -129,7 +129,7 @@ class ComicGrabber {
             this.element.querySelector( ".CG-menu-button" ).classList.add( "CG-alert" );
         }
         else {
-            console.log( `%cAll configuration is correct.`, $inform );
+            console.log( `%cAll configuration has no error.`, $inform );
             this.element.querySelector( ".CG-menu-button" ).classList.remove( "CG-alert" );
         }
     }

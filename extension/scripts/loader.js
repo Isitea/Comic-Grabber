@@ -79,8 +79,8 @@ class CommunicationTunnel {
     }
 }
 
-console.log( `%cComic grabber v0.0.1 Build 8`, `font-size: 48px; color: rgba( 117, 211, 88, 0.75 );` );
-console.log( `%cUnder developing - extension id: ${chrome.runtime.id}`, $log.replace( /rgba\([\d\s,.]+\)/, "rgba( 114, 20, 214, 0.75 )" ) );
+console.log( `%cComic grabber v0.0.1 Build 11`, `font-size: 48px; color: rgba( 117, 211, 88, 0.75 );` );
+//console.log( `%cUnder developing - extension id: ${chrome.runtime.id}`, $log.replace( /rgba\([\d\s,.]+\)/, "rgba( 114, 20, 214, 0.75 )" ) );
 const $tunnel = new CommunicationTunnel();
 $tunnel.addListener( "ComicGrabber.saveArchive", function ( download ) {
     $client.runtime.sendMessage( { type: "saveToLocal", download } );
@@ -126,11 +126,6 @@ retrieveRules().then(
             $tunnel.addListener(
                 "ComicGrabber.readyExtension",
                 async ( event ) => {
-                    if ( $delay ) {
-                        console.log( `%cWait ${$delay} seconds`, $inform );
-                        await new Promise( resolve => setTimeout( resolve, $delay ) );
-                        console.log( `%cResume procedure`, $inform );
-                    }
                     if ( $await ) {
                         console.log( `%cWait WebWorker response`, $inform );
                         let webWorker = new Worker( URL.createObjectURL( new Blob( [ $await ], { type: "plain/text" } ) ) );
@@ -138,6 +133,11 @@ retrieveRules().then(
                             webWorker.addEventListener( "message", resolve );
                             webWorker.postMessage( document.URL );
                         } );
+                        console.log( `%cResume procedure`, $inform );
+                    }
+                    if ( $delay ) {
+                        console.log( `%cWait ${$delay} seconds`, $inform );
+                        await new Promise( resolve => setTimeout( resolve, $delay ) );
                         console.log( `%cResume procedure`, $inform );
                     }
                     $tunnel.broadcast( "ComicGrabber.activateExtension", configuration );
