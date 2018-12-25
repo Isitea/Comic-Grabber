@@ -1,6 +1,6 @@
 ﻿{
 	"manifest_version": 2,
-	"name": "Image beholder",
+	"name": "Comic grabber",
 	"version": "0.0.1",
 	"description": "This extension watches loaded images and serves the downloading function of them.",
 	"author": "Isitea",
@@ -32,6 +32,6 @@
 	"background": {
 		"page": "backend/beholder.html"
 	},
-	"content_security_policy": "default-src 'self' blob: filesystem: chrome-extension-resource: https://*.isitea.net https://cdnjs.cloudflare.com/ https://drive.google.com;",
+	"content_security_policy": "default-src 'self' blob: chrome-extension-resource: https://cdnjs.cloudflare.com/;",
 	"minimum_chrome_version": "61"
 }

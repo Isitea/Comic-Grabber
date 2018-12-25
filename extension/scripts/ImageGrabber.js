@@ -2,7 +2,7 @@
 import 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.js';
 import { HTML } from './library.HTML.js';
 
-class ImageGrabbler {
+class ImageGrabber {
     constructor (  ) {
         Object.defineProperties( this, {
             captured: { writable: false, configurable: true },
@@ -35,27 +35,42 @@ class ImageGrabbler {
      */
     grabImages ( anchor ) {
         let list;
-        if ( !( anchor instanceof Node || anchor instanceof NodeList ) ) return false;
-        if ( anchor instanceof Node ) { list = [ ...anchor.querySelectorAll( "img" ) ]; }
-        else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
-        else return false;
-        
-        Object.defineProperty( this, "captured", { value: list.reduce( ( captureList, item ) => {
-            item.replaceWith( ...HTML.render( {
-                img: {
-                    fetchUri: item.dataset.original || item.src,
-                    _todo: function ( node ) {
-                        captureList.push( node );
-                        return node;
+        if ( ( anchor instanceof Node || anchor instanceof NodeList ) ) {
+            if ( anchor instanceof Node ) { list = [ ...anchor.querySelectorAll( "img" ) ]; }
+            else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
+            Object.defineProperty( this, "captured", { value: list.reduce( ( captureList, item ) => {
+                item.replaceWith( ...HTML.render( {
+                    img: {
+                        fetchUri: item.dataset.original || item.src,
+                        _todo: function ( node ) {
+                            captureList.push( node );
+                            return node;
+                        }
                     }
-                }
-            } ) );
-            
-            return captureList;
-        }, [] ) } );
+                } ) );
+                
+                return captureList;
+            }, [] ) } );
+        }
+        else if ( anchor instanceof Array ) {
+            list = anchor;
+            list.reduce( ( captureList, uri ) => {
+                uri.replaceWith( ...HTML.render( {
+                    img: {
+                        fetchUri: uri,
+                        _todo: function ( node ) {
+                            captureList.push( node );
+                            return node;
+                        }
+                    }
+                } ) );
+                
+                return captureList;
+            }, [] );
+        }
         
         return this.captured;
     }
 }
 
-export { ImageGrabbler }
+export { ImageGrabber }

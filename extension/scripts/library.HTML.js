@@ -58,7 +58,7 @@ Object.defineProperties( Image.prototype, {
             } while ( cursor < total || total === 0 );
             reader.releaseLock();
 
-            let blob = new Blob( [ loaded ], { type: contentType || recognizeByFileSignature( loaded ) } );
+            let blob = new Blob( [ loaded ], { type: recognizeByFileSignature( loaded, contentType ) } );
             this.src = URL.createObjectURL( blob );
             this.addEventListener( "load", () => {
                 this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: blob.size, total: blob.size } ) );
@@ -174,7 +174,7 @@ class HTML {
  * Recognize file type based on magic number
  * @param {ArrayBuffer} arraybuffer 
  */
-function recognizeByFileSignature ( arraybuffer ) {
+function recognizeByFileSignature ( arraybuffer, contentType ) {
     //File signature information ( https://en.wikipedia.org/wiki/List_of_file_signatures )
     //File signature information ( http://forensic-proof.com/archives/300 )
     //File signature information ( https://www.filesignatures.net/ )
@@ -193,7 +193,7 @@ function recognizeByFileSignature ( arraybuffer ) {
         if ( binSign.match( new RegExp( `^${sign.join( "|^" )}` ) ) ) return category;
     }
     //When none of the heading signatures was matched.
-    return "application/octet-strem";
+    return contentType || "application/octet-strem";
 }
 
 export { HTML, recognizeByFileSignature };

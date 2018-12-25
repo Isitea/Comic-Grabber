@@ -2,27 +2,26 @@
 import { StorageManager } from './library.util.js';
 import './library.extend.js';
 import { HTML } from './library.HTML.js';
-import { ImageGrabbler } from './ImageGrabbler.js';
-import { Locale } from './ImageGrabbler.locale.js';
+import { ImageGrabber } from './ImageGrabber.js';
+import { Locale } from './ImageGrabber.locale.js';
 
-class ComicGrabbler {
-    constructor ( grabbler, { $session, $local, configuration } ) {
+class ComicGrabber {
+    constructor ( grabber, { $session, $local, configuration, generalExpression } ) {
         Object.defineProperties( this, {
-            grabbler: { value: grabbler },
+            grabber: { value: grabber },
             $session: { value: $session.storage },
             $local: { value: $local.storage },
-            $memory: { value: { title: "", subTitle: "" }, writable: true },
-            checkbox: { value: { saveOnLoad: configuration.saveOnLoad, moveOnSave: configuration.moveOnSave }, writable: true },
-            move: { value: { next: configuration.moveNext, prev: configuration.movePrev }, writable: true },
+            $memory: { value: { title: "", subTitle: "", complete: false } },
+            move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
         } );
         if ( configuration instanceof Object ) {
-            this.injectController( configuration.lang );
             if ( configuration.subject ) {
-                Object.assign( this.$memory, this.constructor.analyseInformation( configuration.subject ) );
+                Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
             }
             if ( configuration.images ) {
-                this.attachProgressEvent( grabbler.grabImages( document.querySelectorAll( configuration.images ) ) );
+                this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
             }
+            this.injectController( configuration.lang );
         }
         $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
         $session.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
@@ -30,7 +29,7 @@ class ComicGrabbler {
     }
 
     moveChapter ( selector ) {
-        console.log( `%cTry to change chapter.`, $log );
+        console.log( `%cTry to change chapter...`, $log );
         return ( button => ( button instanceof HTMLElement ? button.click() : false ) )( document.querySelector( selector ) );
     }
 
@@ -62,7 +61,8 @@ class ComicGrabbler {
             if ( ref.count.total === ref.computable.count ) this.drawProgressCircle( ref.size.loaded / ref.size.total );
             else this.drawProgressCircle( ref.size.loaded / ( ( ref.computable.size / ref.computable.count ) * ref.count.total ) );
     
-            if ( ref.size.loaded === ref.size.total ) {
+            if ( ref.count.loaded === ref.count.total && !this.$memory.complete ) {
+                this.$memory.complete = !this.$memory.complete;
                 console.log( `%cEvery image was loaded.`, $log );
                 console.log( `%cNow you can save images immediately.`, $inform );
                 if ( this.$session.saveOnLoad ) {
@@ -71,13 +71,13 @@ class ComicGrabbler {
             }
         }
     
-        let grabbler = this;
+        let grabber = this;
         let fn = function ( { lengthComputable, loaded, total } ) {
             Object.defineProperties( this, { progressEvent: { value: { lengthComputable, loaded, total }, writable: false, configurable: true }, } );
-            showProgress.call( grabbler, images );
+            showProgress.call( grabber, images );
         };
         for ( let image of images ) image.addEventListener( "progress", fn );
-        window.addEventListener( "focus", () => showProgress.call( grabbler, images ) );
+        window.addEventListener( "focus", () => showProgress.call( grabber, images ) );
     }
 
     drawProgressCircle ( progress ) {
@@ -116,6 +116,7 @@ class ComicGrabbler {
                 if ( cK in this.$memory ) this.$memory[ cK ] = cV;
                 else if ( cK in this.$session ) this.$session[ cK ] = cV;
                 else if ( cK in this.$local ) this.$local[ cK ] = cV;
+                if ( cK === "title" ) this.$session[ cK ] = cV;
                 break;
             }
         }
@@ -137,7 +138,7 @@ class ComicGrabbler {
         let localized = Locale[lang];
         let [ node ] = HTML.render( {
             div: {
-                className: "ComicGrabbler CG-menu",
+                className: "ComicGrabber CG-menu",
                 _child: [
                     {
                         div: {
@@ -248,13 +249,60 @@ class ComicGrabbler {
                                         _child: [
                                             {
                                                 div: {
+                                                    className: "CG-label",
+                                                    _child: [
+                                                        {
+                                                            label: {
+                                                                htmlFor: "onConflict",
+                                                                textContent: localized.download.onDuplicated
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                div: {
+                                                    className: "CG-text",
+                                                    _child: [
+                                                        {
+                                                            select: {
+                                                                className: "CG-select",
+                                                                id: "onConflict",
+                                                                _child: [
+                                                                    {
+                                                                        option: {
+                                                                            value: "uniquify",
+                                                                            textContent: localized.download.uniquify
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        option: {
+                                                                            value: "overwrite",
+                                                                            textContent: localized.download.overwrite
+                                                                        }
+                                                                    },
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
                                                     className: "CG-row",
                                                     _child: [
                                                         {
                                                             label: {
                                                                 className: "CG-checkbox",
                                                                 id: "saveToLocal",
-                                                                textContent: localized.saveToLocal
+                                                                textContent: `${localized.saveToLocal} (${this.grabber.captured.length})`
                                                             }
                                                         }
                                                     ]
@@ -297,53 +345,6 @@ class ComicGrabbler {
                                                                 className: "CG-checkbox",
                                                                 id: "moveOnSave",
                                                                 textContent: localized.moveOnSave
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-label",
-                                                    _child: [
-                                                        {
-                                                            label: {
-                                                                htmlFor: "onConflict",
-                                                                textContent: localized.download.onDuplicated
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                div: {
-                                                    className: "CG-text",
-                                                    _child: [
-                                                        {
-                                                            select: {
-                                                                className: "CG-select",
-                                                                id: "onConflict",
-                                                                _child: [
-                                                                    {
-                                                                        option: {
-                                                                            value: "uniquify",
-                                                                            textContent: localized.download.uniquify
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        option: {
-                                                                            value: "overwrite",
-                                                                            textContent: localized.download.overwrite
-                                                                        }
-                                                                    },
-                                                                ]
                                                             }
                                                         }
                                                     ]
@@ -412,9 +413,9 @@ class ComicGrabbler {
                         )
                         .then( download => {
                             console.log( `%cSend download information to downloader.`, $log );
-                            $tunnel.broadcast( "ComicGrabbler.saveArchive", download );
+                            $tunnel.broadcast( "ComicGrabber.saveArchive", download );
 
-                            return new Promise( resolve => $tunnel.addListener( "ComicGrabbler.archiveSaved", resolve ) );
+                            return new Promise( resolve => $tunnel.addListener( "ComicGrabber.archiveSaved", resolve ) );
                         } )
                         .then( () => {
                             console.log( `%cArchive saved.`, $inform );
@@ -445,27 +446,48 @@ class ComicGrabbler {
 
     /**
      * Analyse title and sub-title of this page.
-     * @param {{ title: { selector: String, propertyChain: String, exp: String }, subTitle: { selector: String, propertyChain: String, exp: String }, generalExp: String }}
+     * @param {{ title: { selector: String, propertyChain: String, exp: String }, subTitle: { selector: String, propertyChain: String, exp: String }, generalExpression: String }}
      * @returns {{ title: string, subTitle: string }}
      */
-    static analyseInformation ( { title, subTitle, generalExp } ) {
-        console.log( `%cTry to recognize title and sub-title.`, $log );
+    analyseInformation ( { title, subTitle, siteExpression }, generalExpression ) {
+        console.log( `%cTry to recognize title and sub-title...`, $log );
         let result = { title: "", subTitle: "" };
         try {
-            if ( title && subTitle ) {
-                let $subTitle = document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" );
-                result.subTitle = $subTitle || "";
-                let $title = document.querySelector( title.selector ).readProperty( title.propertyChain ).replace( $subTitle, "" ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" );
-                result.title = $title || "";
+            if ( this.$session.title ) {
+                console.log( `%cTry to apply previous user modification...`, $log );
+                result.title = this.$session.title;
+                let $subTitle = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().replace( result.title, "" ).replace( new RegExp( title.exp || "(.+)" ), "$1" );
+                if ( $subTitle ) {
+                    if ( $subTitle !== document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" ) ) result.subTitle = $subTitle;
+                    else {
+                        console.log( `%cApplying prvious user modification is failed.`, $inform );
+                        delete this.$session.title;
+                        if ( this.$session.saveOnLoad ) console.log( `%cDisable save on load function.`, $inform );
+                        this.$session.saveOnLoad = false;
+                        return this.analyseInformation( { title, subTitle, siteExpression, generalExpression }, generalExpression );
+                    }
+                }
+                else $subTitle = document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" );
+                console.log( `%cPrevious user modification is applied.`, $inform );
             }
-            else {
-                console.log( `%c`, $inform );
-                let { title: $title, subTitle: $subTitle } = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().match( new RegExp( generalExp ) ).groups;
-                result.title = $title || "";
-                result.subTitle = $subTitle || "";
+            else  {
+                if ( title && subTitle ) {
+                    let $subTitle = document.querySelector( subTitle.selector ).readProperty( subTitle.propertyChain ).toFilename().replace( new RegExp( subTitle.exp || "(.+)" ), "$1" );
+                    let $title = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().replace( new RegExp( title.exp || "(.+)" ), "$1" );
+                    if ( $subTitle.length > $title.length ) $subTitle = $subTitle.replace( $title, "" ).toFilename();
+                    else if ( $subTitle.length < $title.length ) $title = $title.replace( $subTitle, "" ).toFilename();
+                    result = { title: $title || "", subTitle: $subTitle || "" };
+                }
+                else {
+                    console.log( `%cTry to distinguish title and sub title...`, $inform );
+                    const expression  = siteExpression || generalExpression;
+                    let { title: $title, subTitle: $subTitle } = document.querySelector( title.selector ).readProperty( title.propertyChain ).toFilename().match( new RegExp( expression ) ).groups;
+                    result = { title: $title || "", subTitle: $subTitle || "" };
+                }
             }
             console.log( `%cSuccessfully recognized.`, $log );
-        } catch ( e ) {
+        }
+        catch ( e ) {
             console.log( `%cRecognition failed.`, $alert );
         }
 
@@ -479,7 +501,7 @@ class ComicGrabbler {
      */
     async saveToLocal ( { localPath, onConflict, title, subTitle } ) {
         console.log( `%cSolidates image data as a zip archive.`, $log );
-        let zip = await this.grabbler.solidateImages();
+        let zip = await this.grabber.solidateImages();
         zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
         let blob = await zip.generateAsync( { type: "blob" } );
         console.log( `%cSolidation completed.`, $inform );
@@ -487,7 +509,7 @@ class ComicGrabbler {
         return {
             blob,
             url: URL.createObjectURL( blob ),
-            filename: `${localPath}/${title}/${subTitle}.zip`,
+            filename: `${localPath.toFilename()}/${title.toFilename()}${( title !== subTitle ? "/" + subTitle.toFilename() : "" )}.zip`,
             conflictAction: onConflict
         }
     }
@@ -497,10 +519,9 @@ class CommunicationTunnel {
     /**
      * @param {*} client - Browser specific global object like 'chrome' in Chrome or 'browser' in Firefox.
      */
-    constructor ( client ) {
+    constructor () {
         Object.defineProperties( this, {
             listener: { value: [] },
-            client: { value: client },
         } );
         window.addEventListener(
             "message",
@@ -545,21 +566,21 @@ class CommunicationTunnel {
     }
 }
 
-function activateExtension ( { keyboard, configuration, session, local } ) {
+function activateExtension ( { keyboard, configuration, session, local, generalExpression } ) {
     console.log( `%cRead previous configuration from sessionStorage.`, $log );
     const $session = new StorageManager(
         sessionStorage,
-        "ComicGrabbler",
+        "ComicGrabber",
         session
     );
     console.log( `%cRead previous configuration from localStorage.`, $log );
     const $local = new StorageManager(
         localStorage,
-        "ComicGrabbler",
+        "ComicGrabber",
         local
     );
     console.log( `%cRecognition data received.`, $log );
-    const comic = new ComicGrabbler( new ImageGrabbler(), { $session, $local, configuration } );
+    const comic = new ComicGrabber( new ImageGrabber(), { $session, $local, configuration, generalExpression } );
     return;
     window.addEventListener( "keydown", function ( { code, altKey, ctrlKey, shiftKey } ) {
         switch ( code ) {
@@ -585,7 +606,7 @@ const $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
 console.log( `%cAll components loaded.`, $log );
 
 const $tunnel = new CommunicationTunnel( ( () => { try { return browser; } catch ( e ) { return chrome; } } )() );
-$tunnel.addListener( "ComicGrabbler.activateExtension", activateExtension );
+$tunnel.addListener( "ComicGrabber.activateExtension", activateExtension );
 console.log( `%cRequest recognition data.`, $log );
-$tunnel.broadcast( "ComicGrabbler.readyExtension" );
+$tunnel.broadcast( "ComicGrabber.readyExtension" );
 

@@ -68,14 +68,35 @@ $client.webRequest.onBeforeRequest.addListener(
     ( { url, initiator, originUrl } ) => {
         const origin = initiator || originUrl;
         if ( origin ) {
-            const host = origin.match( /https?:/ )[0].toLowerCase();
-            if ( host === "https:" && host !== url.match( /https?:/ )[0].toLowerCase() ) {
-                return { redirectUrl: url.replace( /https?:/, "https:" ) };
+            try {
+                const host = origin.match( /https?:/ )[0].toLowerCase();
+                if ( host === "https:" && host !== url.match( /https?:/ )[0].toLowerCase() ) {
+                    return { redirectUrl: url.replace( /https?:/, "https:" ) };
+                }
+            }
+            catch ( e ) {
+                console.log( `%c${origin}`, $alert );
             }
         }
     },
     { urls: [ '*://*/*' ] },
     [ 'blocking' ]
+);
+
+$client.webRequest.onBeforeSendHeaders.addListener(
+    ( details ) => {
+		const header = new Header( details.requestHeaders );
+		for ( const modifier of headerModifier ) {
+			if ( modifier.filter( details, header ) ) {
+				for ( const field of modifier.fields ) {
+					header.write( ( field instanceof Function ? field( details, header ) : field ) );
+				}
+			}
+		}
+		if ( header.modified ) return { requestHeaders: header.arrayform };
+    },
+    { urls: [ '*://*/*' ] },
+    [ 'blocking', 'requestHeaders' ]
 );
 
 const headerModifier = [
@@ -121,20 +142,7 @@ $client.webRequest.onHeadersReceived.addListener(
     [ 'blocking', 'responseHeaders' ]
 );
 
-const $downloader = new Downloader();
-$client.runtime.onMessage.addListener(
-    ( message, sender, sendResponse ) => {
-        switch ( message.type ) {
-            case "saveToLocal": {
-                $downloader.save( message.download )
-                    .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabbler.archiveSaved" } ) );
-                break;
-            }
-        }
-    }
-);
-
-$client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => {
+function loadDefault ( { reason, previousVersion, id } ) {
     if ( reason === "install" || reason === "update" ) {
         console.log( `%cReset configuration`, $log );
         $client.storage.local.clear();
@@ -153,6 +161,7 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                 onConflict: "overwrite",
             },
             lang: "ko-kr",
+            generalExpression: "(?<title>.+)\\s+(?<subTitle>(?:\\d+화)|(?:[\\d\\s\\-\\~화권])|(?:\\(?\\[?단편\\]?\\)?.+))",
             rules: [
                 {
                     name: "Naver comic",
@@ -164,35 +173,32 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                             title: {
                                 selector: ".comicinfo .detail h2:first-child",
                                 propertyChain: ".firstChild.textContent",
-                                exp: "(.+)"
                             },
                             subTitle: {
                                 selector: ".tit_area .view h3",
                                 propertyChain: ".textContent",
-                                exp: "(.+)"
                             },
                         },
                         images: ".view_area .wt_viewer img",
                     }
                 },
                 {
-                    name: "001",
-                    RegExp: "brotoon\\.com/.+?/\\d+|newtoki\\.com/.+?/\\d+",
+                    name: "newtoki/brotoon",
+                    RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+$|(brotoon|newtoki)\\.com/.+?\\?.+?spage",
                     rule: {
-                        moveNext: "a[title=다음글]",
-                        movePrev: "a[title=이전글]",
+                        moveNext: "a[title*=다음]",
+                        movePrev: "a[title*=이전]",
                         subject: {
                             title: {
-                                selector: "article h1[content]",
+                                selector: ".page-desc",
                                 propertyChain: ".textContent"
                             },
-                            generalExp: "(?<title>.+?)[~\\-\\s]+(?<episode>(\\d[\\d.~\\-\\s]*화)|(단편)|(\\d[\\d.~\\-\\s]*권.*))",
                         },
-                        images: ".view-padding .view-content img",
+                        images: ".view-padding .view-content img, .view-img img",
                     }
                 },
                 {
-                    name: "002",
+                    name: "mangashow",
                     RegExp: "mangashow.me/bbs/board.php.+?wr_id",
                     rule: {
                         moveNext: ".chapter_next",
@@ -211,8 +217,8 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                     }
                 },
                 {
-                    name: "003",
-                    RegExp: "manastaynight009i.blogspot.com",
+                    name: "mana",
+                    RegExp: "manastaynight[\\w\\d]+.blogspot.com/\\d+/\\d+",
                     rule: {
                         moveNext: null,
                         movePrev: null,
@@ -221,14 +227,35 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                                 selector: "h3.post-title.entry-title",
                                 propertyChain: ".firstChild.textContent"
                             },
-                            generalExp: "(?<title>.+?)[~\\-\\s]+(?<episode>(\\d[\\d.~\\-\\s]*화)|(단편)|(\\d[\\d.~\\-\\s]*권.*))",
                         },
                         images: "a[imageanchor] > img",
                     }
                 },
                 {
-                    name: "004",
-                    RegExp: "marumaru01.com",
+                    name: "jmana",
+                    RegExp: "jmana2.com/book/\\d+/\\d+",
+                    HTTPMod: {
+                        onBeforeSendHeaders: {}
+                    },
+                    rule: {
+                        moveNext: ".col-12 .pull-left a",
+                        movePrev: ".col-12 .pull-right a",
+                        subject: {
+                            title: {
+                                selector: ".breadcrumb .breadcrumb_list",
+                                propertyChain: ".textContent"
+                            },
+                            subTitle: {
+                                selector: ".breadcrumb #breadcrumb_detail",
+                                propertyChain: ".textContent"
+                            },
+                        },
+                        images: "#maincontent > img",
+                    }
+                },
+                {
+                    name: "marumaru - ur18",
+                    RegExp: "marumaru\\d+.com(.+bo_table=maru_view|.+wr_id){2,2}",
                     rule: {
                         moveNext: ".bottom_nav > .first",
                         movePrev: ".bottom_nav > .last",
@@ -245,7 +272,72 @@ $client.runtime.onInstalled.addListener( ( { reason, previousVersion, id } ) => 
                         images: ".view-content > img",
                     }
                 },
+                {
+                    name: "marumaru - r18",
+                    RegExp: "marumaru01.com(.+bo_table=manga|.+wr_id){2,2}",
+                    rule: {
+                        moveNext: null,
+                        movePrev: null,
+                        subject: {
+                            title: {
+                                selector: ".view-wrap h1:first-child",
+                                propertyChain: ".textContent"
+                            },
+                            subTitle: {
+                                selector: ".view-wrap h1:first-child",
+                                propertyChain: ".textContent"
+                            },
+                        },
+                        images: ".view-content > img",
+                    }
+                },
+                {
+                    name: "Daum webtoon",
+                    RegExp: "webtoon\\.daum\\.net/webtoon/viewer/\\d+",
+                    rule: {
+                        moveNext: "a.btn_comm.btn_next",
+                        movePrev: "a.btn_comm.btn_prev",
+                        subject: {
+                            title: {
+                                selector: ".list_info .txt_title .link_title",
+                                propertyChain: "a.textContent"
+                            },
+                            subTitle: {
+                                selector: ".list_info .txt_episode",
+                                propertyChain: ".textContent"
+                            },
+                        },
+                        images: ".cont_view#imgView > img",
+                    },
+                    $await: 
+`"use strict";
+addEventListener( "message", async ( { data: uri } ) => {
+	let response = await fetch( uri.replace( /(https:?\\/\\/).+\\/(\\d+)$/, "$1webtoon.daum.net/data/pc/webtoon/viewer/$2" ) );
+    let blob = await response.blob();
+    postMessage( blob );
+    close();
+} );`
+                },
             ]
         } );
     }
-} );
+}
+
+const $downloader = new Downloader();
+$client.runtime.onMessage.addListener(
+    ( message, sender, sendResponse ) => {
+        switch ( message.type ) {
+            case "saveToLocal": {
+                $downloader.save( message.download )
+                    .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabber.archiveSaved" } ) );
+                break;
+            }
+            case "resetConfiguration": {
+                loadDefault( { reason: "install" } );
+                break;
+            }
+        }
+    }
+);
+
+$client.runtime.onInstalled.addListener( loadDefault );
