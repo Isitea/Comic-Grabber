@@ -128,7 +128,7 @@ class StorageManager extends customEventTarget {
             changed: changed => this.ACC.log( changed ),
             removed: removed => this.ACC.log( removed )
         } );
-        for ( const [ key, value ] of Object.entries( JSON.parse( this.area.getItem( this.id ) || JSON.stringify( init ) ) ) ) {
+        for ( const [ key, value ] of Object.entries( Object.assign( {}, init, JSON.parse( this.area.getItem( this.id ) || "{}" ) ) ) ) {
             this._Stored[ key ] = value;
         }
         this.dispatchEvent( Object.assign( new Event( "initialized" ), { storage: this._Stored } ) );

@@ -297,6 +297,74 @@ class ComicGrabber {
                                         _child: [
                                             {
                                                 div: {
+                                                    className: "CG-label",
+                                                    _child: [
+                                                        {
+                                                            label: {
+                                                                htmlFor: "separator",
+                                                                textContent: this.$localized.filename.separator
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                div: {
+                                                    className: "CG-text",
+                                                    _child: [
+                                                        {
+                                                            select: {
+                                                                className: "CG-select",
+                                                                id: "separator",
+                                                                _child: [
+                                                                    {
+                                                                        option: {
+                                                                            value: "/",
+                                                                            textContent: this.$localized.filename.without
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        option: {
+                                                                            value: " - ",
+                                                                            textContent: this.$localized.filename.with
+                                                                        }
+                                                                    },
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "CG-row",
+                                                    _child: [
+                                                        {
+                                                            label: {
+                                                                className: "CG-checkbox",
+                                                                id: "showGrabbedImages",
+                                                                textContent: `${this.$localized.showGrabbedImages}`
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
                                                     className: "CG-row",
                                                     _child: [
                                                         {
@@ -393,12 +461,18 @@ class ComicGrabber {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
                         item.addEventListener( "change", () => this.syncModelView( "VtM", { cK: item.id, cV: item.value } ) );
                     }
-                    for ( const item of node.querySelectorAll( ".CG-row .CG-checkbox:not(#saveToLocal)" ) ) {
+                    for ( const item of node.querySelectorAll( ".CG-row .CG-checkbox:not(#saveToLocal):not(#showGrabbedImages)" ) ) {
                         item.addEventListener( "click", () => {
                             item.classList.toggle( "checked" );
                             this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
                         } );
                     }
+                    node.querySelector( ".CG-row .CG-checkbox#showGrabbedImages" ).addEventListener( "click", () => {
+                        for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) node.classList.add( "emphasis" );
+                        setTimeout( () => {
+                            for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) node.classList.remove( "emphasis" );
+                        }, 5000 );
+                    } );
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
                         if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return alert( this.$localized.fillTextboxes );
@@ -408,6 +482,7 @@ class ComicGrabber {
                             {
                                 localPath: this.$local.savePath,
                                 onConflict: this.$local.onConflict,
+                                separator: this.$local.separator,
                                 title: this.$memory.title,
                                 subTitle: this.$memory.subTitle
                             }
@@ -500,7 +575,7 @@ class ComicGrabber {
      * @param {{ localPath: String, onConflict: String, title: String, subTitle: String }}
      * @returns {Promise<Object>}
      */
-    async saveToLocal ( { localPath, onConflict, title, subTitle } ) {
+    async saveToLocal ( { localPath, onConflict, separator, title, subTitle } ) {
         console.log( `%cSolidates image data as a zip archive.`, $log );
         let zip = await this.grabber.solidateImages();
         zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
@@ -510,7 +585,7 @@ class ComicGrabber {
         return {
             blob,
             url: URL.createObjectURL( blob ),
-            filename: `${localPath.toFilename()}/${title.toFilename()}${( title !== subTitle ? "/" + subTitle.toFilename() : "" )}.zip`,
+            filename: `${localPath.toFilename()}/${title.toFilename()}${( title !== subTitle ? separator + subTitle.toFilename() : "" )}.zip`,
             conflictAction: onConflict
         }
     }

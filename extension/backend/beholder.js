@@ -136,6 +136,7 @@ function loadDefault ( { reason, previousVersion, id } ) {
             local: {
                 savePath: "Downloaded comics",
                 onConflict: "overwrite",
+                separator: "/",
             },
             lang: "ko-kr",
             generalExpression: "(?<title>.+)\\s+(?<subTitle>(?:\\d+화)|(?:[\\d\\s\\-\\~화권])|(?:\\(?\\[?단편\\]?\\)?.+))",

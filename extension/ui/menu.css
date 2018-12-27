@@ -1,3 +1,21 @@
+img.emphasis[src*=blob] {
+  box-sizing: content-box !important;
+  animation: blinkBorder 1s infinite;
+  border: 4px solid;
+}
+
+@keyframes blinkBorder {
+  0% {
+    border-color: rgba(0, 255, 0, 0.9);
+  }
+  50% {
+    border-color: rgba(0, 0, 0, 0.75);
+  }
+  100% {
+    border-color: rgba(0, 255, 0, 0.9);
+  }
+}
+
 .ComicGrabber.CG-menu, .ComicGrabber .CG-menu * {
   box-sizing: border-box;
   padding: 0;
