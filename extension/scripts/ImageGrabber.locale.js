@@ -10,6 +10,12 @@ const Locale = {
         fillTextboxes: "입력 상자를 모두 채워주세요.",
         moveNext: "다음 화로 이동",
         movePrev: "이전 화로 이동",
+        showGrabbedImages: "인식된 이미지 확인",
+        filename: {
+            separator: "제목 포함 여부",
+            without: "안 함",
+            with: "함",
+        },
         download: {
             onDuplicated: "이름 겹칠 때,",
             uniquify: "자동 수정",

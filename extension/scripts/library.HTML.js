@@ -58,7 +58,7 @@ Object.defineProperties( Image.prototype, {
             } while ( cursor < total || total === 0 );
             reader.releaseLock();
 
-            let blob = new Blob( [ loaded ], { type: recognizeByFileSignature( loaded, contentType ) } );
+            let blob = new Blob( [ loaded ], { type: await recognizeByFileSignature( loaded, contentType ) } );
             this.src = URL.createObjectURL( blob );
             this.addEventListener( "load", () => {
                 this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: blob.size, total: blob.size } ) );
@@ -174,25 +174,26 @@ class HTML {
  * Recognize file type based on magic number
  * @param {ArrayBuffer} arraybuffer 
  */
-function recognizeByFileSignature ( arraybuffer, contentType ) {
+async function recognizeByFileSignature ( arraybuffer, contentType ) {
     //File signature information ( https://en.wikipedia.org/wiki/List_of_file_signatures )
     //File signature information ( http://forensic-proof.com/archives/300 )
     //File signature information ( https://www.filesignatures.net/ )
     const signatures = {
-        "image/png": [ "89504E470D0A1A0A" ],
-        "image/jpeg": [ "FFD8FFE[0-9]" ],
+        "image/png": [ "89504e470D0a1a0a" ],
+        "image/jpeg": [ "ffd8ffe[0-9]" ],
         "image/gif": [ "47494638" ],
-        "image/tiff": [ "49492A00", "4D4D002[AB]", "492049" ],
-        "image/bmp": [ "424D" ],
-        "image/webp": [ "52494646[0-9A-F]{6,6}57454250" ],
+        "image/tiff": [ "49492a00", "4d4d002[ab]", "492049" ],
+        "image/bmp": [ "424d" ],
+        "image/webp": [ "52494646[0-9a-f]{6,6}57454250" ],
     };
     //Read signature from binary
-    const binSign = ( new Uint8Array( arraybuffer.slice( 0, 24 ) ) ).reduce( ( hex, bin ) => hex + bin.toString( 16 ), "" ).toUpperCase();
+    const binSign = ( new Uint8Array( arraybuffer.slice( 0, 24 ) ) ).reduce( ( hex, bin ) => hex + bin.toString( 16 ).padStart( 2, "0" ), "" );
     //Compare signatures
     for ( const [ category, sign ] of Object.entries( signatures ) ) {
         if ( binSign.match( new RegExp( `^${sign.join( "|^" )}` ) ) ) return category;
     }
     //When none of the heading signatures was matched.
+    console.log( `Unknown file header: ${binSign}` );
     return contentType || "application/octet-strem";
 }
 
