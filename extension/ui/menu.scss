@@ -24,7 +24,9 @@ img.emphasis[src*=blob] {
     $height-ListItem: 24px;
     $letterSize: 16px;
     $border: 8px;
-    
+
+    .CG-invisible { display: none !important; }
+
     &.CG-menu, .CG-menu * {
         box-sizing: border-box;
         padding: 0;
@@ -66,16 +68,19 @@ img.emphasis[src*=blob] {
                     > label {
                         cursor: pointer;
                     }
+                    &~ .CG-text {
+                        width: calc( 100% * 3 / 5 );
+                        > input, > select { border-radius: 0 $border $border 0; }
+                    }
                 }
                 > .CG-text {
-                    width: calc( 100% * 3 / 5 );
                     > input, > select {
                         caret-color: $white;
                         text-align: center;
                         display: block;
                         border: {
                             width: 0;
-                            radius: 0 $border $border 0;
+                            radius: $border;
                         }
                         background: $black-50;
                     }

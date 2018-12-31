@@ -12,9 +12,9 @@ const Locale = {
         movePrev: "이전 화로 이동",
         showGrabbedImages: "인식된 이미지 확인",
         filename: {
-            separator: "제목 포함 여부",
-            without: "안 함",
-            with: "함",
+            filenameRule: "저장 이름 규칙",
+            recommend: '기본 설정',
+            manual: "직접 작성",
         },
         download: {
             onDuplicated: "이름 겹칠 때,",

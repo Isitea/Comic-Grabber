@@ -16,6 +16,10 @@ img.emphasis[src*=blob] {
   }
 }
 
+.ComicGrabber .CG-invisible {
+  display: none !important;
+}
+
 .ComicGrabber.CG-menu, .ComicGrabber .CG-menu * {
   box-sizing: border-box;
   padding: 0;
@@ -67,8 +71,12 @@ img.emphasis[src*=blob] {
   cursor: pointer;
 }
 
-.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-text {
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-label ~ .CG-text {
   width: calc( 100% * 3 / 5);
+}
+
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-label ~ .CG-text > input, .ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-label ~ .CG-text > select {
+  border-radius: 0 8px 8px 0;
 }
 
 .ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-text > input, .ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-text > select {
@@ -76,7 +84,7 @@ img.emphasis[src*=blob] {
   text-align: center;
   display: block;
   border-width: 0;
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.5);
 }
 

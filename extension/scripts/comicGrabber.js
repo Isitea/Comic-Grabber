@@ -4,6 +4,7 @@ import './library.extend.js';
 import { HTML } from './library.HTML.js';
 import { ImageGrabber } from './ImageGrabber.js';
 import { Locale } from './ImageGrabber.locale.js';
+const $filenameRule = '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}';
 
 class ComicGrabber {
     constructor ( grabber, { $session, $local, configuration, generalExpression } ) {
@@ -112,9 +113,37 @@ class ComicGrabber {
                     if ( value ) item.classList.add( "checked" );
                     else item.classList.remove( "checked" );
                 }
+                if ( this.$local.filenameRule === $filenameRule ) {
+                    el.querySelector( '.CG-menu .CG-item .CG-text #filenameRule' ).value = "default";
+                    el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).parentNode.parentNode.classList.add( "CG-invisible" );
+                    el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).disabled = true;
+                }
+                else {
+                    el.querySelector( '.CG-menu .CG-item .CG-text #filenameRule' ).value = "manual";
+                    el.querySelector( '.CG-menu .CG-item .CG-text #filenameRuleManual' ).value = this.$local.filenameRule;
+                    el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).parentNode.parentNode.classList.remove( "CG-invisible" );
+                    el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).disabled = false;
+            }
                 break;
             }
             case "VtM": {
+                if ( cK === "filenameRuleManual" ) cK = "filenameRule";
+                else if ( cK !== "filenameRule" && typeof cV === "string" ) {
+                    cV = cV.toFilename();
+                    el.querySelector( `.CG-menu .CG-item #${cK}` ).value = cV;
+                }
+                else if ( cK === "filenameRule" ) {
+                    if ( cV === "default" ) {
+                        cV = $filenameRule;
+                        el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).parentNode.parentNode.classList.add( "CG-invisible" );
+                        el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).disabled = true;
+                    }
+                    else {
+                        cV = el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).value;
+                        el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).parentNode.parentNode.classList.remove( "CG-invisible" );
+                        el.querySelector( `.CG-menu .CG-item #filenameRuleManual` ).disabled = false;
+                    }
+                }
                 if ( cK in this.$memory ) this.$memory[ cK ] = cV;
                 else if ( cK in this.$session ) this.$session[ cK ] = cV;
                 else if ( cK in this.$local ) this.$local[ cK ] = cV;
@@ -301,8 +330,8 @@ class ComicGrabber {
                                                     _child: [
                                                         {
                                                             label: {
-                                                                htmlFor: "separator",
-                                                                textContent: this.$localized.filename.separator
+                                                                htmlFor: "filenameRule",
+                                                                textContent: this.$localized.filename.filenameRule
                                                             }
                                                         }
                                                     ]
@@ -315,21 +344,43 @@ class ComicGrabber {
                                                         {
                                                             select: {
                                                                 className: "CG-select",
-                                                                id: "separator",
+                                                                id: "filenameRule",
                                                                 _child: [
                                                                     {
                                                                         option: {
-                                                                            value: "/",
-                                                                            textContent: this.$localized.filename.without
+                                                                            value: "default",
+                                                                            textContent: this.$localized.filename.recommend
                                                                         }
                                                                     },
                                                                     {
                                                                         option: {
-                                                                            value: " - ",
-                                                                            textContent: this.$localized.filename.with
+                                                                            value: "manual",
+                                                                            textContent: this.$localized.filename.manual
                                                                         }
                                                                     },
                                                                 ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item CG-invisible",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "CG-text",
+                                                    _child: [
+                                                        {
+                                                            input: {
+                                                                id: "filenameRuleManual",
+                                                                type: "text",
+                                                                placeholder: $filenameRule,
+                                                                disabled: true
                                                             }
                                                         }
                                                     ]
@@ -482,7 +533,7 @@ class ComicGrabber {
                             {
                                 localPath: this.$local.savePath,
                                 onConflict: this.$local.onConflict,
-                                separator: this.$local.separator,
+                                filenameRule: this.$local.filenameRule,
                                 title: this.$memory.title,
                                 subTitle: this.$memory.subTitle
                             }
@@ -575,17 +626,28 @@ class ComicGrabber {
      * @param {{ localPath: String, onConflict: String, title: String, subTitle: String }}
      * @returns {Promise<Object>}
      */
-    async saveToLocal ( { localPath, onConflict, separator, title, subTitle } ) {
+    async saveToLocal ( { localPath, onConflict, filenameRule, title, subTitle } ) {
         console.log( `%cSolidates image data as a zip archive.`, $log );
         let zip = await this.grabber.solidateImages();
         zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
         let blob = await zip.generateAsync( { type: "blob" } );
         console.log( `%cSolidation completed.`, $inform );
+        let webWorker = new Worker( URL.createObjectURL( new Blob( [
+`"use strict";
+addEventListener( "message", async ( { data: { localPath, title, subTitle } } ) => {
+    postMessage( \`${filenameRule || $filenameRule}\` );
+    close();
+} );`
+        ], { type: "plain/text" } ) ) );
+        let filename = await new Promise( resolve => {
+            webWorker.addEventListener( "message", ( { data: filename } ) => resolve( filename ) );
+            webWorker.postMessage( { localPath, title, subTitle } );
+        } ) + ".zip";
 
         return {
             blob,
             url: URL.createObjectURL( blob ),
-            filename: `${localPath.toFilename()}/${title.toFilename()}${( title !== subTitle ? separator + subTitle.toFilename() : "" )}.zip`,
+            filename,
             conflictAction: onConflict
         }
     }

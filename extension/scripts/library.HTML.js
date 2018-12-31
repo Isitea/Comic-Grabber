@@ -35,6 +35,7 @@ Object.defineProperties( Image.prototype, {
             let binaryData;
             Object.defineProperties( this, {
                 binaryData: { value: new Promise( resolve => binaryData = resolve ), writable: false, configurable: true },
+                fetchUri: { get: () => uri },
             } );
             const response = await fetch( uri.replace( /^https?:/i, "" ) );
             const contentType = response.headers.get( 'Content-Type' );

@@ -91,7 +91,7 @@ const responseHeadersModifier = [
     {
         filter: ( details, { location } ) => Boolean( location ),
         fields: [
-            ( { url, initiator, originUrl, requestId }, { location } ) => {
+            ( { initiator, originUrl, ...details }, { location } ) => {
                 const origin = initiator || originUrl;
                 let value = location;
                 if ( origin && origin.match( /https?:/ ) ) {
@@ -136,10 +136,10 @@ function loadDefault ( { reason, previousVersion, id } ) {
             local: {
                 savePath: "Downloaded comics",
                 onConflict: "overwrite",
-                separator: "/",
+                filenameRule: '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}',
             },
             lang: "ko-kr",
-            generalExpression: "(?<title>.+)\\s+(?<subTitle>(?:\\d+화)|(?:[\\d\\s\\-\\~화권])|(?:\\(?\\[?단편\\]?\\)?.+))",
+            generalExpression: "^(?<title>.+)\\s+(?<subTitle>(?:[\\d\\s\\-\\~화권]+)|(?:(?:번외|특별).+)|(?:\\(?\\[?단편\\]?\\)?.+))",
             rules: [
                 {
                     name: "Naver comic",

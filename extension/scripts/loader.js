@@ -38,7 +38,7 @@ class CommunicationTunnel {
         } );
         window.addEventListener(
             "message",
-            ( { source, data: { type, event } } ) => {
+            ( { source, data: { type, event } = {} } ) => {
                 if ( source !== window ) return null;
                 this.listener
                     .filter( listener => listener.type === type )
