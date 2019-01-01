@@ -1,4 +1,5 @@
 "use strict";
+import 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.js';
 import { StorageManager } from './library.util.js';
 import './library.extend.js';
 import { HTML } from './library.HTML.js';
@@ -421,6 +422,27 @@ class ComicGrabber {
                                                         {
                                                             label: {
                                                                 className: "CG-checkbox",
+                                                                id: "copyShareLink",
+                                                                textContent: `${this.$localized.copyShareLink}`
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "CG-row",
+                                                    _child: [
+                                                        {
+                                                            label: {
+                                                                className: "CG-checkbox",
                                                                 id: "saveToLocal",
                                                                 textContent: `${this.$localized.saveToLocal} (0/${this.grabber.captured.length})`
                                                             }
@@ -518,6 +540,27 @@ class ComicGrabber {
                             this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
                         } );
                     }
+                    node.querySelector( ".CG-row .CG-checkbox#copyShareLink" ).addEventListener( "click", async () => {
+                        let list = [];
+                        for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) {
+                            list.push( node.fetchUri );
+                        }
+                        node.querySelector( ".CG-row .CG-checkbox#copyShareLink" ).replaceWith( ...HTML.render( {
+                            input: {
+                                type: "text",
+                                id: "sharedLink",
+                                value: `https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`,
+                            }
+                        } ) );
+                        {
+                            const element = node.querySelector( ".CG-row #sharedLink" );
+                            const parent = element.parentNode;
+                            parent.classList.remove( "CG-row" );
+                            parent.classList.add( "CG-text" );
+                            element.focus();
+                            element.select();
+                        }
+                    } );
                     node.querySelector( ".CG-row .CG-checkbox#showGrabbedImages" ).addEventListener( "click", () => {
                         for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) node.classList.add( "emphasis" );
                         setTimeout( () => {

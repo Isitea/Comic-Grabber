@@ -11,6 +11,7 @@ const Locale = {
         moveNext: "다음 화로 이동",
         movePrev: "이전 화로 이동",
         showGrabbedImages: "인식된 이미지 확인",
+        copyShareLink: "인식된 이미지 공유하기",
         filename: {
             filenameRule: "저장 이름 규칙",
             recommend: '기본 설정',

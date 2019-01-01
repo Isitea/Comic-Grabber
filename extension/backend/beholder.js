@@ -238,19 +238,15 @@ function loadDefault ( { reason, previousVersion, id } ) {
                     name: "marumaru - ur18",
                     RegExp: "marumaru\\d+.com(.+bo_table=maru_view|.+wr_id){2,2}",
                     rule: {
-                        moveNext: ".bottom_nav > .first",
-                        movePrev: ".bottom_nav > .last",
+                        moveNext: ".btn-group > a[title*=다음]",
+                        movePrev: ".btn-group > a[title*=이전]",
                         subject: {
                             title: {
-                                selector: ".directory > a",
+                                selector: ".view-wrap > h1",
                                 propertyChain: ".textContent"
                             },
-                            subTitle: {
-                                selector: ".directory",
-                                propertyChain: ".lastChild.textContent"
-                            },
                         },
-                        images: ".view-content > img",
+                        images: ".view-content img",
                     }
                 },
                 {
@@ -269,7 +265,7 @@ function loadDefault ( { reason, previousVersion, id } ) {
                                 propertyChain: ".textContent"
                             },
                         },
-                        images: ".view-content > img",
+                        images: ".view-content img",
                     }
                 },
                 {

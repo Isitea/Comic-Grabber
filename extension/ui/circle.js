@@ -16,3 +16,5 @@ function drawTest ( canvas ) {
     drawer();
 }
 drawTest( document.querySelector( ".load-progress" ) )
+
+`https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`

@@ -1,0 +1,26 @@
+* {
+    box-sizing: content-box !important;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    body {
+        width: 100vw;
+        background: rgba( 0, 0, 0, 0.8 );
+        .text-information {
+            position: fixed;
+            top: 1;
+            left: 1;
+            max-width: 100vw;
+            height: 64px;
+            background: rgba( 128, 192, 128, 0.3 );
+            text-align: center;
+            #title, #subTitle {
+                color: rgba( 192, 192, 192, 0.9 )
+            }
+        }
+        #imageContainer {
+            text-align: center;
+            width: 100vw;
+        }
+    }
+}
