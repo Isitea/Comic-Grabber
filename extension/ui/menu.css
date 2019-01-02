@@ -1,7 +1,7 @@
 img.emphasis[src*=blob] {
-  box-sizing: content-box !important;
+  box-sizing: border-box !important;
   animation: blinkBorder 1s infinite;
-  border: 4px solid;
+  border: 8px solid;
 }
 
 @keyframes blinkBorder {
@@ -13,6 +13,24 @@ img.emphasis[src*=blob] {
   }
   100% {
     border-color: rgba(0, 255, 0, 0.9);
+  }
+}
+
+@keyframes marqueeLeftFirst {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-100%, 0);
+  }
+}
+
+@keyframes marqueeLeftSecond {
+  0% {
+    transform: translate(100%, 0);
+  }
+  100% {
+    transform: translate(0%, 0);
   }
 }
 
@@ -125,6 +143,32 @@ img.emphasis[src*=blob] {
 
 .ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-row > .CG-moveChapter:hover {
   background: rgba(0, 0, 0, 0.5);
+}
+
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-row#filenameRuleResult {
+  position: relative;
+  overflow: hidden;
+}
+
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-row#filenameRuleResult > label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 8px 0 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: max-content;
+  background: linear-gradient(to right, #07ffaf, #ffb3ef);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-row#filenameRuleResult > label:first-child {
+  animation: marqueeLeftFirst 5s infinite linear;
+}
+
+.ComicGrabber.CG-menu > .CG-list > .CG-item > .CG-row#filenameRuleResult > label:last-child {
+  animation: marqueeLeftSecond 5s infinite linear;
 }
 
 .ComicGrabber.CG-menu > .CG-bottom-padding, .ComicGrabber.CG-menu > .CG-menu-button {

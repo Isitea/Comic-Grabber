@@ -1,7 +1,17 @@
+$transparent: rgba( 0, 0, 0, 0 );
+$black-50: rgba( 0, 0, 0, 0.5 );
+$black-75: rgba( 0, 0, 0, 0.75 );
+$white: rgba( 255, 255, 255, 1 );
+$green: rgba( 0, 255, 0, 0.9 );
+$square-Button: 48px;
+$height-ListItem: 24px;
+$letterSize: 16px;
+$border: 8px;
+
 img.emphasis[src*=blob] {
-    box-sizing: content-box !important;
+    box-sizing: border-box !important;
     animation: blinkBorder 1s infinite;
-    border: 4px solid;
+    border: $border solid;
 }
 @keyframes blinkBorder {
     0% {
@@ -14,17 +24,23 @@ img.emphasis[src*=blob] {
         border-color: rgba( 0, 255, 0, 0.9 );
     }
 }
+@keyframes marqueeLeftFirst {
+    0% {
+        transform: translate( 0, 0 );
+    }
+    100% {
+        transform: translate( -100%, 0 );
+    }
+}
+@keyframes marqueeLeftSecond {
+    0% {
+        transform: translate( 100%, 0 );
+    }
+    100% {
+        transform: translate( 0%, 0 );
+    }
+}
 .ComicGrabber {
-    $transparent: rgba( 0, 0, 0, 0 );
-    $black-50: rgba( 0, 0, 0, 0.5 );
-    $black-75: rgba( 0, 0, 0, 0.75 );
-    $white: rgba( 255, 255, 255, 1 );
-    $green: rgba( 0, 255, 0, 0.9 );
-    $square-Button: 48px;
-    $height-ListItem: 24px;
-    $letterSize: 16px;
-    $border: 8px;
-
     .CG-invisible { display: none !important; }
 
     &.CG-menu, .CG-menu * {
@@ -124,6 +140,28 @@ img.emphasis[src*=blob] {
                         }
                         &:hover {
                             background: $black-50;
+                        }
+                    }
+                }
+                > .CG-row#filenameRuleResult {
+                    position: relative;
+                    overflow: hidden;
+                    > label {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        padding: 0 $border 0 0;
+                        min-width: 100%;
+                        width: max-content;
+                        max-width: max-content;
+                        background: linear-gradient( to right, rgba( 7, 255, 175, 1 ), rgba( 255, 179, 239, 1 ) );
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        &:first-child {
+                            animation: marqueeLeftFirst 5s infinite linear;
+                        }
+                        &:last-child {
+                            animation: marqueeLeftSecond 5s infinite linear;
                         }
                     }
                 }

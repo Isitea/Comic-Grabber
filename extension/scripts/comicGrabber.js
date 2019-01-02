@@ -152,7 +152,18 @@ class ComicGrabber {
                 break;
             }
         }
-
+        
+        //Preview save name
+        this.interpretFilenameRule( {
+            localPath: this.$local.savePath,
+            filenameRule: this.$local.filenameRule,
+            title: this.$memory.title,
+            subTitle: this.$memory.subTitle
+        } )
+        .then(
+            result =>
+            [ ...document.querySelectorAll( ".CG-menu .CG-item #filenameRuleResult label" ) ].forEach( node => node.textContent = result )
+        );
         //Toggle alert
         if ( !( this.$local.savePath && this.$memory.title && this.$memory.subTitle ) ) {
             console.log( `%cSome configuration has an error.`, $alert );
@@ -384,6 +395,23 @@ class ComicGrabber {
                                                                 disabled: true
                                                             }
                                                         }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "CG-row",
+                                                    id: "filenameRuleResult",
+                                                    _child: [
+                                                        { label: {} },
+                                                        { label: {} },
                                                     ]
                                                 }
                                             }
@@ -663,6 +691,20 @@ class ComicGrabber {
 
         return result;
     }
+    
+    async interpretFilenameRule ( { localPath, filenameRule, title, subTitle } ) {
+        let webWorker = new Worker( URL.createObjectURL( new Blob( [
+`"use strict";
+addEventListener( "message", async ( { data: { localPath, title, subTitle } } ) => {
+    postMessage( \`${filenameRule || $filenameRule}\` );
+    close();
+} );`
+        ], { type: "plain/text" } ) ) );
+        return ( await new Promise( resolve => {
+            webWorker.addEventListener( "message", ( { data: filename } ) => resolve( filename ) );
+            webWorker.postMessage( { localPath, title, subTitle } );
+        } ) ).split( "/" ).reduce( ( name, path ) => `${name}/${path.toFilename()}` , "" ).substr( 1 ) + ".zip";
+    }
 
     /**
      * Make download option object for download api.
@@ -675,22 +717,11 @@ class ComicGrabber {
         zip.file( 'Downloaded from.txt', new Blob( [ document.URL ], { type: 'text/plain' } ) );
         let blob = await zip.generateAsync( { type: "blob" } );
         console.log( `%cSolidation completed.`, $inform );
-        let webWorker = new Worker( URL.createObjectURL( new Blob( [
-`"use strict";
-addEventListener( "message", async ( { data: { localPath, title, subTitle } } ) => {
-    postMessage( \`${filenameRule || $filenameRule}\` );
-    close();
-} );`
-        ], { type: "plain/text" } ) ) );
-        let filename = await new Promise( resolve => {
-            webWorker.addEventListener( "message", ( { data: filename } ) => resolve( filename ) );
-            webWorker.postMessage( { localPath, title, subTitle } );
-        } ) + ".zip";
 
         return {
             blob,
             url: URL.createObjectURL( blob ),
-            filename,
+            filename: await this.interpretFilenameRule( { localPath, filenameRule, title, subTitle } ),
             conflictAction: onConflict
         }
     }
