@@ -8,6 +8,7 @@ const Locale = {
         saveOnLoad: "자동 저장",
         moveOnSave: "자동 이동",
         fillTextboxes: "입력 상자를 모두 채워주세요.",
+        tryToLeave: "페이지 이동 시도 중...",
         moveNext: "다음 화로 이동",
         movePrev: "이전 화로 이동",
         showGrabbedImages: "인식된 이미지 확인",

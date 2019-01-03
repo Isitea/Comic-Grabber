@@ -35,6 +35,9 @@ class ComicGrabber {
 
     moveChapter ( selector ) {
         console.log( `%cTry to change chapter...`, $log );
+        let [ node ] = HTML.render( { div: { className: "CG-notice", textContent: this.$localized.tryToLeave } } );
+        this.element.appendChild( node );
+        setTimeout( () => this.element.removeChild( node ), $defaultDelay );
         return ( button => ( button instanceof HTMLElement ? button.click() : false ) )( document.querySelector( selector ) );
     }
 
@@ -87,20 +90,20 @@ class ComicGrabber {
     }
 
     drawProgressCircle ( progress ) {
-        console.log( progress )
         let canvas = this.element.querySelector( ".CG-load-progress" );
         let context = canvas.getContext( "2d" );
+        let { radius } = canvas.dataset;
         if ( $fillCircle ) {
-            context.strokeStyle = "rgba( 0, 192, 128, 0.75 )";
-            context.lineWidth = canvas.height / 2;
+            context.strokeStyle = "rgba( 0, 256, 128, 0.95 )";
+            context.lineWidth = radius / 2 + 2;
         }
         else {
-            context.strokeStyle = "rgba( 0, 255, 0, 0.75 )";
+            context.strokeStyle = "rgba( 0, 256, 0, 0.95 )";
             context.lineWidth = 4;
         }
         context.clearRect( 0, 0, canvas.width, canvas.height );
         context.beginPath();
-        context.arc( canvas.width / 2, canvas.height / 2, ( canvas.height - context.lineWidth ) / 2 + 1, -0.5 * Math.PI, ( progress * 2 - 0.5 ) * Math.PI );
+        context.arc( canvas.width / 2, canvas.height / 2, ( radius - context.lineWidth ) / 2 + 1, -0.5 * Math.PI, ( progress * 2 - 0.5 ) * Math.PI );
         context.stroke();
     }
 
@@ -575,6 +578,7 @@ class ComicGrabber {
                         }
                     },
                     { div: { className: "CG-menu-button" } },
+                    { div: { className: "CG-menu-cover", textContent: this.$localized.saveOnLoad + this.$localized.moveOnSave } },
                 ],
                 _todo: node => {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
@@ -657,8 +661,9 @@ class ComicGrabber {
             let menu = node.querySelector( ".CG-menu-button" );
             if ( menu.clientHeight && menu.clientWidth ) {
                 let canvas = node.querySelector( ".CG-load-progress" );
-                canvas.width = menu.clientWidth;
-                canvas.height = menu.clientHeight;
+                canvas.width = menu.clientWidth * 1.1;
+                canvas.height = menu.clientHeight * 1.1;
+                canvas.dataset.radius = menu.clientWidth;
             }
             else setTimeout( getRealSize, 100 );
         };

@@ -54,10 +54,10 @@ class Downloader {
             }
             delete download.blob;
         }
-        return $api( download ).then( ( { id } ) => new Promise( ( resolve, reject ) => {
+        return $api( download ).then( id => new Promise( ( resolve, reject ) => {
             let onComplete = ( item ) => {
                 if ( item.id === id && item.state ) {
-                    switch ( item.state ) {
+                    switch ( item.state.current ) {
                         case "complete": {
                             if ( item.state.current === "complete" ) {
                                 URL.revokeObjectURL( download.url )
@@ -345,6 +345,7 @@ $client.runtime.onMessage.addListener(
     ( message, sender, sendResponse ) => {
         switch ( message.type ) {
             case "saveToLocal": {
+                console.log( `%cDownload data recieved.`, $inform );
                 $downloader.save( message.download )
                     .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabber.archiveSaved" } ) )
                     .catch( err => console.log( err ) );
