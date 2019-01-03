@@ -3,6 +3,10 @@ $black-50: rgba( 0, 0, 0, 0.5 );
 $black-75: rgba( 0, 0, 0, 0.75 );
 $white: rgba( 255, 255, 255, 1 );
 $green: rgba( 0, 255, 0, 0.9 );
+$cornerX: 1vw;
+$cornerY: 1vh;
+$itemWidth: calc( 256px * 1.2 );
+$itemMargin: 4px;
 $square-Button: 48px;
 $height-ListItem: 24px;
 $letterSize: 16px;
@@ -47,7 +51,6 @@ img.emphasis[src*=blob] {
         box-sizing: border-box;
         padding: 0;
         margin: 0;
-        transition-duration: 500ms;
         font-family: 'Times New Roman', 'Malgun Gothic';
         font-size: $letterSize;
         line-height: $height-ListItem;
@@ -57,19 +60,21 @@ img.emphasis[src*=blob] {
     &.CG-menu {
         position: fixed;
         z-index: 999999;
-        bottom: 1vh;
-        left: 1vw;
-        max-width: $square-Button;
-        max-height: $square-Button;
+        bottom: calc( #{$cornerY} + #{$square-Button} );
+        left: $cornerX;
+        transition-duration: 500ms;
+        max-height: 100vh;
+        max-width: 100vw;
         > .CG-list {
             max-height: 0;
-            max-width: 0;
+            //width: calc( #{$itemWidth} + #{$itemMargin} * 2 );
+            transition-duration: 500ms;
             overflow: hidden;
             > .CG-item {
                 position: relative;
-                width: calc( 256px * 1.2 );
+                width: $itemWidth;
                 display: flex;
-                margin: 4px;
+                margin: $itemMargin;
                 border-radius: $border;
                 background: $black-75;
                 color: $white;
@@ -104,9 +109,7 @@ img.emphasis[src*=blob] {
                 > .CG-row {
                     .CG-checkbox {
                         background: $black-50;
-                        border: {
-                            radius: $border;
-                        }
+                        border-radius: $border;
                         cursor: pointer;
                         &.checked {
                             color: $green;
@@ -167,14 +170,51 @@ img.emphasis[src*=blob] {
                 }
             }
         }
-        > .CG-bottom-padding, > .CG-menu-button {
-            height: $square-Button;
-            width: $square-Button;
+        > .CG-load-progress:not(:hover) ~ .CG-list {
+            &:not(:hover):not(.NoOutSide) {
+                > .CG-item > .CG-row.CG-OutSide.CG-SelectiveInvisible {
+                    display: none !important;
+                }
+                > .CG-item > .CG-row.CG-OutSide {
+                    position: fixed !important;
+                    background: $black-75 !important;
+                    border-radius: $border !important;
+                }
+                > .CG-item > .CG-row.CG-OutSide#filenameRuleResult {
+                    left: calc( #{$cornerX} );
+                    bottom: calc( #{$cornerY} + #{$square-Button} );
+                    width: calc( #{$itemWidth} / 2 );
+                    margin: 0 0 $itemMargin 0;
+                }
+                > .CG-item > .CG-row.CG-OutSide {
+                    left: calc( #{$cornerX} + #{$letterSize} / 2 + #{$square-Button} );
+                    width: max-content;
+                    height: $height-ListItem;
+                    > .CG-checkbox {
+                        padding: 0 calc( #{$letterSize} / 2 ) 0 calc( #{$letterSize} );
+                        background: none;
+                    }
+                    &.CG-First {
+                        bottom: calc( #{$cornerY} + #{$height-ListItem} * 0 );
+                    }
+                    &.CG-Second {
+                        bottom: calc( #{$cornerY} + #{$height-ListItem} * 1 );
+                    }
+                }
+            }
+        }
+        > .CG-load-progress, > .CG-menu-button {
+            position: fixed;
+            bottom: $cornerY;
+            left: $cornerX;
+        }
+        > .CG-load-progress {
+            z-index: 999999;
         }
         > .CG-menu-button {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            z-index: 99999;
+            height: $square-Button;
+            width: $square-Button;
             border-radius: 50%;
             background: $black-75;
             &::before {
@@ -193,20 +233,10 @@ img.emphasis[src*=blob] {
                 }
             }
         }
-        > .CG-load-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-        }
-    }
-    
-    &.CG-menu:hover {
-        max-height: 100vh;
-        max-width: 100vw;
-        > .CG-menu-button {
+        > .CG-load-progress:hover ~ .CG-menu-button, > .CG-list:hover ~ .CG-menu-button {
             transform: rotateZ( 45deg );
         }
-        > .CG-list {
+        > .CG-list:hover, > .CG-load-progress:hover ~ .CG-list {
             max-height: 100vh;
             max-width: 100vw;
         }

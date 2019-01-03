@@ -6,6 +6,8 @@ import { HTML } from './library.HTML.js';
 import { ImageGrabber } from './ImageGrabber.js';
 import { Locale } from './ImageGrabber.locale.js';
 const $filenameRule = '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}';
+const $defaultDelay = 9000;
+let $fillCircle = false;
 
 class ComicGrabber {
     constructor ( grabber, { $session, $local, configuration, generalExpression } ) {
@@ -85,10 +87,17 @@ class ComicGrabber {
     }
 
     drawProgressCircle ( progress ) {
+        console.log( progress )
         let canvas = this.element.querySelector( ".CG-load-progress" );
         let context = canvas.getContext( "2d" );
-        context.strokeStyle = "rgba( 0, 255, 0, 0.75 )";
-        context.lineWidth = 4;
+        if ( $fillCircle ) {
+            context.strokeStyle = "rgba( 0, 192, 128, 0.75 )";
+            context.lineWidth = canvas.height / 2;
+        }
+        else {
+            context.strokeStyle = "rgba( 0, 255, 0, 0.75 )";
+            context.lineWidth = 4;
+        }
         context.clearRect( 0, 0, canvas.width, canvas.height );
         context.beginPath();
         context.arc( canvas.width / 2, canvas.height / 2, ( canvas.height - context.lineWidth ) / 2 + 1, -0.5 * Math.PI, ( progress * 2 - 0.5 ) * Math.PI );
@@ -111,8 +120,14 @@ class ComicGrabber {
                     else if ( item.id in this.$local ) value = this.$local[ item.id ];
                     else continue;
 
-                    if ( value ) item.classList.add( "checked" );
-                    else item.classList.remove( "checked" );
+                    if ( value ) {
+                        item.classList.add( "checked" );
+                        item.parentNode.classList.remove( "CG-SelectiveInvisible" );
+                    }
+                    else {
+                        item.classList.remove( "checked" );
+                        item.parentNode.classList.add( "CG-SelectiveInvisible" );
+                    }
                 }
                 if ( this.$local.filenameRule === $filenameRule ) {
                     el.querySelector( '.CG-menu .CG-item .CG-text #filenameRule' ).value = "default";
@@ -163,7 +178,11 @@ class ComicGrabber {
         .then(
             result =>
             [ ...document.querySelectorAll( ".CG-menu .CG-item #filenameRuleResult label" ) ].forEach( node => node.textContent = result )
-        );
+        )
+        .then( () => {
+            document.querySelector( ".CG-menu .CG-item #filenameRuleResult" ).classList.remove( "CG-SelectiveInvisible" );
+            setTimeout( () => document.querySelector( ".CG-menu .CG-item #filenameRuleResult" ).classList.add( "CG-SelectiveInvisible" ), $defaultDelay );
+        } );
         //Toggle alert
         if ( !( this.$local.savePath && this.$memory.title && this.$memory.subTitle ) ) {
             console.log( `%cSome configuration has an error.`, $alert );
@@ -182,6 +201,7 @@ class ComicGrabber {
             div: {
                 className: "ComicGrabber CG-menu",
                 _child: [
+                    { canvas: { className: "CG-load-progress" } },
                     {
                         div: {
                             className: "CG-list",
@@ -407,7 +427,7 @@ class ComicGrabber {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row",
+                                                    className: "CG-row CG-OutSide",
                                                     id: "filenameRuleResult",
                                                     _child: [
                                                         { label: {} },
@@ -487,7 +507,7 @@ class ComicGrabber {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row",
+                                                    className: "CG-row CG-OutSide CG-Second CG-SelectiveInvisible",
                                                     _child: [
                                                         {
                                                             label: {
@@ -508,7 +528,7 @@ class ComicGrabber {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row",
+                                                    className: "CG-row CG-OutSide CG-First CG-SelectiveInvisible",
                                                     _child: [
                                                         {
                                                             label: {
@@ -554,9 +574,7 @@ class ComicGrabber {
                             ]
                         }
                     },
-                    { div: { className: "CG-bottom-padding" } },
                     { div: { className: "CG-menu-button" } },
-                    { canvas: { className: "CG-load-progress" } },
                 ],
                 _todo: node => {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
@@ -565,6 +583,7 @@ class ComicGrabber {
                     for ( const item of node.querySelectorAll( ".CG-row .CG-checkbox:not(#saveToLocal):not(#showGrabbedImages)" ) ) {
                         item.addEventListener( "click", () => {
                             item.classList.toggle( "checked" );
+                            item.parentNode.classList.toggle( "CG-SelectiveInvisible" );
                             this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
                         } );
                     }
@@ -573,18 +592,22 @@ class ComicGrabber {
                         for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) {
                             list.push( node.fetchUri );
                         }
-                        node.querySelector( ".CG-row .CG-checkbox#copyShareLink" ).replaceWith( ...HTML.render( {
-                            input: {
-                                type: "text",
-                                id: "sharedLink",
-                                value: `https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`,
+                        node.querySelector( ".CG-row .CG-checkbox#copyShareLink" ).parentNode.replaceWith( ...HTML.render( {
+                            div: {
+                                className: "CG-text",
+                                _child: [
+                                    {
+                                        input: {
+                                            type: "text",
+                                            id: "sharedLink",
+                                            value: `https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`,
+                                        }
+                                    }
+                                ]
                             }
                         } ) );
                         {
                             const element = node.querySelector( ".CG-row #sharedLink" );
-                            const parent = element.parentNode;
-                            parent.classList.remove( "CG-row" );
-                            parent.classList.add( "CG-text" );
                             element.focus();
                             element.select();
                         }
@@ -593,7 +616,7 @@ class ComicGrabber {
                         for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) node.classList.add( "emphasis" );
                         setTimeout( () => {
                             for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) node.classList.remove( "emphasis" );
-                        }, 5000 );
+                        }, $defaultDelay );
                     } );
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
@@ -617,6 +640,8 @@ class ComicGrabber {
                         } )
                         .then( () => {
                             console.log( `%cArchive saved.`, $inform );
+                            $fillCircle = true;
+                            this.drawProgressCircle( 1 );
                             if ( this.$session.moveOnSave ) this.moveChapter( this.move.next );
                         } );
                     };

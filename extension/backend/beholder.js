@@ -43,16 +43,10 @@ class Header {
 }
 
 class Downloader {
-    constructor () {
-        Object.defineProperties( this, {
-            api: { value: $client.downloads },
-        } );
-    }
-
     save ( download ) {
         const $api = ( () => {
-            try { browser; return this.api.download; }
-            catch ( e ) { return ( download ) => new Promise( resolve => this.api.download( download, resolve ) ) }
+            try { browser; return $client.downloads.download; }
+            catch ( e ) { return ( download ) => new Promise( resolve => $client.downloads.download( download, resolve ) ) }
         } )();
         if ( download.blob ) {
             if ( download.blob instanceof Blob && blob.size ) {
@@ -60,7 +54,28 @@ class Downloader {
             }
             delete download.blob;
         }
-        return $api( download ).then( () => URL.revokeObjectURL( download.url ) );
+        return $api( download ).then( ( { id } ) => new Promise( ( resolve, reject ) => {
+            let onComplete = ( item ) => {
+                if ( item.id === id && item.state ) {
+                    switch ( item.state ) {
+                        case "complete": {
+                            if ( item.state.current === "complete" ) {
+                                URL.revokeObjectURL( download.url )
+                                $client.downloads.onChanged.removeListener( onComplete );
+                                resolve( item.state );
+                            }
+                            break;
+                        }
+                        case "interrupted": {
+                            $client.downloads.onChanged.removeListener( onComplete );
+                            reject( item.state );
+                            break;
+                        }
+                    }
+                }
+            };
+            $client.downloads.onChanged.addListener( onComplete );
+        } ) );
     }
 }
 
@@ -331,7 +346,8 @@ $client.runtime.onMessage.addListener(
         switch ( message.type ) {
             case "saveToLocal": {
                 $downloader.save( message.download )
-                    .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabber.archiveSaved" } ) );
+                    .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabber.archiveSaved" } ) )
+                    .catch( err => console.log( err ) );
                 break;
             }
             case "resetConfiguration": {

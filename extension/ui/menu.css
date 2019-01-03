@@ -42,7 +42,6 @@ img.emphasis[src*=blob] {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  transition-duration: 500ms;
   font-family: 'Times New Roman', 'Malgun Gothic';
   font-size: 16px;
   line-height: 24px;
@@ -52,15 +51,16 @@ img.emphasis[src*=blob] {
 .ComicGrabber.CG-menu {
   position: fixed;
   z-index: 999999;
-  bottom: 1vh;
+  bottom: calc( 1vh + 48px);
   left: 1vw;
-  max-width: 48px;
-  max-height: 48px;
+  transition-duration: 500ms;
+  max-height: 100vh;
+  max-width: 100vw;
 }
 
 .ComicGrabber.CG-menu > .CG-list {
   max-height: 0;
-  max-width: 0;
+  transition-duration: 500ms;
   overflow: hidden;
 }
 
@@ -171,15 +171,56 @@ img.emphasis[src*=blob] {
   animation: marqueeLeftSecond 5s infinite linear;
 }
 
-.ComicGrabber.CG-menu > .CG-bottom-padding, .ComicGrabber.CG-menu > .CG-menu-button {
-  height: 48px;
-  width: 48px;
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide.CG-SelectiveInvisible {
+  display: none !important;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide {
+  position: fixed !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  border-radius: 8px !important;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide#filenameRuleResult {
+  left: calc( 1vw);
+  bottom: calc( 1vh + 48px);
+  width: calc( calc( 256px * 1.2) / 2);
+  margin: 0 0 4px 0;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide {
+  left: calc( 1vw + 16px / 2 + 48px);
+  width: max-content;
+  height: 24px;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide > .CG-checkbox {
+  padding: 0 calc( 16px / 2) 0 calc( 16px);
+  background: none;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide.CG-First {
+  bottom: calc( 1vh + 24px * 0);
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress:not(:hover) ~ .CG-list:not(:hover):not(.NoOutSide) > .CG-item > .CG-row.CG-OutSide.CG-Second {
+  bottom: calc( 1vh + 24px * 1);
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress, .ComicGrabber.CG-menu > .CG-menu-button {
+  position: fixed;
+  bottom: 1vh;
+  left: 1vw;
+}
+
+.ComicGrabber.CG-menu > .CG-load-progress {
+  z-index: 999999;
 }
 
 .ComicGrabber.CG-menu > .CG-menu-button {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  z-index: 99999;
+  height: 48px;
+  width: 48px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.75);
 }
@@ -202,22 +243,11 @@ img.emphasis[src*=blob] {
   color: rgba(255, 0, 0, 0.9);
 }
 
-.ComicGrabber.CG-menu > .CG-load-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-.ComicGrabber.CG-menu:hover {
-  max-height: 100vh;
-  max-width: 100vw;
-}
-
-.ComicGrabber.CG-menu:hover > .CG-menu-button {
+.ComicGrabber.CG-menu > .CG-load-progress:hover ~ .CG-menu-button, .ComicGrabber.CG-menu > .CG-list:hover ~ .CG-menu-button {
   transform: rotateZ(45deg);
 }
 
-.ComicGrabber.CG-menu:hover > .CG-list {
+.ComicGrabber.CG-menu > .CG-list:hover, .ComicGrabber.CG-menu > .CG-load-progress:hover ~ .CG-list {
   max-height: 100vh;
   max-width: 100vw;
 }
