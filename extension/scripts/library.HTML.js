@@ -180,7 +180,7 @@ async function recognizeByFileSignature ( arraybuffer, contentType ) {
     //File signature information ( http://forensic-proof.com/archives/300 )
     //File signature information ( https://www.filesignatures.net/ )
     const signatures = {
-        "image/png": [ "89504e470D0a1a0a" ],
+        "image/png": [ "89504e470d0a1a0a" ],
         "image/jpeg": [ "ffd8ffe[0-9]" ],
         "image/gif": [ "47494638" ],
         "image/tiff": [ "49492a00", "4d4d002[ab]", "492049" ],

@@ -4,7 +4,7 @@ import { StorageManager } from './library.util.js';
 import './library.extend.js';
 import { HTML } from './library.HTML.js';
 import { ImageGrabber } from './ImageGrabber.js';
-import { Locale } from './ImageGrabber.locale.js';
+import { Locale } from './ComicGrabber.locale.js';
 const $filenameRule = '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}';
 const $defaultDelay = 9000;
 let $fillCircle = false;
