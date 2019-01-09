@@ -177,7 +177,7 @@ function loadDefault ( { reason, previousVersion, id } ) {
                 },
                 {
                     name: "newtoki/brotoon",
-                    RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+(?:[^\/]+)?|(brotoon|newtoki)\\.com/.+?\\?.+?spage",
+                    RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+(?:[^\/]+)?|(brotoon|newtoki)\\.com/.+?\\?.+?wr_id",
                     rule: {
                         moveNext: "a[alt*=다음]",
                         movePrev: "a[alt*=이전]",

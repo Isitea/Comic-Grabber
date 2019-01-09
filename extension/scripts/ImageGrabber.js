@@ -5,7 +5,7 @@ import { HTML } from './library.HTML.js';
 class ImageGrabber {
     constructor (  ) {
         Object.defineProperties( this, {
-            captured: { value: [], writable: false, configurable: true },
+            captured: { value: [] },
         } );
     }
 
@@ -39,42 +39,34 @@ class ImageGrabber {
      * @returns {Array<HTMLImageElement>} - Image objects which load image using fetchUri method.
      */
     grabImages ( anchor ) {
+        const renderer = uri => {
+            return HTML.render( {
+                img: {
+                    fetchUri: uri,
+                    _todo: node => {
+                        this.captured.push( node );
+                        node.addEventListener( "error", () => {
+                            let index;
+                            if ( index = this.captured.indexOf( node ) > -1 ) this.captured.splice( index, 1 );
+                            //node.parentNode.removeChild( node );
+                        } );
+                        return node;
+                    }
+                }
+            } );
+        }
         let list;
         if ( ( anchor instanceof Node || anchor instanceof NodeList ) ) {
             if ( anchor instanceof Node ) { list = [ ...anchor.querySelectorAll( "img" ) ]; }
             else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
-            Object.defineProperty( this, "captured", { value: list.reduce( ( captureList, item ) => {
-                item.replaceWith( ...HTML.render( {
-                    img: {
-                        fetchUri: item.dataset.original || item.src,
-                        _todo: function ( node ) {
-                            if ( item.src === document.URL ) return null;
-                            else {
-                                captureList.push( node );
-                                return node;
-                            }
-                        }
-                    }
-                } ) );
-                
-                return captureList;
-            }, [] ) } );
+            for ( const item of list ) {
+                item.replaceWith( ...renderer( item.dataset.original || item.src ) );
+            }
         }
         else if ( anchor instanceof Array ) {
-            list = anchor;
-            list.reduce( ( captureList, uri ) => {
-                uri.replaceWith( ...HTML.render( {
-                    img: {
-                        fetchUri: uri,
-                        _todo: function ( node ) {
-                            captureList.push( node );
-                            return node;
-                        }
-                    }
-                } ) );
-                
-                return captureList;
-            }, [] );
+            for ( const uri of anchor ) {
+                renderer( uri );
+            }
         }
         
         return this.captured;

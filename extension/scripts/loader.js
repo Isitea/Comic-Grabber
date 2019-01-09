@@ -82,6 +82,7 @@ class CommunicationTunnel {
 console.log( `%cComic grabber v0.0.1 Build 11`, `font-size: 48px; color: rgba( 117, 211, 88, 0.75 );` );
 //console.log( `%cUnder developing - extension id: ${chrome.runtime.id}`, $log.replace( /rgba\([\d\s,.]+\)/, "rgba( 114, 20, 214, 0.75 )" ) );
 const $tunnel = new CommunicationTunnel();
+const $URI = decodeURI( document.URL );
 $tunnel.addListener( "ComicGrabber.saveArchive", function ( download ) {
     $client.runtime.sendMessage( { type: "saveToLocal", download } );
 } );
@@ -98,8 +99,8 @@ async function retrieveRules () {
     console.log( `%cSuccessfully retrieved.`, $log );
     let { keyboard, session, local, generalExpression, lang, rules } = $memory;
     for ( const rule of rules ) {
-        console.log( `%cRule test: ${rule.name} - /${rule.RegExp}/: ${document.URL}`, $inform );
-        if ( document.URL.match( RegExp( rule.RegExp ) ) ) {
+        console.log( `%cRule test: ${rule.name} - /${rule.RegExp}/: ${$URI}`, $inform );
+        if ( $URI.match( RegExp( rule.RegExp ) ) ) {
             console.log( `%cRule matched: ${rule.name} - /${rule.RegExp}/`, $inform );
             return ( {
                 matched: true,
