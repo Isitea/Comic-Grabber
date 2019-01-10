@@ -7,6 +7,7 @@
 
 * body {
   width: 100vw;
+  overflow-x: hidden;
   background: rgba(0, 0, 0, 0.8);
 }
 
@@ -27,5 +28,11 @@
 * body #imageContainer {
   text-align: center;
   width: 100vw;
+}
+
+* body #imageContainer img {
+  display: block;
+  margin-left: 50vw;
+  transform: translateX(-50%);
 }
 /*# sourceMappingURL=shareImages.css.map */
