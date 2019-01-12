@@ -190,7 +190,7 @@ async function recognizeByFileSignature ( arraybuffer, contentType ) {
     //File signature information ( https://www.filesignatures.net/ )
     const signatures = {
         "image/png": [ "89504e470d0a1a0a" ],
-        "image/jpeg": [ "ffd8ffe[0-9]" ],
+        "image/jpeg": [ "ffd8ff" ],
         "image/gif": [ "47494638" ],
         "image/tiff": [ "49492a00", "4d4d002[ab]", "492049" ],
         "image/bmp": [ "424d" ],
