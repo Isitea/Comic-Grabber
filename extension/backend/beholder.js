@@ -60,7 +60,7 @@ class Downloader {
             delete download.blob;
         }
         for ( const part of download.filename.split( "/" ) ) {
-            if ( part !== part.toFilename() ) return false;
+            if ( part !== part.toFilename() ) return Promise.reject();
         }
         return $api( download ).then( id => new Promise( ( resolve, reject ) => {
             let onComplete = ( item ) => {
