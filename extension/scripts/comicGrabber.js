@@ -30,14 +30,25 @@ class ComicGrabber {
         }
         $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
         $session.addEventListener( "updated", () => this.syncModelView( "MtV" ) );
-        this.syncModelView( "MtV" );
+        if ( !this.syncModelView( "MtV" ) && this.$session.saveOnLoad && this.$session.moveOnSave ) {
+            console.log( `%cTry to reload automatically after ${$defaultDelay} ms.`, $inform );
+            this.notify( this.$localized.tryToReload );
+            setTimeout( () => location.reload(), $defaultDelay * 2 );
+        }
+        window.addEventListener( "beforeunload", () => {
+            this.notify( this.$localized.leavingPage, true );
+        } )
+    }
+
+    notify ( textContent, infinite ) {
+        let [ node ] = HTML.render( { div: { textContent } } );
+        this.notification.appendChild( node );
+        if ( !infinite ) setTimeout( () => this.notification.removeChild( node ), $defaultDelay );
     }
 
     moveChapter ( selector ) {
         console.log( `%cTry to change chapter...`, $log );
-        let [ node ] = HTML.render( { div: { className: "CG-notice", textContent: this.$localized.tryToLeave } } );
-        this.element.appendChild( node );
-        setTimeout( () => this.element.removeChild( node ), $defaultDelay );
+        this.notify( this.$localized.tryToLeave )
         return ( button => ( button instanceof HTMLElement ? button.click() : false ) )( document.querySelector( selector ) );
     }
 
@@ -190,10 +201,12 @@ class ComicGrabber {
         if ( !( this.$local.savePath && this.$memory.title && this.$memory.subTitle ) ) {
             console.log( `%cSome configuration has an error.`, $alert );
             this.element.querySelector( ".CG-menu-button" ).classList.add( "CG-alert" );
+            return false;
         }
         else {
             console.log( `%cAll configuration has no error.`, $inform );
             this.element.querySelector( ".CG-menu-button" ).classList.remove( "CG-alert" );
+            return true;
         }
     }
 
@@ -579,6 +592,7 @@ class ComicGrabber {
                     },
                     { div: { className: "CG-menu-button" } },
                     { div: { className: "CG-menu-cover", textContent: this.$localized.saveOnLoad + this.$localized.moveOnSave } },
+                    { div: { className: "CG-notice" } },
                 ],
                 _todo: node => {
                     for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
@@ -624,9 +638,9 @@ class ComicGrabber {
                     } );
                     let saveToLocal = () => {
                         console.log( `%cSave images to local as zip archive.`, $log );
-                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return alert( this.$localized.fillTextboxes );
+                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return this.notify( this.$localized.fillTextboxes );
                         node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).classList.toggle( "checked" );
-                        node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
+                        //node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
                         this.saveToLocal(
                             {
                                 localPath: this.$local.savePath,
@@ -669,7 +683,7 @@ class ComicGrabber {
         };
         setTimeout( getRealSize, 0 );
 
-        Object.defineProperties( this, { element: { value: node } } );
+        Object.defineProperties( this, { element: { value: node }, notification: { value: node.querySelector( ".CG-notice" ) } } );
     }
 
     /**
