@@ -5,6 +5,7 @@
     margin: 0;
     body {
         width: 100vw;
+        overflow-x: hidden;
         background: rgba( 0, 0, 0, 0.8 );
         .text-information {
             position: fixed;
@@ -21,6 +22,11 @@
         #imageContainer {
             text-align: center;
             width: 100vw;
+            img {
+                display: block;
+                margin-left: 50vw;
+                transform: translateX( -50% );
+            }
         }
     }
 }
