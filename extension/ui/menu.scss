@@ -65,30 +65,35 @@ img.emphasis[src*=blob] {
 .ComicGrabber {
     .CG-invisible { display: none !important; }
     &.CG-menu > .CG-notice {
+        z-index: 9999999999999999999;
         position: fixed !important;
         left: 50vw !important;
         top: 50vh !important;
         width: max-content !important;
-        height: calc( #{$height-ListItem} * 2 ) !important;
         line-height: calc( #{$height-ListItem} * 2 ) !important;
-        padding: 0 $letterSize 0 $letterSize !important;
         transform: translate( -50%, -50% );
         background: $black-75 !important;
         color: $white !important;
         border: {
             radius: $border !important;
         }
+        padding: 0 $letterSize 0 $letterSize !important;
         animation: NOTICE 1.5s linear 0s infinite alternate forwards !important;
+        > div {
+            animation: NOTICE 1.5s linear 0s infinite alternate forwards !important;
+            padding: $letterSize 0 $letterSize 0 !important;
+            display: block;
+            height: calc( #{$height-ListItem} * 2 ) !important;
+        }
     }
 
     &.CG-menu, &.CG-menu * {
         box-sizing: border-box !important;
         padding: 0;
-        margin: 0;
-        font-family: 'Times New Roman', 'Malgun Gothic';
+        font-family: 'Times New Roman', 'Malgun Gothic' !important;
         font-size: $letterSize !important;
         line-height: $height-ListItem !important;
-        text-align: center;
+        text-align: center !important;
         transition-duration: 500ms;
     }
     
