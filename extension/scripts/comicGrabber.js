@@ -213,6 +213,9 @@ class ComicGrabber {
     injectController () {
         if ( this.element ) throw "Already inserted";
         console.log( `%cBuild controller.`, $log );
+        for ( const item of document.querySelectorAll( '[oncopy], [oncut], [onpaste]' ) ) {
+            item.oncut = null; item.oncopy = null; item.onpaste = null;
+        }
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
