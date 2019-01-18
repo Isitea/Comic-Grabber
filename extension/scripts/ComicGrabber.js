@@ -213,9 +213,11 @@ class ComicGrabber {
     injectController () {
         if ( this.element ) throw "Already inserted";
         console.log( `%cBuild controller.`, $log );
-        for ( const item of document.querySelectorAll( '[oncopy], [oncut], [onpaste]' ) ) {
-            item.oncut = null; item.oncopy = null; item.onpaste = null;
+        for ( const item of document.querySelectorAll( '[oncopy*=false], [oncut*=false], [onpaste*=false], [oncontext*=false]' ) ) {
+            item.removeAttribute( "oncut" ); item.removeAttribute( "oncopy" );
+            item.removeAttribute( "onpaste" ); item.removeAttribute( "oncontext" );
         }
+        document.body.replaceWith( document.body.cloneNode( true ) );
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
