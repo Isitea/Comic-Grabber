@@ -37,7 +37,11 @@ class ComicGrabber {
         }
         window.addEventListener( "beforeunload", () => {
             this.notify( this.$localized.leavingPage, true );
-        } )
+        } );
+        window.addEventListener( "load", () => {
+            document.body.destroyEventListener();
+            document.destroyEventListener();
+        } );
     }
 
     notify ( textContent, infinite ) {
@@ -213,11 +217,6 @@ class ComicGrabber {
     injectController () {
         if ( this.element ) throw "Already inserted";
         console.log( `%cBuild controller.`, $log );
-        for ( const item of document.querySelectorAll( '[oncopy*=false], [oncut*=false], [onpaste*=false], [oncontext*=false]' ) ) {
-            item.removeAttribute( "oncut" ); item.removeAttribute( "oncopy" );
-            item.removeAttribute( "onpaste" ); item.removeAttribute( "oncontext" );
-        }
-        document.body.replaceWith( document.body.cloneNode( true ) );
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
@@ -865,6 +864,10 @@ const $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`;
 const $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`;
 const $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
 console.log( `%cAll components loaded.`, $log );
+
+console.log( `%cRemove rebundant event listeners`, $log );
+const $REL = [ ...document.querySelectorAll( [ "oncopy", "oncut", "onpaste", "oncontextmenu" ].reduce( ( query, event ) => { query.push( `[${event}*=false]` ); return query; }, [ "body" ] ).join( ", " ) ) ];
+for ( const item of $REL ) item.destroyEventListener();
 
 const $tunnel = new CommunicationTunnel( ( () => { try { return browser; } catch ( e ) { return chrome; } } )() );
 $tunnel.addListener( "ComicGrabber.activateExtension", activateExtension );

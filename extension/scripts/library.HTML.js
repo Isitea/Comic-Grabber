@@ -1,10 +1,11 @@
 "use strict";
+const $EventList = ["onbeforecopy","onbeforecut","onbeforepaste","onfullscreenchange","onfullscreenerror","onsearch","onabort","onauxclick","onblur","oncancel","oncanplay","oncanplaythrough","onchange","onclick","onclose","oncontextmenu","oncopy","oncuechange","oncut","ondblclick","ondrag","ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop","ondurationchange","onemptied","onended","onerror","onfocus","ongotpointercapture","oninput","oninvalid","onkeydown","onkeypress","onkeyup","onload","onloadeddata","onloadedmetadata","onloadstart","onlostpointercapture","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onpaste","onpause","onplay","onplaying","onpointercancel","onpointerdown","onpointerenter","onpointerleave","onpointermove","onpointerout","onpointerover","onpointerup","onprogress","onratechange","onreset","onresize","onscroll","onseeked","onseeking","onselect","onselectionchange","onselectstart","onstalled","onsubmit","onsuspend","ontimeupdate","ontoggle","onvolumechange","onwaiting","onwheel","onafterprint","onbeforeprint","onbeforeunload","onhashchange","onlanguagechange","onmessage","onmessageerror","onoffline","ononline","onpagehide","onpageshow","onpopstate","onrejectionhandled","onstorage","onunhandledrejection","onunload"];
 Object.defineProperties( Node.prototype, {
     appendChildren: {
         /**
          * @description Extends Node object for multi appending child node.
          * @param {NodeList} children - Nodes which are append to the target.
-         * @returns {void}
+         * @returns {Node}
          */
         value: function ( children ) {
             if ( children instanceof NodeList ) {
@@ -13,6 +14,23 @@ Object.defineProperties( Node.prototype, {
                 throw new TypeError( "Passed parameter on method appendChildren under Node must be a NodeList." );
             }
             return this;
+        }
+    },
+    destroyEventListener: {
+        /**
+         * @description Destroy event listener on Node.
+         * @param {Array<String>} inlineEvent - A series of event name like 'onclick".
+         * @returns {undefined}
+         */
+        value: function ( inlineEvent ) {
+            if ( this !== document ) {
+                for ( const event of ( inlineEvent || $EventList ) ) this.removeAttribute( event );
+                this.replaceWith( this.cloneNode().appendChildren( this.childNodes ) );
+            }
+            else {
+                for ( const event of ( inlineEvent || $EventList ) ) console.log( event, this[ event ] );
+                for ( const event of ( inlineEvent || $EventList ) ) this[ event ] = null;
+            }
         }
     }
 } );
@@ -207,4 +225,4 @@ async function recognizeByFileSignature ( arraybuffer, contentType ) {
     return contentType || "application/octet-strem";
 }
 
-export { HTML, recognizeByFileSignature };
+export { HTML, recognizeByFileSignature, $EventList };
