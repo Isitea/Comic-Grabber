@@ -57,30 +57,11 @@ Object.defineProperties( Image.prototype, {
                 } );
                 const response = await fetch( uri.replace( /^https?:/i, "" ) );
                 const contentType = response.headers.get( 'Content-Type' );
-                let total = Number( response.headers.get( 'Content-Length' ) );
-                const reader = await response.body.getReader();
-                let loaded = new Uint8Array( total ), cursor = 0;
-                do {
-                    const { done, value: bin } = await reader.read();
-                    if ( !bin ) break;
-                    if ( cursor + bin.length > total ) total = 0;
-                    if ( total === 0 ) {
-                        let tmp = new Uint8Array( cursor + bin.length );
-                        tmp.set( loaded, 0 );
-                        tmp.set( bin, cursor );
-                        loaded = tmp;
-                    }
-                    else loaded.set( bin, cursor );
-                    cursor += bin.length;
-                    this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: cursor, total } ) );
-                    if ( done ) break;
-                } while ( cursor < total || total === 0 );
-                reader.releaseLock();
-    
-                const blob = new Blob( [ loaded ], { type: await recognizeByFileSignature( loaded, contentType ) } );
+                const arraybuffer = await response.arrayBuffer();
+                const blob = new Blob( [ arraybuffer ], { type: await recognizeByFileSignature( arraybuffer, contentType ) } );
                 this.src = URL.createObjectURL( blob );
                 const eHandler = () => {
-                    setTimeout( () => this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: Boolean( total ), loaded: blob.size, total: blob.size } ) ), 0 );
+                    setTimeout( () => this.dispatchEvent( new ProgressEvent( "progress", { lengthComputable: true, loaded: blob.size, total: blob.size } ) ), 0 );
                     URL.revokeObjectURL( this.src );
                     this.removeEventListener( "load", eHandler );
                     this.removeEventListener( "error", eHandler );
