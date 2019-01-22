@@ -32,6 +32,5 @@
 	"background": {
 		"page": "backend/beholder.html"
 	},
-	"content_security_policy": "default-src 'self' blob: chrome-extension-resource: https://cdnjs.cloudflare.com/;",
 	"minimum_chrome_version": "61"
 }

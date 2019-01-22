@@ -28,7 +28,6 @@ Object.defineProperties( Node.prototype, {
                 this.replaceWith( this.cloneNode().appendChildren( this.childNodes ) );
             }
             else {
-                for ( const event of ( inlineEvent || $EventList ) ) console.log( event, this[ event ] );
                 for ( const event of ( inlineEvent || $EventList ) ) this[ event ] = null;
             }
         }
