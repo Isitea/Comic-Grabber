@@ -614,6 +614,9 @@ class ComicGrabber {
                         for ( const node of document.querySelectorAll( "img[src*=blob]" ) ) {
                             list.push( node.fetchUri );
                         }
+                        let urlWithHash = `https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`;
+                        let shortenUrl = await ( await fetch( `//tinyurl.com/api-create.php?url=${encodeURIComponent( urlWithHash )}` ) ).text();
+                        
                         node.querySelector( ".CG-row .CG-checkbox#copyShareLink" ).parentNode.replaceWith( ...HTML.render( {
                             div: {
                                 className: "CG-text",
@@ -622,7 +625,7 @@ class ComicGrabber {
                                         input: {
                                             type: "text",
                                             id: "sharedLink",
-                                            value: `https://extension.isitea.net/shareImages#${await ( new JSZip() ).file( "grabbedImageList", new Blob( [ JSON.stringify( { title: this.$memory.title, subTitle: this.$memory.subTitle, reference: document.URL, images: list } ) ], { type: "plain/text" } ) ).generateAsync( { type: "base64", compression: "DEFLATE", compressionOptions: { level: 9 } } )}`,
+                                            value: shortenUrl,
                                         }
                                     }
                                 ]
