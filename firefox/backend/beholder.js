@@ -89,9 +89,13 @@ class Downloader {
 
 const redirections = [
 ];
-function onBeforeRequest ( details ) {
+function onBeforeRequest ( { initiator, originUrl, ...details } ) {
+    const origin = initiator || originUrl;
     for ( const item of redirections ) {
-        if ( item.filter( details ) ) return { redirectUrl: item.redirectTo( details ) }
+        if ( origin.match( item.filter ) ) {
+            let [ pattern, replace ] = item.redirectTo;
+            return { redirectUrl: origin.replace( pattern, replace ) };
+        }
     }
 }
 $client.webRequest.onBeforeRequest.addListener(
@@ -107,7 +111,7 @@ const responseHeadersModifier = [
             ( { initiator, originUrl, ...details }, header ) => {
                 const origin = initiator || originUrl;
                 let value;
-                if ( header.read( "Access-Control-Allow-Credentials" ) === "true" ) value = origin || header.read( "Access-Control-Allow-Origin" );
+                if ( header.read( "Access-Control-Allow-Credentials" ) === "true" ) value = header.read( "Access-Control-Allow-Origin" ) || origin;
                 else value = "*";
                 return { name: "Access-Control-Allow-Origin", value };
             },

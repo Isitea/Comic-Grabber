@@ -1,7 +1,7 @@
-﻿{
+{
 	"manifest_version": 2,
 	"name": "Comic grabber",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "This extension watches loaded images and serves the downloading function of them. (specialized for some sites)",
 	"author": "Isitea",
 	"icons": {

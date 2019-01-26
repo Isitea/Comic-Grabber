@@ -3,7 +3,7 @@ const $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`;
 const $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`;
 const $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
 const $client = ( () => { try { return browser; } catch ( e ) { return chrome; } } )();
-const $baseUri = chrome.runtime.getURL( "" );
+const $baseUri = $client.runtime.getURL( "" );
 
 function moduleLoader ( scripts ) {
     for ( const source of scripts ) {
