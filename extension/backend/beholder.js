@@ -54,7 +54,7 @@ class Downloader {
             catch ( e ) { return ( download ) => new Promise( resolve => $client.downloads.download( download, resolve ) ) }
         } )();
         if ( download.blob ) {
-            if ( download.blob instanceof Blob && blob.size ) {
+            if ( download.blob instanceof Blob && download.blob.size ) {
                 download.url = URL.createObjectURL( download.blob );
             }
             delete download.blob;
@@ -89,10 +89,9 @@ class Downloader {
 
 const redirections = [
 ];
-function onBeforeRequest ( { initiator, originUrl, ...details } ) {
-    const origin = initiator || originUrl;
+function onBeforeRequest ( { url, ...details } ) {
     for ( const item of redirections ) {
-        if ( origin.match( item.filter ) ) {
+        if ( url.match( item.filter ) ) {
             let [ pattern, replace ] = item.redirectTo;
             return { redirectUrl: origin.replace( pattern, replace ) };
         }
@@ -108,8 +107,8 @@ const responseHeadersModifier = [
     {
         filter: ( { type, details }, header ) => type === "xmlhttprequest",
         fields: [
-            ( { initiator, originUrl, ...details }, header ) => {
-                const origin = initiator || originUrl;
+            ( { documentUrl, initiator, ...details }, header ) => {
+                const origin = documentUrl || initiator;
                 let value;
                 if ( header.read( "Access-Control-Allow-Credentials" ) === "true" ) value = header.read( "Access-Control-Allow-Origin" ) || origin;
                 else value = "*";
@@ -120,8 +119,8 @@ const responseHeadersModifier = [
     {
         filter: ( { type, ...details }, { location } ) => Boolean( location ) && type === "xmlhttprequest",
         fields: [
-            ( { initiator, originUrl, ...details }, { location } ) => {
-                const origin = initiator || originUrl;
+            ( { documentUrl, initiator, ...details }, { location } ) => {
+                const origin = documentUrl || initiator;
                 let value = location;
                 if ( origin && origin.match( /https?:/ ) ) {
                     const host = origin.match( /https?:/ )[0].toLowerCase();
