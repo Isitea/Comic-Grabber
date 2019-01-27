@@ -142,20 +142,11 @@ function onHeadersReceived ( details ) {
     }
     if ( header.modified ) return { responseHeaders: header.arrayform };
 }
-try {
-    $client.webRequest.onHeadersReceived.addListener(
-        onHeadersReceived,
-        { urls: [ '*://*/*' ] },
-        [ 'blocking', 'responseHeaders', 'extraHeaders' ]
-    );
-}
-catch ( e ) {
-    $client.webRequest.onHeadersReceived.addListener(
-        onHeadersReceived,
-        { urls: [ '*://*/*' ] },
-        [ 'blocking', 'responseHeaders' ]
-    );
-}
+$client.webRequest.onHeadersReceived.addListener(
+    onHeadersReceived,
+    { urls: [ '*://*/*' ] },
+    [ 'blocking', 'responseHeaders' ]
+);
 
 const $extensionDefault = {
     keyboard: {
