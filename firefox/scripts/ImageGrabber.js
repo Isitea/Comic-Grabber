@@ -60,7 +60,7 @@ class ImageGrabber {
             if ( anchor instanceof Node ) { list = [ ...anchor.querySelectorAll( "img" ) ]; }
             else if ( anchor instanceof NodeList ) { list = [ ...anchor ]; }
             for ( const item of list ) {
-                item.replaceWith( ...renderer( item.dataset.original || item.src ) );
+                item.replaceWith( ...renderer( ( item.dataset ? item.dataset.original : undefined ) || item.src ) );
             }
         }
         else if ( anchor instanceof Array ) {

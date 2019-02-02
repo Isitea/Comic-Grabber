@@ -192,7 +192,7 @@ async function recognizeByFileSignature ( arraybuffer, contentType ) {
         "image/gif": [ "47494638" ],
         "image/tiff": [ "49492a00", "4d4d002[ab]", "492049" ],
         "image/bmp": [ "424d" ],
-        "image/webp": [ "52494646[0-9a-f]{6,6}57454250" ],
+        "image/webp": [ "52494646[0-9a-f]{8}57454250" ],
     };
     //Read signature from binary
     const binSign = ( new Uint8Array( arraybuffer.slice( 0, 24 ) ) ).reduce( ( hex, bin ) => hex + bin.toString( 16 ).padStart( 2, "0" ), "" );

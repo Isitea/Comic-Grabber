@@ -5,6 +5,7 @@ import './library.extend.js';
 import { HTML } from './library.HTML.js';
 import { ImageGrabber } from './ImageGrabber.js';
 import { Locale } from './ComicGrabber.locale.js';
+import { decypher } from './decypher.js';
 const $filenameRule = '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}';
 const $defaultDelay = 9000;
 let $fillCircle = false;
@@ -25,7 +26,34 @@ class ComicGrabber {
                 Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
             }
             if ( configuration.images ) {
-                this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
+                try {
+                    if ( img_list ) {
+                        let dc = new decypher( view_cnt );
+                        let list = [];
+                        for ( const uri of img_list ) {
+                            list.push( dc.restoreImage( uri, 0 ).then( blob => {
+                                let image = new Image();
+                                image.crossOrigin = 'anonymous';
+                                image.src = URL.createObjectURL( blob );
+                                return image;
+                            } ) );
+                        }
+                        Promise.all( list ).then( list => {
+                            let container = document.querySelector( '.view-content' );
+                            let box = container.cloneNode();
+                            container.replaceWith( box );
+                            for ( const item of list ) {
+                                box.appendChild( item );
+                            }
+                            return box.childNodes;
+                        } ).then( nodelist => this.attachProgressEvent( grabber.grabImages( nodelist ) ) );
+                    }
+                    else throw null;
+                }
+                catch ( e ) {
+                    console.log( e );
+                    this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
+                }
             }
         }
         $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );

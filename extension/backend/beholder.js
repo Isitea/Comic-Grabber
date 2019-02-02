@@ -93,7 +93,7 @@ function onBeforeRequest ( { url, ...details } ) {
     for ( const item of redirections ) {
         if ( url.match( item.filter ) ) {
             let [ pattern, replace ] = item.redirectTo;
-            return { redirectUrl: origin.replace( pattern, replace ) };
+            return { redirectUrl: url.replace( RegExp( pattern ), replace ) };
         }
     }
 }
@@ -105,7 +105,7 @@ $client.webRequest.onBeforeRequest.addListener(
 
 const responseHeadersModifier = [
     {
-        filter: ( { type, details }, header ) => type === "xmlhttprequest",
+        filter: ( { type, details }, header ) => type === "xmlhttprequest" || type === "image",
         fields: [
             ( { documentUrl, initiator, ...details }, header ) => {
                 const origin = documentUrl || initiator;
@@ -187,7 +187,7 @@ const $extensionDefault = {
         },
         {
             name: "newtoki/brotoon",
-            RegExp: "(brotoon|newtoki)\\.com/.+?/\\d+(?:[^\/]+)?|(brotoon|newtoki)\\.com/.+?\\?.+?wr_id",
+            RegExp: "(brotoon|newtoki)\\.\\w{3}\\/.+?(?:\\/\\d+(?:[^\\/]+)?|\\?.+?wr_id)",
             rule: {
                 moveNext: "a[alt*=다음]",
                 movePrev: "a[alt*=이전]",
@@ -267,7 +267,7 @@ const $extensionDefault = {
                 movePrev: ".btn-group > a[title*=이전]",
                 subject: {
                     title: {
-                        selector: ".view-wrap > h1",
+                        selector: ".view-wrap strong",
                         propertyChain: ".textContent"
                     },
                 },
@@ -342,10 +342,7 @@ async function retrieveRules () {
             for ( const [ key, value ] of Object.entries( site.HTTPMod ) ) {
                 switch ( key ) {
                     case "redirections": {
-                        redirections.push( {
-                            filter: ( { url } ) => url.match( new RegExp( value.filter ) ),
-                            redirectTo: ( { url } ) => url.replace( new RegExp( value.redirectTo[0] ), value.redirectTo[1] )
-                        } );
+                        redirections.push( value );
                     }
                 }
             }
