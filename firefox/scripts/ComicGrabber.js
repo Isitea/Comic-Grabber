@@ -20,16 +20,34 @@ class ComicGrabber {
             $memory: { value: { title: "", subTitle: "", complete: false } },
             move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
         } );
+        if ( window.img_list ) {
+            //Mimic original
+            $(function () {
+                var e = [];
+                for (var t in img_list) e.push("<option value='" + t + "'>" + (Number(t) + 1) + " 페이지</option>");
+                var n = null,
+                    a = only_chapter.map(function (e, t) {
+                        return e[1] == chapter && (n = t), "<option value='" + e[1] + "' " + (e[1] == chapter ? "selected" : "") + " >" + e[0] + "</option>"
+                    });
+                $(".chapter_selector").html(a.join("\n")), $(".chapter_selector").change(function () {
+                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + $(this).val()
+                }), $(".chapter_prev").click(function () {
+                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + only_chapter[n + 1][1]
+                }), $(".chapter_next").click(function () {
+                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + only_chapter[n - 1][1]
+                }), 0 == n && $(".chapter_next").css("display", "none"), n >= only_chapter.length - 1 && $(".chapter_prev").css("display", "none"), null == n && ($(".chapter_prev").css("display", "none"), $(".chapter_next").css("display", "none"), $(".chapter_selector").css("display", "none"))
+            })
+        }
         this.injectController();
         if ( configuration instanceof Object ) {
             if ( configuration.subject ) {
                 Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
             }
             if ( configuration.images ) {
-                try {
-                    if ( img_list ) {
-                        let dc = new decypher( view_cnt );
-                        let list = [];
+                if ( window.img_list ) {
+                    let dc = new decypher( view_cnt );
+                    let list = [];
+                    if ( view_cnt !== 0 ) {
                         for ( const uri of img_list ) {
                             list.push( dc.restoreImage( uri, 0 ).then( blob => {
                                 let image = new Image();
@@ -38,22 +56,29 @@ class ComicGrabber {
                                 return image;
                             } ) );
                         }
-                        Promise.all( list ).then( list => {
-                            let container = document.querySelector( '.view-content' );
-                            let box = container.cloneNode();
-                            container.replaceWith( box );
-                            for ( const item of list ) {
-                                box.appendChild( item );
-                            }
-                            return box.childNodes;
-                        } ).then( nodelist => this.attachProgressEvent( grabber.grabImages( nodelist ) ) );
                     }
-                    else throw null;
+                    else {
+                        for ( const uri of img_list ) {
+                            list.push( new Promise( resolve => {
+                                let image = new Image();
+                                image.crossOrigin = 'anonymous';
+                                image.src = uri;
+                                //image.addEventListener( 'load', () => resolve( image ) );
+                                resolve( image );
+                            } ) );
+                        }
+                    }
+                    Promise.all( list ).then( list => {
+                        let container = document.querySelector( '.view-content' );
+                        let box = container.cloneNode();
+                        container.replaceWith( box );
+                        for ( const item of list ) {
+                            box.appendChild( item );
+                        }
+                        return box.childNodes;
+                    } ).then( nodelist => this.attachProgressEvent( grabber.grabImages( nodelist ) ) );
                 }
-                catch ( e ) {
-                    console.log( e );
-                    this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
-                }
+                else this.attachProgressEvent( grabber.grabImages( document.querySelectorAll( configuration.images ) ) );
             }
         }
         $local.addEventListener( "updated", () => this.syncModelView( "MtV" ) );

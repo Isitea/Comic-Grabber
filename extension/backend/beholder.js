@@ -92,8 +92,15 @@ const redirections = [
 function onBeforeRequest ( { url, ...details } ) {
     for ( const item of redirections ) {
         if ( url.match( item.filter ) ) {
-            let [ pattern, replace ] = item.redirectTo;
-            return { redirectUrl: url.replace( RegExp( pattern ), replace ) };
+            switch ( item.type ) {
+                case 'redirect': {
+                    let [ pattern, replace ] = item.redirectTo;
+                    return { redirectUrl: url.replace( RegExp( pattern ), replace ) };
+                }
+                case 'cancel': {
+                    return { cancel: true };
+                }
+            }
         }
     }
 }
@@ -102,6 +109,35 @@ $client.webRequest.onBeforeRequest.addListener(
     { urls: [ '*://*/*' ] },
     [ 'blocking' ]
 );
+
+const requestHeadersModifier = [
+    {
+        filter: ( { url, type, ...details } ) => type === 'xmlhttprequest' && url.match( /dcinside/ ),
+        fields: [
+            ( details, header ) => {
+                console.log( details.url );
+                header.write( { name: 'Referer', value: "http://gall.dcinside.com/mgallery/board/lists?id=kizunaai" } );
+                return { name: 'Origin', value: "http://gall.dcinside.com" };
+            }
+        ]
+    },
+];
+function onBeforeSendHeaders ( details ) {
+    const header = new Header( details.requestHeaders );
+    for ( const modifier of requestHeadersModifier ) {
+        if ( modifier.filter( details, header ) ) {
+            for ( const field of modifier.fields ) {
+                header.write( ( field instanceof Function ? field( details, header ) : field ) );
+            }
+        }
+    }
+    if ( header.modified ) return { requestHeaders: header.arrayform };
+}
+$client.webRequest.onBeforeSendHeaders.addListener(
+    onBeforeSendHeaders,
+    { urls: [ '*://*/*' ] },
+    [ 'blocking', 'requestHeaders' ]
+)
 
 const responseHeadersModifier = [
     {
@@ -203,6 +239,12 @@ const $extensionDefault = {
         {
             name: "mangashow",
             RegExp: "mangashow.me/bbs/board.php.+?wr_id",
+            HTTPMod: {
+                redirections: {
+                    type: 'cancel',
+                    filter: "mangashow.me.+?viewer.+?js"
+                }
+            },
             rule: {
                 moveNext: ".chapter_next",
                 movePrev: ".chapter_prev",
@@ -239,6 +281,7 @@ const $extensionDefault = {
             RegExp: "jmana2.com\\/book2\\/",
             HTTPMod: {
                 redirections: {
+                    type: 'redirect',
                     filter: "jmana3.com\\/book\\/",
                     redirectTo: [ "jmana3.com\\/book\\/", "jmana2.com/book2/" ]
                 }
