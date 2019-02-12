@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Comic grabber",
-	"version": "1.0.12",
+	"version": "1.0.13",
 	"description": "This extension watches loaded images and serves the downloading function of them. (specialized for some sites)",
 	"author": "Isitea",
 	"icons": {
@@ -31,6 +31,9 @@
 	],
 	"background": {
 		"page": "backend/beholder.html"
+	},
+	"options_ui": {
+		"page": "ui/importer/index.html"
 	},
 	"minimum_chrome_version": "61"
 }

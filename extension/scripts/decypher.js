@@ -47,7 +47,7 @@ class decypher {
             context.drawImage( image, 0, 0, width, height, ( flag === 1 ? -width / 2 : 0 ), 0, width, height );
         }
         else {
-            if ( location.hostname.match( /mangashow.me/ ) ) this.resetSeed( this.originalSeed / 10 );
+            if ( location.hostname.match( /mangashow.+me/ ) ) this.resetSeed( this.originalSeed / 10 );
             else this.resetSeed();
             let clip = [];
             for ( let index = 0; index < this.clip.x * this.clip.y; index++ ) {
