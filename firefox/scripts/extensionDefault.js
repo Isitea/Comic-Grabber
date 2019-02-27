@@ -18,6 +18,27 @@ const $extensionDefault = {
     generalExpression: "^(.+)\\s+((?:[\\d\\s\\-\\~화권]+)|(?:(?:번외|특별).+)|(?:\\(?\\[?단편\\]?\\)?.+))",
     rules: [
         {
+            name: "mana02",
+            RegExp: "mana\\d+.com/board/webtoon/view/wr_id",
+            rule: {
+                moveNext: ".fa.fa-arrow-circle-right",
+                movePrev: ".fa.fa-arrow-circle-left",
+                subject: {
+                    title: {
+                        selector: "#topnavi .fa-home",
+                        propertyChain: ".textContent",
+                        exp: "(.+?)\\s+\\d+화.+\\(.+\\)",
+                    },
+                    subTitle: {
+                        selector: "#topnavi .fa-home",
+                        propertyChain: ".textContent",
+                        exp: "(?:.+?)\\s+(\\d+화).+\\(.+\\)",
+                    },
+                },
+                images: ".content #about .inner img",
+            }
+        },
+        {
             name: "Naver comic",
             RegExp: "comic\\.naver\\.com/.+?/detail\\.nhn.+?titleId",
             rule: {
