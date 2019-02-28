@@ -2,7 +2,7 @@ class decypher {
     constructor ( seed = 1, x = 5, y = 5 ) {
         Object.defineProperties( this, {
             originalSeed: { value: seed },
-            clip: { value: { x, y } },
+            clip: { value: { x, y }, configurable: true },
         } );
     }
     
