@@ -52,6 +52,7 @@ class decypher {
                 this.resetSeed( seed );
                 if ( seed > 3e4 ) Object.defineProperties( this, { clip: { value: { x: 1 , y: 6 } } } );
                 else if ( seed > 2e4 ) Object.defineProperties( this, { clip: { value: { x: 1 , y: 5 } } } );
+                else if ( seed > 1e4 ) Object.defineProperties( this, { clip: { value: { x: 5 , y: 1 } } } );
             }
             else this.resetSeed();
             let clip = [];
