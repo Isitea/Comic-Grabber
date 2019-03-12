@@ -31,7 +31,7 @@ class decypher {
         return new Promise( resolve => {
             const image = new Image();
             image.crossOrigin = 'anonymous';
-            image.src = src;
+            image.src = ( location.hostname.match( /mangashow.+me/ ) ? src + '?v=2' : src );
             image.addEventListener( 'load', () => resolve( image ) );
         } );
     }

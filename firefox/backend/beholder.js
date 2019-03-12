@@ -115,8 +115,9 @@ const requestHeadersModifier = [
     {
         filter: ( { url, type, ...details } ) => type === 'xmlhttprequest' && url.match( /dcinside/ ),
         fields: [
-            ( details, header ) => {
-                console.log( details.url );
+            ( { documentUrl, initiator, ...details }, header ) => {
+                const origin = documentUrl || initiator;
+                if ( origin.match( /dcinside.com/ ) ) return { name: 'DoNothing', value: '' };
                 header.write( { name: 'Referer', value: "http://gall.dcinside.com/mgallery/board/lists?id=kizunaai" } );
                 return { name: 'Origin', value: "http://gall.dcinside.com" };
             }
