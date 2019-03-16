@@ -13,6 +13,7 @@ const $extensionDefault = {
         savePath: "Downloaded comics",
         onConflict: "overwrite",
         filenameRule: '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}',
+        imageType: "webp",
     },
     lang: "ko-kr",
     generalExpression: "^(.+)\\s+((?:[\\d\\s\\-\\~화권]+)|(?:(?:번외|특별).+)|(?:\\(?\\[?단편\\]?\\)?.+))",

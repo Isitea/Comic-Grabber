@@ -36,7 +36,7 @@ class decypher {
         } );
     }
 
-    async restoreImage ( src, flag = 0 ) {
+    async restoreImage ( src, flag = 0, type = 'webp' ) {
         const image = await this.loadImage( src );
         const canvas = document.createElement( "canvas" );
         const context = canvas.getContext( "2d" );
@@ -72,7 +72,7 @@ class decypher {
                 //context.drawImage( image, sx, sy, sw, sh, dx, dy, dw, dh );
             }
         }
-        return await new Promise( resolve => { canvas.toBlob( resolve, 'image/webp', 1 ); } );
+        return await new Promise( resolve => { canvas.toBlob( resolve, `image/${type}`, 1 ); } );
     }
 }
 export { decypher };

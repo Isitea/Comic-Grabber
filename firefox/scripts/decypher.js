@@ -72,7 +72,7 @@ class decypher {
                 //context.drawImage( image, sx, sy, sw, sh, dx, dy, dw, dh );
             }
         }
-        return await new Promise( resolve => { canvas.toBlob( resolve, 'image/webp', 1 ); } );
+        return await new Promise( resolve => { canvas.toBlob( resolve, `image/${type}`, 1 ); } );
     }
 }
 export { decypher };
