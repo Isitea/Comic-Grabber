@@ -50,7 +50,7 @@ class ComicGrabber {
                     let list = [];
                     if ( view_cnt !== 0 ) {
                         for ( const uri of img_list ) {
-                            list.push( dc.restoreImage( uri, 0, this.$local.imageType ).then( blob => {
+                            list.push( dc.restoreImage( uri, 0, this.$session.imageType ).then( blob => {
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
                                 image.src = URL.createObjectURL( blob );

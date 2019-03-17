@@ -22,7 +22,17 @@ async function importRules ( ev ) {
         await new Promise( resolve => $client.storage.local.set( json, resolve ) );
     }
     $client.runtime.reload();
+    informConfigApplied();
+}
+
+function informConfigApplied () {
+    const inform = document.querySelector( "#information" );
+    inform.textContent = "Applied";
+    setTimeout( () => inform.textContent = "", 1000 );
 }
 
 document.querySelector( "#importer" ).addEventListener( "click", importRules );
-document.querySelector( "#resetter" ).addEventListener( "click", () => $client.runtime.sendMessage( chrome.runtime.id, { type: "resetConfiguration" } ) );
+document.querySelector( "#resetter" ).addEventListener( "click", () => {
+    $client.runtime.sendMessage( chrome.runtime.id, { type: "resetConfiguration" } );
+    informConfigApplied();
+} );
