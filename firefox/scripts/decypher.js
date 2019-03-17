@@ -36,7 +36,7 @@ class decypher {
         } );
     }
 
-    async restoreImage ( src, flag = 0 ) {
+    async restoreImage ( src, flag = 0, type = 'webp' ) {
         const image = await this.loadImage( src );
         const canvas = document.createElement( "canvas" );
         const context = canvas.getContext( "2d" );
