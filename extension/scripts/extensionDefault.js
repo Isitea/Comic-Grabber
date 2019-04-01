@@ -8,7 +8,7 @@ const $extensionDefault = {
     session: {
         saveOnLoad: false,
         moveOnSave: false,
-        imageType: "webp",
+        imageType: "png",
     },
     local: {
         savePath: "Downloaded comics",
@@ -74,12 +74,12 @@ const $extensionDefault = {
             }
         },
         {
-            name: "mangashow",
-            RegExp: "mangashow.+me/bbs/board.php.+?wr_id",
+            name: "manamoa",
+            RegExp: "manamoa.+net/bbs/board.php.+?wr_id",
             HTTPMod: {
                 redirections: {
                     type: 'cancel',
-                    filter: "mangashow.+me.+?viewer.+?js"
+                    filter: "manamoa.+net.+?viewer.+?js"
                 }
             },
             rule: {
@@ -87,8 +87,8 @@ const $extensionDefault = {
                 movePrev: ".chapter_prev",
                 subject: {
                     title: {
-                        selector: ".head .subject h1",
-                        propertyChain: ".textContent",
+                        selector: ".toon-info .toon-title",
+                        propertyChain: ".firstChild.textContent",
                     },
                     subTitle: {
                         selector: ".chapter_selector [selected]",

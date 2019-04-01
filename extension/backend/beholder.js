@@ -189,14 +189,16 @@ $client.webRequest.onHeadersReceived.addListener(
 async function loadDefault ( { reason, previousVersion, id } ) {
     if ( reason === "install" || reason === "update" ) {
         console.log( `%cReset configuration`, $log );
+        const $memory = await new Promise( resolve => $client.storage.local.get( null, resolve ) );
+        let $Default = Object.assign( {}, $extensionDefault, { session: { imageType: $memory.session.imageType } } );
         try {
             browser;
             await $client.storage.local.clear();
-            await $client.storage.local.set( $extensionDefault );
+            await $client.storage.local.set( $Default );
         }
         catch ( e ) {
             await new Promise( resolve => $client.storage.local.clear( resolve ) );
-            await new Promise( resolve => $client.storage.local.set( $extensionDefault, resolve ) );
+            await new Promise( resolve => $client.storage.local.set( $Default, resolve ) );
         }
         location.reload();
     }

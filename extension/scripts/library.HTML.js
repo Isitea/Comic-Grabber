@@ -170,7 +170,14 @@ class HTML {
                     break;
                 }
                 default: {
-                    node[ key ] = value;
+                    switch ( typeof value ) {
+                        case 'boolean': {
+                            if ( value ) node.setAttributeNode( document.createAttribute( key ) );
+                        }
+                        default: {
+                            node[ key ] = value;
+                        }
+                    }
                 }
             }
         }

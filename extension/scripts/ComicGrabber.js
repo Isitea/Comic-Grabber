@@ -21,23 +21,27 @@ class ComicGrabber {
             $memory: { value: { title: "", subTitle: "", complete: false } },
             move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
         } );
-        if ( window.img_list ) {
+        if ( window.img_list && window.only_chapter && window.chapter ) {
             //Mimic original
-            $(function () {
-                var e = [];
-                for (var t in img_list) e.push("<option value='" + t + "'>" + (Number(t) + 1) + " 페이지</option>");
-                var n = null,
-                    a = only_chapter.map(function (e, t) {
-                        return e[1] == chapter && (n = t), "<option value='" + e[1] + "' " + (e[1] == chapter ? "selected" : "") + " >" + e[0] + "</option>"
-                    });
-                $(".chapter_selector").html(a.join("\n")), $(".chapter_selector").change(function () {
-                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + $(this).val()
-                }), $(".chapter_prev").click(function () {
-                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + only_chapter[n + 1][1]
-                }), $(".chapter_next").click(function () {
-                    location.href = "/bbs/board.php?bo_table=msm_manga&wr_id=" + only_chapter[n - 1][1]
-                }), 0 == n && $(".chapter_next").css("display", "none"), n >= only_chapter.length - 1 && $(".chapter_prev").css("display", "none"), null == n && ($(".chapter_prev").css("display", "none"), $(".chapter_next").css("display", "none"), $(".chapter_selector").css("display", "none"))
-            })
+            const chapter_selector = document.querySelector( ".chapter_selector" );
+            for ( let chapter of window.only_chapter ) {
+                chapter_selector.appendChildren( HTML.render(
+                    {
+                        option: {
+                            value: chapter[1],
+                            selected: window.chapter == chapter[1],
+                            textContent: chapter[0]
+                        }
+                    }
+                ) );
+            }
+            chapter_selector.addEventListener( "change", function () { location.href = `/bbs/board.php?bo_table=manga&wr_id=${this.value}`} );
+            const selected = chapter_selector.querySelector( "[selected]" );
+            console.log( selected );
+            console.log( selected.previousElementSibling );
+            console.log( selected.nextElementSibling );
+            if ( selected.previousElementSibling ) document.querySelector( ".chapter_next" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.previousElementSibling.value}`; } );
+            if ( selected.nextElementSibling ) document.querySelector( ".chapter_prev" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.nextElementSibling.value}`; } );
         }
         this.injectController();
         if ( configuration instanceof Object ) {

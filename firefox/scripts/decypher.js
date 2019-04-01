@@ -31,7 +31,7 @@ class decypher {
         return new Promise( resolve => {
             const image = new Image();
             image.crossOrigin = 'anonymous';
-            image.src = ( location.hostname.match( /mangashow.+me/ ) ? src + '?v=2' : src );
+            image.src = src;
             image.addEventListener( 'load', () => resolve( image ) );
         } );
     }
@@ -47,7 +47,7 @@ class decypher {
             context.drawImage( image, 0, 0, width, height, ( flag === 1 ? -width / 2 : 0 ), 0, width, height );
         }
         else {
-            if ( location.hostname.match( /mangashow.+me/ ) ) {
+            if ( location.hostname.match( /manamoa.+net/ ) ) {
                 let seed = this.originalSeed / 10;
                 this.resetSeed( seed );
                 if ( seed > 3e4 ) Object.defineProperties( this, { clip: { value: { x: 1 , y: 6 } } } );
