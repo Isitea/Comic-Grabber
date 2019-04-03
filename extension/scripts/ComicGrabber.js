@@ -55,7 +55,7 @@ class ComicGrabber {
                     let list = [];
                     if ( view_cnt !== 0 ) {
                         for ( const uri of img_list ) {
-                            list.push( dc.restoreImage( uri, 0, this.$session.imageType ).then( blob => {
+                            list.push( dc.restoreImage( uri.replace( /https?:/, 'https:' ), 0, this.$session.imageType ).then( blob => {
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
                                 image.src = URL.createObjectURL( blob );
@@ -68,7 +68,7 @@ class ComicGrabber {
                             list.push( new Promise( resolve => {
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
-                                image.src = uri;
+                                image.src = uri.replace( /https?:/, 'https:' );
                                 image.addEventListener( 'load', () => resolve( image ) );
                                 image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : false ) );
                             } ) );
