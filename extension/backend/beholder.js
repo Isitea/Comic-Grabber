@@ -189,16 +189,14 @@ $client.webRequest.onHeadersReceived.addListener(
 async function loadDefault ( { reason, previousVersion, id } ) {
     if ( reason === "install" || reason === "update" ) {
         console.log( `%cReset configuration`, $log );
-        const $memory = await new Promise( resolve => $client.storage.local.get( null, resolve ) );
-        let $Default = Object.assign( {}, $extensionDefault, { session: { imageType: $memory.session.imageType } } );
         try {
             browser;
             await $client.storage.local.clear();
-            await $client.storage.local.set( $Default );
+            await $client.storage.local.set( $extensionDefault );
         }
         catch ( e ) {
             await new Promise( resolve => $client.storage.local.clear( resolve ) );
-            await new Promise( resolve => $client.storage.local.set( $Default, resolve ) );
+            await new Promise( resolve => $client.storage.local.set( $extensionDefault, resolve ) );
         }
         location.reload();
     }
@@ -209,6 +207,10 @@ async function retrieveRules () {
     const $memory = await new Promise( resolve => $client.storage.local.get( null, resolve ) );
     console.log( `%cSuccessfully retrieved.`, $log );
     console.log( `%cApply rules.`, $log );
+    $extensionDefault.session.imageType = ( storage => {
+        try { return storage.session.imageType; }
+        catch ( e ) { return "png" }
+    } )( $memory );
     for ( const site of $memory.rules ) {
         if ( "HTTPMod" in site ) {
             for ( const [ key, value ] of Object.entries( site.HTTPMod ) ) {
@@ -222,8 +224,7 @@ async function retrieveRules () {
     }
 }
 
-$client.runtime.onInstalled.addListener( loadDefault );
-retrieveRules()
+retrieveRules().catch( () => loadDefault( { reason: "install" } ) ).then( () => $client.runtime.onInstalled.addListener( loadDefault ) );
 
 const $downloader = new Downloader();
 $client.runtime.onMessage.addListener(

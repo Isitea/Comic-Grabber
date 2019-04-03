@@ -21,27 +21,28 @@ class ComicGrabber {
             $memory: { value: { title: "", subTitle: "", complete: false } },
             move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
         } );
-        if ( window.img_list && window.only_chapter && window.chapter ) {
-            //Mimic original
-            const chapter_selector = document.querySelector( ".chapter_selector" );
-            for ( let chapter of window.only_chapter ) {
-                chapter_selector.appendChildren( HTML.render(
-                    {
-                        option: {
-                            value: chapter[1],
-                            selected: window.chapter == chapter[1],
-                            textContent: chapter[0]
+        try {
+            if ( window.img_list && window.only_chapter && window.chapter ) {
+                //Mimic original
+                const chapter_selector = document.querySelector( ".chapter_selector" );
+                for ( let chapter of window.only_chapter ) {
+                    chapter_selector.appendChildren( HTML.render(
+                        {
+                            option: {
+                                value: chapter[1],
+                                selected: window.chapter == chapter[1],
+                                textContent: chapter[0]
+                            }
                         }
-                    }
-                ) );
+                    ) );
+                }
+                chapter_selector.addEventListener( "change", function () { location.href = `/bbs/board.php?bo_table=manga&wr_id=${this.value}`} );
+                const selected = chapter_selector.querySelector( "[selected]" );
+                if ( selected.previousElementSibling ) document.querySelector( ".chapter_next" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.previousElementSibling.value}`; } );
+                if ( selected.nextElementSibling ) document.querySelector( ".chapter_prev" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.nextElementSibling.value}`; } );
             }
-            chapter_selector.addEventListener( "change", function () { location.href = `/bbs/board.php?bo_table=manga&wr_id=${this.value}`} );
-            const selected = chapter_selector.querySelector( "[selected]" );
-            console.log( selected );
-            console.log( selected.previousElementSibling );
-            console.log( selected.nextElementSibling );
-            if ( selected.previousElementSibling ) document.querySelector( ".chapter_next" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.previousElementSibling.value}`; } );
-            if ( selected.nextElementSibling ) document.querySelector( ".chapter_prev" ).addEventListener( "click", () => { location.href = `/bbs/board.php?bo_table=manga&wr_id=${selected.nextElementSibling.value}`; } );
+        } catch ( e ) {
+            console.log( `%cThere is no related episodes`, $inform );
         }
         this.injectController();
         if ( configuration instanceof Object ) {
@@ -68,8 +69,8 @@ class ComicGrabber {
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
                                 image.src = uri;
-                                //image.addEventListener( 'load', () => resolve( image ) );
-                                resolve( image );
+                                image.addEventListener( 'load', () => resolve( image ) );
+                                image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : false ) );
                             } ) );
                         }
                     }

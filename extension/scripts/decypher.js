@@ -33,6 +33,7 @@ class decypher {
             image.crossOrigin = 'anonymous';
             image.src = src;
             image.addEventListener( 'load', () => resolve( image ) );
+            image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : false ) );
         } );
     }
 
