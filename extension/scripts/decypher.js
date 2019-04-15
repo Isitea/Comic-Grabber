@@ -33,12 +33,13 @@ class decypher {
             image.crossOrigin = 'anonymous';
             image.src = src;
             image.addEventListener( 'load', () => resolve( image ) );
-            image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : false ) );
+            image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : resolve( false ) ) );
         } );
     }
 
     async restoreImage ( src, flag = 0, type = 'webp' ) {
         const image = await this.loadImage( src );
+        if ( !( image instanceof HTMLElement ) ) return false;
         const canvas = document.createElement( "canvas" );
         const context = canvas.getContext( "2d" );
         const { naturalWidth: width, naturalHeight: height } = image;

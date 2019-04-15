@@ -232,7 +232,6 @@ $client.runtime.onMessage.addListener(
         switch ( message.type ) {
             case "saveToLocal": {
                 console.log( `%cDownload data recieved.`, $inform );
-                console.log( message );
                 $downloader.save( message.download )
                     .then( () => $client.tabs.sendMessage( sender.tab.id, { type: "ComicGrabber.archiveSaved" } ) )
                     .catch( err => console.log( err ) );

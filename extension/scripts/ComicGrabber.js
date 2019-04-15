@@ -9,6 +9,7 @@ import { decypher } from './decypher.js';
 import { CommunicationTunnel } from './library.webExtension.js';
 const $filenameRule = '${localPath}/${title}${( title !== subTitle ? "/" + subTitle : "" )}';
 const $defaultDelay = 9000;
+const $client = ( () => { try { return browser; } catch ( e ) { return chrome; } } )();
 let $fillCircle = false;
 
 class ComicGrabber {
@@ -56,6 +57,7 @@ class ComicGrabber {
                     if ( view_cnt !== 0 ) {
                         for ( const uri of img_list ) {
                             list.push( dc.restoreImage( uri.replace( /https?:/, 'https:' ), 0, this.$session.imageType ).then( blob => {
+                                if ( !( blob instanceof Blob ) ) return false;
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
                                 image.src = URL.createObjectURL( blob );
@@ -70,7 +72,7 @@ class ComicGrabber {
                                 image.crossOrigin = 'anonymous';
                                 image.src = uri.replace( /https?:/, 'https:' );
                                 image.addEventListener( 'load', () => resolve( image ) );
-                                image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : false ) );
+                                image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : resolve( false ) ) );
                             } ) );
                         }
                     }
@@ -79,7 +81,7 @@ class ComicGrabber {
                         let box = container.cloneNode();
                         container.replaceWith( box );
                         for ( const item of list ) {
-                            box.appendChild( item );
+                            if ( item instanceof HTMLElement ) box.appendChild( item );
                         }
                         return box.childNodes;
                     } ).then( nodelist => this.attachProgressEvent( grabber.grabImages( nodelist ) ) );
@@ -880,7 +882,7 @@ console.log( `%cRemove rebundant event listeners`, $log );
 const $REL = [ ...document.querySelectorAll( [ "oncopy", "oncut", "onpaste", "oncontextmenu" ].reduce( ( query, event ) => { query.push( `[${event}*=false]` ); return query; }, [ "body" ] ).join( ", " ) ) ];
 for ( const item of $REL ) item.destroyEventListener();
 
-const $tunnel = new CommunicationTunnel( ( () => { try { return browser; } catch ( e ) { return chrome; } } )() );
+const $tunnel = new CommunicationTunnel( $client );
 $tunnel.addListener( "ComicGrabber.activateExtension", activateExtension );
 console.log( `%cRequest recognition data.`, $log );
 $tunnel.broadcast( "ComicGrabber.readyExtension" );
