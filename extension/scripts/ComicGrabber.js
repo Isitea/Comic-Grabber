@@ -51,6 +51,7 @@ class ComicGrabber {
                 Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
             }
             if ( configuration.images ) {
+                if ( window.img_list1 && window.img_list1.length !== 0 ) window.img_list = window.img_list.concat( window.img_list1 );
                 if ( window.img_list ) {
                     let dc = new decypher( view_cnt );
                     let list = [];
@@ -72,7 +73,11 @@ class ComicGrabber {
                                 image.crossOrigin = 'anonymous';
                                 image.src = uri.replace( /https?:/, 'https:' );
                                 image.addEventListener( 'load', () => resolve( image ) );
-                                image.addEventListener( 'error', () => ( image.src.match( /img\./ ) ? image.src = image.src.replace( /img/, 's3' ) : resolve( false ) ) );
+                                image.addEventListener( 'error', () => {
+                                    if ( image.src.match( /img\./ ) ) image.src = image.src.replace( /img/, 's3' );
+                                    else if ( !image.src.match( /s3\./ ) ) image.src = image.src.replace( /:\/\//, '://s3.' );
+                                    else resolve(false);
+                                } );
                             } ) );
                         }
                     }
