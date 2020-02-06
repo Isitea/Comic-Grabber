@@ -67,6 +67,11 @@ class ComicGrabber {
                         }
                     }
                     else {
+                        if ( cdn_domains && cdn_domains.length !== 0 ) {
+                            let cdn = cdn_domains[chapter % cdn_domains.length];
+                            img_list.forEach( ( item, index, oArray ) => oArray[index] = oArray[index].replace( "filecdn.xyz", cdn ) );
+                            console.log( img_list );
+                        }
                         for ( const uri of img_list ) {
                             list.push( new Promise( resolve => {
                                 let image = new Image();
