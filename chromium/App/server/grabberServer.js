@@ -58,8 +58,40 @@ class Downloader {
         } )();
         
         this.save = function ( contents ) {
+            function fetchImage ( result, item, index, source ) {
+                let name = `${index.toString().padStart( 3, "0" )}.${ type.groups.extension.replace( /jpeg/gi, 'jpg' ) }`
+                let blob = fetch( item, { method: 'post', headers: {} } )
+                            .then( body => {
+                                if ( body.status !== 200 ) {
+                                    
+                                    return contents.onError( item );
+                                }
+                                else return body.blob();
+                            } );
+                result.push( { blob, name } );
 
+                return result;
+                
+            }
+            contents.list
             apiParameter;
+            
+            contents.list.reduce( fetchImage, [] );
+
+            ( await targets.reduce( async ( list, item, index ) => {
+                let blob = await item.binaryData, type;
+                if ( type = blob.type.match( /image\/(?<extension>\w+);?/ ) ) {
+                    ( await list ).push( {
+                        blob,
+                        name: `${index.toString().padStart( 3, "0" )}.${ type.groups.extension.replace( /jpeg/gi, 'jpg' ) }`
+                    } );
+                }
+                else {
+                    console.log( blob, item.src );
+                }
+                return list;
+            }, [] ) ).reduce( ( zip, { blob, name } ) => zip.file( name, blob ), new JSZip() )
+
 
             return $api( apiParameter ).then( id => new Promise( ( resolve, reject ) => {
                 let onComplete = ( item ) => {
