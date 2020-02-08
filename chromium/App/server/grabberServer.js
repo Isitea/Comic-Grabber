@@ -63,17 +63,15 @@ class Downloader {
                 let blob = fetch( item, { method: 'post', headers: {} } )
                             .then( body => {
                                 if ( body.status !== 200 ) {
-                                    
+                                    console.log( `%cError on downloading: ${item}`, $inform );
                                     return contents.onError( item );
                                 }
                                 else return body.blob();
                             } );
-                result.push( { blob, name } );
+                result.push( blob.then( blob => { blob, name } ) );
 
                 return result;
-                
             }
-            contents.list
             apiParameter;
             
             contents.list.reduce( fetchImage, [] );
