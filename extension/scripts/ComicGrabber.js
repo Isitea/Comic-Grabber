@@ -21,6 +21,7 @@ class ComicGrabber {
             $localized: { value: Locale[ configuration.lang || "ko-kr" ] },
             $memory: { value: { title: "", subTitle: "", complete: false } },
             move: { value: { next: configuration.moveNext, prev: configuration.movePrev } },
+            eraser: { value: configuration.eraser },
         } );
         try {
             if ( window.img_list && window.only_chapter && window.chapter ) {
@@ -45,21 +46,28 @@ class ComicGrabber {
         } catch ( e ) {
             console.log( `%cThere is no related episodes`, $inform );
         }
+        {
+            let style = document.createElement( "style" );
+            style.innerHTML = this.eraser;
+            document.head.appendChild( style );
+        }
         this.injectController();
         if ( configuration instanceof Object ) {
             if ( configuration.subject ) {
                 Object.assign( this.$memory, this.analyseInformation( configuration.subject, generalExpression ) );
             }
             if ( configuration.images ) {
+                let img_list;
                 if ( window.img_list1 && window.img_list1.length !== 0 ) window.img_list = window.img_list.concat( window.img_list1 );
-                if ( window.img_list ) {
+                if ( window.img_list.length == 0 ) {
+                    img_list = [];
+                    for ( const item of document.querySelectorAll( ".view-img img" ) ) {
+                        img_list.push( item.src );
+                    }
+                }
+                if ( img_list ) {
                     let dc = new decypher( view_cnt );
                     let list = [];
-                    if ( cdn_domains && cdn_domains.length !== 0 ) {
-                        let cdn = cdn_domains[chapter % cdn_domains.length];
-                        img_list.forEach( ( item, index, oArray ) => oArray[index] = oArray[index].replace( "filecdn.xyz", cdn ) );
-                        console.log( img_list );
-                    }
                     if ( view_cnt !== 0 ) {
                         for ( const uri of img_list ) {
                             list.push( dc.restoreImage( uri.replace( /https?:/, 'https:' ), 0, this.$session.imageType ).then( blob => {
@@ -77,6 +85,7 @@ class ComicGrabber {
                                 let image = new Image();
                                 image.crossOrigin = 'anonymous';
                                 image.src = uri.replace( /https?:/, 'https:' );
+                                image.style = "width: 100%; max-width: 100%; height: 100%; max-height: 100%;";
                                 image.addEventListener( 'load', () => resolve( image ) );
                                 image.addEventListener( 'error', () => {
                                     if ( image.src.match( /img\./ ) ) image.src = image.src.replace( /img/, 's3' );
@@ -89,10 +98,18 @@ class ComicGrabber {
                     Promise.all( list ).then( list => {
                         let container = document.querySelector( '.view-content' );
                         let box = container.cloneNode();
-                        container.replaceWith( box );
                         for ( const item of list ) {
                             if ( item instanceof HTMLElement ) box.appendChild( item );
                         }
+
+                        document.addEventListener( "readystatechange", () => {
+                            if ( document.readyState == "complete" ) {
+                                setTimeout( () => {
+                                    container.replaceWith( box );
+                                }, 100 );
+                            }
+                        } );
+
                         return box.childNodes;
                     } ).then( nodelist => this.attachProgressEvent( grabber.grabImages( nodelist ) ) );
                 }

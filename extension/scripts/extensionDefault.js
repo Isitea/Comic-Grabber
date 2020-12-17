@@ -74,8 +74,8 @@ const $extensionDefault = {
             }
         },
         {
-            name: "manamoa",
-            RegExp: "manamoa.+net/bbs/board.php.+?wr_id",
+            name: "marumaru",
+            RegExp: "marumaru.*\\.\\w{3,4}",
             HTTPMod: {
                 redirections: {
                     type: 'cancel',
@@ -87,15 +87,12 @@ const $extensionDefault = {
                 movePrev: ".chapter_prev",
                 subject: {
                     title: {
-                        selector: ".toon-info .toon-title",
-                        propertyChain: ".firstChild.textContent",
-                    },
-                    subTitle: {
-                        selector: ".chapter_selector [selected]",
-                        propertyChain: ".textContent",
+                        selector: ".view-wrap h1",
+                        propertyChain: ".nextElementSibling.firstChild.textContent",
                     },
                 },
-                images: ".view-content img",
+                eraser: ".w_banner { display: none !important; }",
+                images: ".view-content img, .view-content canvas",
             }
         },
         {
@@ -137,40 +134,6 @@ const $extensionDefault = {
                     },
                 },
                 images: "#maincontent > img",
-            }
-        },
-        {
-            name: "marumaru - ur18",
-            RegExp: "marumaru\\d+.com(.+bo_table=maru_view|.+wr_id){2,2}",
-            rule: {
-                moveNext: ".btn-group > a[title*=다음]",
-                movePrev: ".btn-group > a[title*=이전]",
-                subject: {
-                    title: {
-                        selector: ".view-wrap strong",
-                        propertyChain: ".textContent"
-                    },
-                },
-                images: ".view-content img",
-            }
-        },
-        {
-            name: "marumaru - r18",
-            RegExp: "marumaru01.com(.+bo_table=manga|.+wr_id){2,2}",
-            rule: {
-                moveNext: null,
-                movePrev: null,
-                subject: {
-                    title: {
-                        selector: ".view-wrap h1:first-child",
-                        propertyChain: ".textContent"
-                    },
-                    subTitle: {
-                        selector: ".view-wrap h1:first-child",
-                        propertyChain: ".textContent"
-                    },
-                },
-                images: ".view-content img",
             }
         },
         {
