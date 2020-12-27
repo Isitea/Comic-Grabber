@@ -47,49 +47,7 @@ async function main () {
         return client;
     } )();
     const $baseUri = $client.runtime.getURL( "" );
-
-    class moduleManager {
-        constructor ( baseUri ) {
-            this.baseUri = baseUri;
-            this.loaded = [];
-        }
-
-        load ( source = "" ) {
-            let script;
-            switch ( source.split( "." ).pop() ) {
-                case "js": {
-                    script = document.createElement( 'script' );
-                    script.setAttribute( "defer", "" );
-                    script.type = "module";
-                    script.src = this.baseUri + source;
-                    break;
-                }
-                case "css": {
-                    script = document.createElement( 'link' );
-                    script.rel="stylesheet";
-                    script.href = this.baseUri + source;
-                    break;
-                }
-            }
-            logger.log( `Attaching... ${source}` );
-            document.head.appendChild( script );
-
-            return script;
-        }
-        
-        unload ( item = null ) {
-            let index;
-            if ( item === null ) {
-                this.loaded.forEach( item => item.remove() );
-                this.loaded = [];
-                logger.log( `Detaching every script` );
-            } else if ( index = this.loaded.indexOf( item ) >= 0 ) {
-                item.remove();
-                this.loaded.splice( index, 1 );
-                logger.log( `Dettaching... ${( item.src || item.rel ).replace( this.baseUri, "" )}` );
-            }
-        }
-    }
+    const $locale = $client.i18n.getMessage;
 
     function moduleWrapper ( script ) {
         return URL.createObjectURL( new Blob( [ script ], { type: "text/javascript" } ) );
@@ -99,7 +57,7 @@ async function main () {
         let siteModule = "/modules/universal.js";
         for ( const module of moduleList ) {
             if ( uri.match( module.matchPattern ) ) {
-                siteModule = moduleWrapper( module.uri || module.content );
+                siteModule = module.uri || moduleWrapper( module.content );
                 break;
             }
         }
@@ -116,17 +74,14 @@ async function main () {
             moduleName: "marumaru",
             buildDate: "2020-12-24 18:00",
             matchPattern: "marumaru.*\\.\\w{2,4}",
-            uri: "/module/marumaru.js",//for Dev.
+            uri: "/modules/marumaru.js",//for Dev.
             content: ""
         }
     ];
-    let pageModule = new ( await import( searchSiteModule( moduleList ) ) ).module( document );
-    pageModule.removeAds();
-    console.log( pageModule.getTitle() );
-    console.log( pageModule.grabImages() );
-
-    let mManager = new moduleManager( $baseUri );
-    //mManager.load();
+    let pageModule = new ( await import( searchSiteModule( moduleList ) ) ).pageModule( document );
+    pageModule?.removeAds();
+    console.log( await pageModule.getInfo() );
+    console.log( await pageModule.grabImages() );
 
     return 0;
 }

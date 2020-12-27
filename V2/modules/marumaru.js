@@ -1,17 +1,17 @@
 "use strict";
-class module {
+class pageModule {
     constructor ( root = document ) {
         this.root = root;
     }
 
-    moveNext () {
-        this.root.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click();
+    async moveNext () {
+        return this.root.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click();
     }
-    movePrev () {
-        this.root.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click();
+    async movePrev () {
+        return this.root.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click();
     }
 
-    removeAds ( method ) {
+    async removeAds ( method ) {
         let Ads = this.root.querySelectorAll( ".w_banner" );
         switch ( method ) {
             case "invisible": {
@@ -24,12 +24,12 @@ class module {
             }
         }
     }
-    getInfo () {
+    async getInfo () {
         return { title: this.root.head.querySelector( "meta[name=title]" )?.content };
     }
-    grabImages () {
+    async grabImages () {
         return [ ...this.root.querySelectorAll( ".view-img img" ) ].map( item => item.src );
     }
 }
 
-export { module };
+export { pageModule };

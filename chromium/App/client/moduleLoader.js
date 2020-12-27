@@ -150,3 +150,47 @@ retrieveRules().then(
         }
     }
 );
+
+class moduleManager {
+    constructor ( baseUri ) {
+        this.baseUri = baseUri;
+        this.loaded = [];
+    }
+
+    load ( source = "" ) {
+        let script;
+        switch ( source.split( "." ).pop() ) {
+            case "js": {
+                script = document.createElement( 'script' );
+                script.setAttribute( "defer", "" );
+                script.type = "module";
+                script.src = this.baseUri + source;
+                break;
+            }
+            case "css": {
+                script = document.createElement( 'link' );
+                script.rel="stylesheet";
+                script.href = this.baseUri + source;
+                break;
+            }
+        }
+        logger.log( `Attaching... ${source}` );
+        document.head.appendChild( script );
+
+        return script;
+    }
+    
+    unload ( item = null ) {
+        let index;
+        if ( item === null ) {
+            this.loaded.forEach( item => item.remove() );
+            this.loaded = [];
+            logger.log( `Detaching every script` );
+        } else if ( index = this.loaded.indexOf( item ) >= 0 ) {
+            item.remove();
+            this.loaded.splice( index, 1 );
+            logger.log( `Dettaching... ${( item.src || item.rel ).replace( this.baseUri, "" )}` );
+        }
+    }
+}
+
