@@ -3,18 +3,26 @@ class Controller {
     async downloadImages () {}
 }
 
-class View {
-    constructor () {}
+class UI {
+    constructor () {
+        
+    }
     
     async attachCSS () {
 
     }
 
-    async buildView () {
+    async buildUI () {
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
                 _child: [
+                    {
+                        label: {
+                            className: "CG-menuButton",
+                            id: "menuButton"
+                        }
+                    },
                     {
                         label: {
                             className: "CG-moveChapter",
@@ -89,7 +97,7 @@ class View {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row CG-OutSide", id: "filenameRuleResult", _child: [ { label: {} }, { label: {} }, ]
+                                                    className: "CG-row", id: "filenameRuleResult", _child: [ { label: {} }, { label: {} }, ]
                                                 }
                                             }
                                         ]
@@ -114,7 +122,7 @@ class View {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row CG-OutSide CG-Second CG-SelectiveInvisible",
+                                                    className: "CG-row",
                                                     _child: [ { label: { className: "CG-checkbox", id: "saveOnLoad", textContent: $locale( "downloadOnLoad" ) } } ]
                                                 }
                                             }
@@ -127,7 +135,7 @@ class View {
                                         _child: [
                                             {
                                                 div: {
-                                                    className: "CG-row CG-OutSide CG-First CG-SelectiveInvisible",
+                                                    className: "CG-row",
                                                     _child: [ { label: { className: "CG-checkbox", id: "moveOnSave", textContent: $locale( "moveOnDownload" ) } } ]
                                                 }
                                             }
@@ -145,51 +153,15 @@ class View {
                         }
                     },
                 ],
-                _todo: node => {
-                    for ( const item of node.querySelectorAll( "input[type=text], select" ) ) {
-                        item.addEventListener( "change", () => this.syncModelView( "VtM", { cK: item.id, cV: item.value } ) );
-                    }
-                    for ( const item of node.querySelectorAll( ".CG-row .CG-checkbox:not(#saveToLocal):not(#showGrabbedImages)" ) ) {
-                        item.addEventListener( "click", () => {
-                            item.classList.toggle( "checked" );
-                            item.parentNode.classList.toggle( "CG-SelectiveInvisible" );
-                            this.syncModelView( "VtM", { cK: item.id, cV: item.classList.contains( "checked" ) } );
-                        } );
-                    }
-                    let saveToLocal = () => {
-                        console.log( `%cSave images to local as zip archive.`, $log );
-                        if ( this.element.querySelector( ".CG-menu-button" ).classList.contains( "CG-alert" ) ) return this.notify( this.$localized.fillTextboxes );
-                        node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).classList.toggle( "checked" );
-                        //node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).removeEventListener( "click", saveToLocal );
-                        this.saveToLocal(
-                            {
-                                localPath: this.$local.savePath,
-                                onConflict: this.$local.onConflict,
-                                filenameRule: this.$local.filenameRule,
-                                title: this.$memory.title,
-                                subTitle: this.$memory.subTitle
-                            }
-                        )
-                        .then( download => {
-                            console.log( `%cSend download information to downloader.`, $log );
-                            $tunnel.broadcast( "ComicGrabber.saveArchive", download );
-
-                            return new Promise( resolve => $tunnel.addListener( "ComicGrabber.archiveSaved", resolve ) );
-                        } )
-                        .then( () => {
-                            console.log( `%cArchive saved.`, $inform );
-                            $fillCircle = true;
-                            this.drawProgressCircle( 1 );
-                            if ( this.$session.moveOnSave ) this.moveChapter( this.move.next );
-                        } );
-                    };
-                    node.querySelector( ".CG-row #moveNext" ).addEventListener( "click", () => this.moveChapter( this.move.next ) );
-                    node.querySelector( ".CG-row #movePrev" ).addEventListener( "click", () => this.moveChapter( this.move.prev ) );
-                    node.querySelector( ".CG-row .CG-checkbox#saveToLocal" ).addEventListener( "click", saveToLocal );
-
-                    return node;
-                },
             }
         } );
+
+        return node;
+    }
+
+    async activateUI ( node ) {
+
     }
 }
+
+//"div.ComicGrabber.CG-menu>{div.CG-moveChapter#movePrev,div.CG-list>{div.CG-item},div.CG-moveChapter#moveNext}"

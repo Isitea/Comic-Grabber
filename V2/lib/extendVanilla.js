@@ -7,18 +7,9 @@ Object.defineProperties( Array.prototype, {
          * @returns {NodeList}
          */
         value: function () {
-            let nodelist;
-            {
-                class NodeList extends Array {
-                    constructor ( array ) {
-                        super( array.filter( item => item instanceof Node ) );
-                    }
-                }
-                nodelist = new NodeList( this );
-            }
-            Object.setPrototypeOf( nodelist, NodeList.prototype );
-        
-            return nodelist;
+            let fragment = document.createDocumentFragment();
+            this.forEach( item => { if ( item instanceof Node ) { fragment.appendChild( item ); } });
+            return fragment.childNodes;
         }
     }
 } );
@@ -44,8 +35,9 @@ Object.defineProperties( String.prototype, {
                 .replace( /<+/g, "＜" )
                 .replace( />+/g, "＞" )
                 .replace( /\|+/g, "｜" )
+                .replace( /\"+/g, "'" )
                 .replace( /(！？)+！?/g, "⁉" )
-                .replace( /？⁉|(？！)+/g, "⁈" )
+                .replace( /？⁉|？！/g, "⁈" )
                 .replace( /[\r\n\s]+/g, " " )
                 .replace( /\u200b+/g, "" )
                 .replace( /^[.\-~\s]*|[.\s]*$/g, "" )
