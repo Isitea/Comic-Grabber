@@ -1,18 +1,14 @@
 "use strict";
 class pageModule {
-    constructor ( root = document ) {
-        this.root = root;
+    static async moveNext () {
+        return document.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click();
+    }
+    static async movePrev () {
+        return document.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click();
     }
 
-    async moveNext () {
-        return this.root.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click();
-    }
-    async movePrev () {
-        return this.root.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click();
-    }
-
-    async removeAds ( method ) {
-        let Ads = this.root.querySelectorAll( ".w_banner" );
+    static async removeAds ( method ) {
+        let Ads = document.querySelectorAll( ".w_banner" );
         switch ( method ) {
             case "invisible": {
                 for (let item of Ads ) item.style = "display: none !important;";
@@ -24,11 +20,11 @@ class pageModule {
             }
         }
     }
-    async getInfo () {
-        return { title: this.root.head.querySelector( "meta[name=title]" )?.content };
+    static async getInfo () {
+        return { title: document.head.querySelector( "meta[name=title]" )?.content, location: document.location.href };
     }
-    async grabImages () {
-        return [ ...this.root.querySelectorAll( ".view-img img" ) ].map( item => item.src );
+    static async grabImages () {
+        return [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src );
     }
 }
 

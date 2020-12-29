@@ -1,5 +1,4 @@
 "use strict";
-
 Object.defineProperties( Array.prototype, {
     toNodeList: {
         /**

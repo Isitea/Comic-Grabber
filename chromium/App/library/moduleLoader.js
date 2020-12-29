@@ -189,7 +189,7 @@ class moduleManager {
         } else if ( index = this.loaded.indexOf( item ) >= 0 ) {
             item.remove();
             this.loaded.splice( index, 1 );
-            logger.log( `Dettaching... ${( item.src || item.rel ).replace( this.baseUri, "" )}` );
+            logger.log( `Detaching... ${( item.src || item.href ).replace( this.baseUri, "" )}` );
         }
     }
 }

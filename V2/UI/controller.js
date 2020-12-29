@@ -1,18 +1,17 @@
 "use strict";
+import { HTML, logger } from '/lib/extendVanilla.js';
+import { resourceManager } from '/lib/resourceManager.js';
+import { $client } from '/lib/unifyBrowser.js';
+
+const log = logger.log;
+
 class Controller {
-    async downloadImages () {}
-}
-
-class UI {
-    constructor () {
-        
-    }
-    
-    async attachCSS () {
-
+    constructor ( baseUri ) {
+        this.resource = new resourceManager( baseUri );
+        this.constructUI().then( ctrl => ctrl.activateUI() ).then( ctrl => log( `UI for ${$client.runtime.getManifest().className} is activated.` ) );
     }
 
-    async buildUI () {
+    async constructUI () {
         let [ node ] = HTML.render( {
             div: {
                 className: "ComicGrabber CG-menu",
@@ -155,13 +154,33 @@ class UI {
                 ],
             }
         } );
+        this.UINode = node;
 
-        return node;
+        return this;
     }
 
-    async activateUI ( node ) {
+    async activateUI () {
+        this.resource.load( "/UI/style.css" );
+        document.body.appendChild( this.UINode );
 
+        return this;
+    }
+
+    async deactivateUI () {
+        if ( !this.UINode ) return "Already inactive";
+        this.UINode.remove();
+        this.UINode = null;
+        this.resource.unload();
+
+        return this;
+    }
+
+    async downloadImages ( { filename, conflictAction, images, uri } ) {
+        $client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename, conflictAction, images, uri } } );
+    
+        return this;
     }
 }
 
+export { Controller };
 //"div.ComicGrabber.CG-menu>{div.CG-moveChapter#movePrev,div.CG-list>{div.CG-item},div.CG-moveChapter#moveNext}"
