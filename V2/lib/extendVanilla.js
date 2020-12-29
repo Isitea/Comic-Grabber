@@ -130,7 +130,7 @@ class HTML {
         }
         if ( children.length ) { node.appendChildren( children ); }
 
-        return ( properties._todo || [] ).reduce( ( node, fn ) => ( fn instanceof Function ? fn( node ) : node ) , node );
+        return ( properties._todo || [] )?.reduce( ( node, fn ) => ( fn instanceof Function ? fn( node ) : node ) , node ) || node;
     }
 
     /**
@@ -150,3 +150,38 @@ class HTML {
         return node.parentNode.removeChild( node );
     }
 }
+
+/**
+ * @description Styled console logger with default style.
+ * @typedef {{ log: (String), alert: (String), inform: (String) }} param Bundle of styles 
+ * @typedef {String} $log - Style for normal log.
+ * @typedef {String} $alert - Style for alert message.
+ * @typedef {String} $inform - Style for information.
+ * @returns Bundle of functions
+ */
+const
+    $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`,
+    $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`,
+    $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
+
+class logger {
+    constructor ( { log = $log, alert = $alert, inform = $inform } ) {
+        this.log = log;
+        this.alert = alert;
+        this.inform = inform;
+    }
+
+    log ( message ) { console.log( `%c${message}`, this.log ); }
+    alert ( message ) { console.log( `%c${message}`, this.alert ); }
+    inform ( message ) { console.log( `%c${message}`, this.inform ); }
+
+    static log ( message ) { console.log( `%c${message}`, $log ); }
+    static alert ( message ) { console.log( `%c${message}`, $alert ); }
+    static inform ( message ) { console.log( `%c${message}`, $inform ); }
+}
+
+function text2Blob ( text, type = "text/javascript" ) {
+    return URL.createObjectURL( new Blob( [ text ], { type } ) );
+}
+
+export { HTML, logger, text2Blob };

@@ -25,17 +25,5 @@
     },
     "moveNext": {
         "message": "다음화"
-    },
-    "LocaleTest": {
-        "message": "$REP$ 치환대상 $LACE$",
-        "placeholders": {
-            "REP": {
-                "content": "$1",
-                "example": "1"
-            },
-            "LACE": {
-                "content": "IS static"
-            }
-        }
     }
 }
