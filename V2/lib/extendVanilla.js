@@ -44,6 +44,41 @@ Object.defineProperties( String.prototype, {
     }
 } );
 
+const $EventList = ["onbeforecopy","onbeforecut","onbeforepaste","onfullscreenchange","onfullscreenerror","onsearch","onabort","onauxclick","onblur","oncancel","oncanplay","oncanplaythrough","onchange","onclick","onclose","oncontextmenu","oncopy","oncuechange","oncut","ondblclick","ondrag","ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop","ondurationchange","onemptied","onended","onerror","onfocus","ongotpointercapture","oninput","oninvalid","onkeydown","onkeypress","onkeyup","onload","onloadeddata","onloadedmetadata","onloadstart","onlostpointercapture","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onpaste","onpause","onplay","onplaying","onpointercancel","onpointerdown","onpointerenter","onpointerleave","onpointermove","onpointerout","onpointerover","onpointerup","onprogress","onratechange","onreset","onresize","onscroll","onseeked","onseeking","onselect","onselectionchange","onselectstart","onstalled","onsubmit","onsuspend","ontimeupdate","ontoggle","onvolumechange","onwaiting","onwheel","onafterprint","onbeforeprint","onbeforeunload","onhashchange","onlanguagechange","onmessage","onmessageerror","onoffline","ononline","onpagehide","onpageshow","onpopstate","onrejectionhandled","onstorage","onunhandledrejection","onunload"];
+Object.defineProperties( Node.prototype, {
+    appendChildren: {
+        /**
+         * @description Extends Node object for multi appending child node.
+         * @param {NodeList} children - Nodes which are append to the target.
+         * @returns {Node}
+         */
+        value: function ( children ) {
+            if ( children instanceof NodeList ) {
+                for ( let item of [ ...children ] ) this.appendChild( item );
+            } else {
+                throw new TypeError( "Passed parameter on method appendChildren under Node must be a NodeList." );
+            }
+            return this;
+        }
+    },
+    destroyEventListener: {
+        /**
+         * @description Destroy event listener on Node.
+         * @param {Array<String>} inlineEvent - A series of event name like 'onclick".
+         * @returns {undefined}
+         */
+        value: function ( inlineEvent ) {
+            if ( this !== document ) {
+                for ( const event of ( inlineEvent || $EventList ) ) this.removeAttribute( event );
+                this.replaceWith( this.cloneNode().appendChildren( this.childNodes ) );
+            }
+            else {
+                for ( const event of ( inlineEvent || $EventList ) ) this[ event ] = null;
+            }
+        }
+    }
+} );
+
 /**
  * @description DOM creation helper. It has static method only.
  * @typedef {String} propertyName - Property name of HTMLElement object.

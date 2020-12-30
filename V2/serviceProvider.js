@@ -50,12 +50,13 @@ async function main () {
 
     $client.runtime.onMessage.addListener(
         async ( { message, action, data }, sender, sendResponse ) => {
+            let response = "";
             switch ( action ) {
                 case "download": {
-                    message = await downloadImages( data )
+                    response = await downloadImages( data )
                 }
             }
-            $client.tabs.sendMessage( sender.tab.id, { message } );
+            $client.tabs.sendMessage( sender.tab.id, { message: response } );
         }
     );
 

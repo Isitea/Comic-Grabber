@@ -1,31 +1,27 @@
 "use strict";
-class pageModule {
-    static async moveNext () {
-        return document.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click();
-    }
-    static async movePrev () {
-        return document.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click();
-    }
-
-    static async removeAds ( method ) {
-        let Ads = document.querySelectorAll( ".w_banner" );
-        switch ( method ) {
-            case "invisible": {
-                for (let item of Ads ) item.style = "display: none !important;";
-                break;
-            }
-            default: {
-                for ( let item of Ads ) item.remove();
-                break;
-            }
+async function removeAds ( method ) {
+    let Ads = document.querySelectorAll( ".w_banner" );
+    switch ( method ) {
+        case "invisible": {
+            for (let item of Ads ) item.style = "display: none !important;";
+            break;
+        }
+        default: {
+            for ( let item of Ads ) item.remove();
+            break;
         }
     }
-    static async getInfo () {
-        return { title: document.head.querySelector( "meta[name=title]" )?.content, location: document.location.href };
-    }
-    static async grabImages () {
-        return [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src );
-    }
 }
+removeAds();
 
+let pageModule = {
+    moveNext: async function () { return document.querySelector( '.chapter_prev.fa-chevron-circle-right')?.click(); },
+    movePrev: async function () { return document.querySelector( '.chapter_prev.fa-chevron-circle-left')?.click(); },
+    info: ( async () => {
+        let result = document.head.querySelector( "meta[name=title]" )?.content.match( /^(?<title>.+|(?:[\(\[]?단편[\]?\)]?.+))\s+(?<episode>(?:\d[.\d\s\-\~화권전후편]+|(?:번외|특별).+)|(?:\#\d+)|(stage\s*\d+))/i )?.groups || { title: document.head.querySelector( "meta[name=title]" )?.content };
+        return { ...result, location: document.location.href };
+    } )(),
+    images: Promise.resolve( [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src ) )
+};
+//function rt ( msg ) { return msg.match( /^(?<title>.+|(?:[\(\[]?단편[\]?\)]?.+))\s+(?<episode>(?:\d[.\d\s\-\~화권전후편]+|(?:번외|특별).+))/ )?.groups }
 export { pageModule };

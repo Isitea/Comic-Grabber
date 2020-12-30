@@ -2,13 +2,22 @@
 import { HTML, logger } from '/lib/extendVanilla.js';
 import { resourceManager } from '/lib/resourceManager.js';
 import { $client } from '/lib/unifyBrowser.js';
+const $locale = $client.i18n.getMessage;
 
 const log = logger.log;
 
 class Controller {
-    constructor ( baseUri ) {
+    constructor ( baseUri, { moveNext, movePrev, info, images } ) {
+        info.then( msg => {
+            console.log( msg );
+        } );
+        //images.then( msg => console.log( msg ) );
+
+        this.moveNext = moveNext;
+        this.movePrev = movePrev;
+
         this.resource = new resourceManager( baseUri );
-        this.constructUI().then( ctrl => ctrl.activateUI() ).then( ctrl => log( `UI for ${$client.runtime.getManifest().className} is activated.` ) );
+        this.constructUI().then( msg => this.activateUI() ).then( msg => log( `UI for ${$client.runtime.getManifest().className} is activated.` ) );
     }
 
     async constructUI () {
@@ -156,14 +165,15 @@ class Controller {
         } );
         this.UINode = node;
 
-        return this;
+        return "UI structure generated";
     }
 
     async activateUI () {
-        this.resource.load( "/UI/style.css" );
+        this.resource.load( "/ui/style.css" );
+        //Attach event listeners
         document.body.appendChild( this.UINode );
 
-        return this;
+        return "UI activated";
     }
 
     async deactivateUI () {
@@ -172,10 +182,10 @@ class Controller {
         this.UINode = null;
         this.resource.unload();
 
-        return this;
+        return "UI deactivated";
     }
 
-    async downloadImages ( { filename, conflictAction, images, uri } ) {
+    async downloadImages ( { filename, conflictAction, images, uri = document.URL } ) {
         $client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename, conflictAction, images, uri } } );
     
         return this;

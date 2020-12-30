@@ -10,13 +10,12 @@ async function main () {
     const [ { $client }, { HTML, logger, text2Blob }, { resourceManager } ]
     = await imports( [ "/lib/unifyBrowser.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js" ] );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
-    const $locale = $client.i18n.getMessage;
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule = "/modules/universal.js";
         for ( const module of moduleList ) {
             if ( uri.match( module.matchPattern ) ) {
-                siteModule = ( module.uri ? $baseUri + module.uri : text2Blob( module.content ) );
+                siteModule = ( module.uri ? module.uri : text2Blob( module.content ) );
                 break;
             }
         }
@@ -36,13 +35,8 @@ async function main () {
             uri: "/modules/marumaru.js",//for Dev.
         }
     ];
-    let { Controller } = ( await import( "/UI/controller.js" ) );
-    let { pageModule } = ( await import( searchSiteModule( moduleList ) ) );
-    if ( pageModule.getInfo ) {
-        let Ads = pageModule?.removeAds();
-        console.log( await pageModule.getInfo() );
-        console.log( await pageModule.grabImages() );
-    }
+    let [ { pageModule }, { Controller } ] = await Promise.all( [ import( searchSiteModule( moduleList ) ), import( "/ui/controller.js" ) ] );
+    let grabber = new Controller( $baseUri, pageModule );
     $client.runtime.onMessage.addListener(
         ( message, sender, sendResponse ) => {
             console.log( sender );
@@ -51,7 +45,7 @@ async function main () {
     
         }
     );
-    $client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename: "test.zip", images: await pageModule.grabImages(), uri: document.URL } } );
+    //$client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename: "test.zip", images: await pageModule.grabImages() } } );
     
     return { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log };
 }

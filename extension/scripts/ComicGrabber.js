@@ -58,12 +58,12 @@ class ComicGrabber {
             }
             if ( configuration.images ) {
                 let img_list;
-                if ( window.img_list1?.length && window.img_list instanceof Array ) window.img_list = window.img_list.concat( window.img_list1 );
-                if ( !window.img_list?.length ) img_list = [ ...document.querySelectorAll( ".view-img img" ) ];
-                if ( img_list && window.view_cnt ) {
-                    let dc = new decypher( view_cnt );
+                //if ( window.img_list1?.length && window.img_list instanceof Array ) window.img_list = window.img_list.concat( window.img_list1 );
+                if ( !window.img_list?.length ) img_list = [ ...document.querySelectorAll( ".view-img img" ) ].map( node => node.src );
+                if ( img_list ) {
                     let list = [];
                     if ( view_cnt !== 0 ) {
+                        let dc = new decypher( view_cnt );
                         for ( const uri of img_list ) {
                             list.push( dc.restoreImage( uri.replace( /https?:/, 'https:' ), 0, this.$session.imageType ).then( blob => {
                                 if ( !( blob instanceof Blob ) ) return false;
