@@ -52,4 +52,4 @@ async function main () {
 
 main()
     .then( ( { message, log } ) => log( message ) )
-    .catch( error => console.log( "Something goes wrong.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
+    .catch( error => console.log( "Something goes wrong with a content script.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );

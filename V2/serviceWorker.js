@@ -6,9 +6,9 @@ async function main () {
     } );
     self.addEventListener( "fetch", e => e.respondWith( caches.match( e.request.url ).then( response => ( response || fetch( e.request ) ) ) ) );;
 
-    return { message: "Scheduled task completed successfully. Waiting user action." };
+    return { message: "Service worker started" };
 }
 
 main()
     .then( ( { message } ) => console.log( message ) )
-    .catch( error => console.log( "Something goes wrong.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
+    .catch( error => console.log( "Something goes wrong with a service worker.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
