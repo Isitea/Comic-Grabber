@@ -34,8 +34,6 @@ async function main () {
             buildDate: "2020-12-24 18:00",
             matchPattern: "marumaru.*\\.\\w+\\/",
             uri: "/modules/marumaru.js",//for Dev.
-            content:
-'"use strict";class pageModule{static async moveNext(){return document.querySelector(".chapter_prev.fa-chevron-circle-right")?.click()}static async movePrev(){return document.querySelector(".chapter_prev.fa-chevron-circle-left")?.click()}static async removeAds(a){let b=document.querySelectorAll(".w_banner");switch(a){case"invisible":{for(let a of b)a.style="display: none !important;";break}default:{for(let a of b)a.remove();break}}}static async getInfo(){return{title:document.head.querySelector("meta[name=title]")?.content,location:document.location.href}}static async grabImages(){return[...document.querySelectorAll(".view-img img")].map(a=>a.src)}}export { pageModule };'
         }
     ];
     let { Controller } = ( await import( "/UI/controller.js" ) );

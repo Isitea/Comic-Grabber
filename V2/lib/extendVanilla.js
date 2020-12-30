@@ -161,7 +161,7 @@ class HTML {
 const
     $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`,
     $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`,
-    $inform = `font-size: 12px; color: rgba( 114, 20, 214, 0.75 );`;
+    $inform = `font-size: 12px; color: rgba( 255, 127, 196, 1 );`;
 
 class logger {
     constructor ( { log = $log, alert = $alert, inform = $inform } ) {

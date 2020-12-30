@@ -58,14 +58,9 @@ class ComicGrabber {
             }
             if ( configuration.images ) {
                 let img_list;
-                if ( window.img_list1 && window.img_list1.length !== 0 ) window.img_list = window.img_list.concat( window.img_list1 );
-                if ( window.img_list.length == 0 ) {
-                    img_list = [];
-                    for ( const item of document.querySelectorAll( ".view-img img" ) ) {
-                        img_list.push( item.src );
-                    }
-                }
-                if ( img_list ) {
+                if ( window.img_list1?.length && window.img_list instanceof Array ) window.img_list = window.img_list.concat( window.img_list1 );
+                if ( !window.img_list?.length ) img_list = [ ...document.querySelectorAll( ".view-img img" ) ];
+                if ( img_list && window.view_cnt ) {
                     let dc = new decypher( view_cnt );
                     let list = [];
                     if ( view_cnt !== 0 ) {
