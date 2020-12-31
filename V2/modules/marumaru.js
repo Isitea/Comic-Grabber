@@ -23,5 +23,5 @@ let pageModule = {
     } )(),
     images: Promise.resolve( [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src ) )
 };
-//function rt ( msg ) { return msg.match( /^(?<title>.+|(?:[\(\[]?단편[\]?\)]?.+))\s+(?<episode>(?:\d[.\d\s\-\~화권전후편]+|(?:번외|특별).+))/ )?.groups }
+
 export { pageModule };

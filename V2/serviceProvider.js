@@ -44,7 +44,7 @@ async function main () {
         } );
     }
 
-    const { $client } = ( await import( "/lib/unifyBrowser.js" ) );
+    const { $client } = ( await import( "/lib/browserUnifier.js" ) );
     const { text2Blob, logger } = ( await import( "/lib/extendVanilla.js" ) );
     await ( import( 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js' ) );
 

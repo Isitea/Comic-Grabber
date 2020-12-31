@@ -1,13 +1,13 @@
 "use strict";
-import { HTML, logger } from '/lib/extendVanilla.js';
+import { HTML, logger, uid } from '/lib/extendVanilla.js';
 import { resourceManager } from '/lib/resourceManager.js';
-import { $client } from '/lib/unifyBrowser.js';
+import { $client } from '/lib/browserUnifier.js';
 const $locale = $client.i18n.getMessage;
-
-const log = logger.log;
 
 class Controller {
     constructor ( baseUri, { moveNext, movePrev, info, images } ) {
+        Object.defineProperty( this, "clientUid", { value: uid(), writable: false, configurable: false, enumerable: false } );
+        Object.defineProperty( this, "UINode", { writable: true, configurable: true, enumerable: false } );
         info.then( msg => {
             console.log( msg );
         } );
@@ -17,7 +17,8 @@ class Controller {
         this.movePrev = movePrev;
 
         this.resource = new resourceManager( baseUri );
-        this.constructUI().then( msg => this.activateUI() ).then( msg => log( `UI for ${$client.runtime.getManifest().className} is activated.` ) );
+        this.constructUI().then( msg => this.activateUI() ).then( msg => logger.log( `UI for ${$client.runtime.getManifest().name } is activated.` ) );
+        
     }
 
     async constructUI () {
@@ -179,16 +180,20 @@ class Controller {
     async deactivateUI () {
         if ( !this.UINode ) return "Already inactive";
         this.UINode.remove();
-        this.UINode = null;
+        delete this.UINode;
         this.resource.unload();
 
         return "UI deactivated";
     }
 
-    async downloadImages ( { filename, conflictAction, images, uri = document.URL } ) {
-        $client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename, conflictAction, images, uri } } );
+    downloadImages ( { filename, conflictAction, images, uri = document.URL } ) {
+        $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, images, uri } } );
     
-        return this;
+        return new Promise();
+    }
+
+    ready ( msg ) {
+        return new Promise(  )
     }
 }
 

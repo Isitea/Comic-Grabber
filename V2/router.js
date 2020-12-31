@@ -7,9 +7,10 @@ function imports ( list = [] ) {
 }
 
 async function main () {
-    const [ { $client }, { HTML, logger, text2Blob }, { resourceManager } ]
-    = await imports( [ "/lib/unifyBrowser.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js" ] );
+    const [ { $client }, { HTML, logger, text2Blob, uid }, { resourceManager } ]
+    = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js" ] );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
+    const pageUid = uid();
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule = "/modules/universal.js";
@@ -37,6 +38,7 @@ async function main () {
     ];
     let [ { pageModule }, { Controller } ] = await Promise.all( [ import( searchSiteModule( moduleList ) ), import( "/ui/controller.js" ) ] );
     let grabber = new Controller( $baseUri, pageModule );
+    console.log( grabber );
     $client.runtime.onMessage.addListener(
         ( message, sender, sendResponse ) => {
             console.log( sender );
@@ -47,7 +49,7 @@ async function main () {
     );
     //$client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename: "test.zip", images: await pageModule.grabImages() } } );
     
-    return { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log };
+    return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
 }
 
 main()

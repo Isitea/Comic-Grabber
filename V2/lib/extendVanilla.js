@@ -197,7 +197,6 @@ const
     $log = `font-size: 12px; color: rgba( 75, 223, 198, 0.75 );`,
     $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`,
     $inform = `font-size: 12px; color: rgba( 255, 127, 196, 1 );`;
-
 class logger {
     constructor ( { log = $log, alert = $alert, inform = $inform } ) {
         this.log = log;
@@ -214,8 +213,86 @@ class logger {
     static inform ( message ) { console.log( `%c${message}`, $inform ); }
 }
 
+/**
+ * 
+ */
+class userEventTarget {
+    constructor () {
+        Object.defineProperties( this, {
+            listeners: { value: {}, configurable: false, enumerable: false },
+        } );
+    }
+
+    addEventListener ( type, listener, { once = false, prior = false, passive = false, expire = 0 } = {} ) {
+        if ( !( type in this.listeners ) ) { this.listeners[ type ] = []; }
+        if ( expire > 0 ) expire += performance.now();
+
+        let item;
+        if ( !( item = this.listeners[ type ].find( item => item.listener === listener ) ) ) {
+            item = { listener, once, passive, expire, id: '_' + secureRandom() };
+            if ( prior ) this.listeners[ type ].unshift( item );
+            else this.listeners[ type ].push( item );
+        }
+        return item.id;
+    }
+
+    removeEventListenerAll ( type ) {
+        if ( type in this.listeners ) {
+            this.listeners[ type ] = [];
+        }
+
+        return this;
+    }
+
+    removeEventListener ( type, item ) {
+        let { listener, id } = item;
+        if ( item instanceof Function ) [ listener, id ] = [ item, false ];
+
+        if ( type in this.listeners ) {
+            let finder = item => ( ( listener && item.listener === listener ) || ( id && item.id === id ) );
+            let stack = this.listeners[ type ], index;
+            if ( ( index = stack.findIndex( finder ) ) > -1 ) stack.splice( index, 1 );
+        }
+
+        return this;
+    }
+
+    dispatchEvent ( event ) {
+        if ( !( event instanceof Event ) ) throw Error( "TypeError" );
+        if ( event.type in this.listeners ) {
+            let stack = this.listeners[ event.type ];
+            const preventDefault = event.defaultPrevented;
+            for ( let item of stack ) {
+                if ( item.expire > 0 && item.expire < performance.now() ) {
+                    this.removeEventListener( event.type, item );
+                    continue;
+                }
+                
+                let listener = item.listener;
+
+                if ( typeof listener === "function" ) listener.call( this, event );
+                else if ( typeof listener.handleEvent === "function" ) listener.handleEvent.call( this, event );
+
+                if ( item.passive ) event.defaultPrevented = preventDefault;
+                if ( item.once ) this.removeEventListener( event.type, item );
+
+                if ( event.cancelBubble ) return !event.defaultPrevented;
+            }
+        }
+
+        return !event.defaultPrevented;
+    }
+}
+
 function text2Blob ( text, type = "text/javascript" ) {
     return URL.createObjectURL( new Blob( [ text ], { type } ) );
 }
 
-export { HTML, logger, text2Blob };
+const uidBox = new Uint8Array( 16 );
+function uid () {
+    crypto.getRandomValues( uidBox );
+    
+    return uidBox.reduce( ( result, number ) => result + number.toString( 16 ).padStart( 2, "0" ), "" );
+}
+
+export { HTML, logger, text2Blob, uid };

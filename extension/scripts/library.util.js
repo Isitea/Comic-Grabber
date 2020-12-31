@@ -2,7 +2,7 @@
 class customEventTarget {
     constructor () {
         Object.defineProperties( this, {
-            listeners: { value: {} },
+            listeners: { value: {}, configurable: false, enumerable: false },
         } );
     }
 
