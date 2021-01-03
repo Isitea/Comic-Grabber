@@ -62,13 +62,15 @@ class Controller extends EventTarget {
             info: { value: new Proxy( ( await this.chekcStorage( info, holder ) ), { set: function ( obj, key, value ) {
                 let event = new Event( "infochange" );
                 if ( typeof value === "string" ) value = value.toFilename();
-                event.data = { key, value: value };
+                event.data = { key, value };
                 holder.dispatchEvent( event );
                 return Reflect.set( obj, key, value );
             } } ), writable: true, configurable: false, enumerable: false },
             moveNext: { value: await moveNext, writable: false, configurable: false, enumerable: true },
             movePrev: { value: await movePrev, writable: false, configurable: false, enumerable: true },
         } );
+        this.info.title = this.info.title;
+        this.info.episode = this.info.episode;
         this.info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics"; //Dev
         return "Data processing completed";
     }
@@ -260,7 +262,7 @@ class Controller extends EventTarget {
                         holder.notify( `${filename} is downloded` );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
-                    .catch( () => holder.notify( `Failed to download ${filename}` ) )
+                    .catch( filename => holder.notify( `Failed to download ${filename}` ) )
             } );
 
         }
@@ -292,6 +294,7 @@ class Controller extends EventTarget {
                 return Promise.reject( this.state );
             }
             case constant.__ready__: {
+                if ( !this.images.length ) return Promise.reject( constant.__nothing__ );
                 this.changeState( constant.__downloading__ );
                 return new Promise( ( resolve, reject ) => {
                     let holder = this;
