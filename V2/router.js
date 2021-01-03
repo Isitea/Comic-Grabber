@@ -7,8 +7,8 @@ function imports ( list = [] ) {
 }
 
 async function main () {
-    const [ { $client }, { HTML, logger, text2Blob, uid }, { resourceManager } ]
-    = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js" ] );
+    const [ { $client }, { HTML, logger, text2Blob, uid }, { resourceManager }, { constant } ]
+    = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js", "/lib/constant.js" ] );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
     const pageUid = uid();
 
@@ -38,16 +38,6 @@ async function main () {
     ];
     let [ { pageModule }, { Controller } ] = await Promise.all( [ import( searchSiteModule( moduleList ) ), import( "/ui/controller.js" ) ] );
     let grabber = new Controller( $baseUri, pageModule );
-    console.log( grabber );
-    $client.runtime.onMessage.addListener(
-        ( message, sender, sendResponse ) => {
-            console.log( sender );
-            console.log( message );
-            //$client.tabs.sendMessage( sender.tab.id, message )
-    
-        }
-    );
-    //$client.runtime.sendMessage( { message: Date.now(), action: "download", data: { filename: "test.zip", images: await pageModule.grabImages() } } );
     
     return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
 }

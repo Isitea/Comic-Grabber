@@ -24,6 +24,7 @@ Object.defineProperties( String.prototype, {
             decoder.innerHTML = this;
 
             return decoder.textContent
+                .trim()
                 .replace( /\.\.+/g, "⋯" )
                 .replace( /!+/g, "！" )
                 .replace( /\?+/g, "？" )

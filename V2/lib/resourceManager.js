@@ -9,6 +9,7 @@ class resourceManager {
     }
 
     load ( source = "", type ) {
+        if ( document.querySelector( `script[src*=${source.replace( /([/.])/g, "\\$1" )}], link[href*=${source.replace( /([/.])/g, "\\$1" )}]` ) ) return "Already attached"
         let script, uri;
         if ( source.match( /^https?|^blob:/ ) ) uri = source;
         else uri = this.baseUri + source;
@@ -26,7 +27,7 @@ class resourceManager {
         log( `Attaching... ${uri.replace( this.baseUri, "" )}` );
         document.head.appendChild( script );
 
-        return script;
+        return "Successfully attached";
     }
     
     unload ( item = null ) {

@@ -1,6 +1,13 @@
 "use strict";
 navigator.serviceWorker.register( "/serviceWorker.js" );
 
+function imports ( list = [] ) {
+    let promises = [];
+    for ( const module of list ) promises.push( import( module ) );
+
+    return Promise.all( promises );
+}
+
 async function main () {
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri } ) {
         let list = await Promise.all( images.map( uri => fetch( uri ).then( response => response.blob() ) ) );
@@ -21,22 +28,19 @@ async function main () {
         }
         zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
-        let id = $client.dl.download( { url, filename, conflictAction } );
-        return new Promise( ( resolve, reject ) => {
+        let id = await $client.dl.download( { url, filename, conflictAction } );
+        return new Promise( resolve => {
             function onComplete ( item ) {
                 if ( item.id === id && item.state ) {
                     switch ( item.state.current ) {
+                        case "interrupted":
                         case "complete": {
+                            $client.dl.onChanged.removeListener( onComplete );
                             URL.revokeObjectURL( url );
-                            $client.dl.onChanged.removeListener( onComplete );
-                            resolve( item.state );
+                            resolve( { result: item.state.current, filename } );
                             break;
                         }
-                        case "interrupted": {
-                            $client.dl.onChanged.removeListener( onComplete );
-                            reject( item.state );
-                            break;
-                        }
+                        default:
                     }
                 }
             };
@@ -44,19 +48,23 @@ async function main () {
         } );
     }
 
-    const { $client } = ( await import( "/lib/browserUnifier.js" ) );
-    const { text2Blob, logger } = ( await import( "/lib/extendVanilla.js" ) );
-    await ( import( 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js' ) );
+    const [ { $client }, { logger, text2Blob, uid }, { constant }, {} ]
+    = await imports( [
+        "/lib/browserUnifier.js",
+        "/lib/extendVanilla.js",
+        "/lib/constant.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"
+    ] );
 
     $client.runtime.onMessage.addListener(
-        async ( { message, action, data }, sender, sendResponse ) => {
-            let response = "";
+        async ( { message, action, clientUid, data }, sender ) => {
+            let result = undefined;
             switch ( action ) {
-                case "download": {
-                    response = await downloadImages( data )
+                case constant.__download__: {
+                    result = await downloadImages( data );
                 }
             }
-            $client.tabs.sendMessage( sender.tab.id, { message: response } );
+            $client.tabs.sendMessage( sender.tab.id, { action, clientUid, data: result } );
         }
     );
 

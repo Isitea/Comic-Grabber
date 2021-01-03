@@ -1,6 +1,6 @@
 {
 	"manifest_version": 2,
-	"name": "Comic grabber ms2",
+	"name": "Comic grabber 2 beta",
     "version": "2.0.00",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
@@ -27,5 +27,5 @@
         "scripts": [ "serviceProvider.js" ]
 	},
 	"content_security_policy": "default-src 'self' blob: filesystem: ; connect-src * ; script-src 'self' blob: filesystem: https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js ;",
-	"minimum_chrome_version": "66"
+	"minimum_chrome_version": "70"
 }
