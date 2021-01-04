@@ -1,0 +1,27 @@
+.ComicGrabber {
+  box-sizing: border-box !important;
+}
+
+.ComicGrabber * {
+  box-sizing: border-box !important;
+  float: left;
+}
+
+.ComicGrabber.CG-menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 65535;
+  background-color: rgba(0, 0, 0, 0.25);
+  width: 100%;
+}
+
+.ComicGrabber .CG-checkbox {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+
+.ComicGrabber .CG-checkbox[active] {
+  color: rgba(0, 255, 0, 0.9);
+}
+/*# sourceMappingURL=style.css.map */

@@ -1,0 +1,36 @@
+$transparent: rgba( 0, 0, 0, 0 );
+$black-50: rgba( 0, 0, 0, 0.5 );
+$black-75: rgba( 0, 0, 0, 0.75 );
+$white: rgba( 255, 255, 255, 1 );
+$green: rgba( 0, 255, 0, 0.9 );
+$cornerX: 1vw;
+$cornerY: 1vh;
+$itemWidth: calc( 256px * 1.2 );
+$itemMargin: 4px;
+$square-Button: 48px;
+$height-ListItem: 24px;
+$letterSize: 16px;
+$border: 8px;
+
+.ComicGrabber {
+    box-sizing: border-box !important;
+    * {
+        box-sizing: border-box !important;
+        float: left;
+    }
+    &.CG-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 65535;
+        background-color: rgba( 0, 0, 0, 0.25 );
+        width: 100%;
+    }
+    .CG-checkbox {
+        background: $black-50;
+        border-radius: $border;
+        &[active] {
+            color: $green;
+        }
+    }
+}

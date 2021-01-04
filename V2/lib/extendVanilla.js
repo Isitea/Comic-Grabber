@@ -24,7 +24,6 @@ Object.defineProperties( String.prototype, {
             decoder.innerHTML = this;
 
             return decoder.textContent
-                .trim()
                 .replace( /\.\.+/g, "⋯" )
                 .replace( /!+/g, "！" )
                 .replace( /\?+/g, "？" )
@@ -41,6 +40,7 @@ Object.defineProperties( String.prototype, {
                 .replace( /[\r\n\s]+/g, " " )
                 .replace( /\u200b+/g, "" )
                 .replace( /^[.\-~\s]*|[.\s]*$/g, "" )
+                .trim()
         }
     }
 } );

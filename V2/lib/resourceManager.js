@@ -25,6 +25,7 @@ class resourceManager {
         }
         
         log( `Attaching... ${uri.replace( this.baseUri, "" )}` );
+        this.loaded.push( script );
         document.head.appendChild( script );
 
         return "Successfully attached";
@@ -40,13 +41,14 @@ class resourceManager {
             item.remove();
             this.loaded.splice( index, 1 );
             log( `Detaching... ${( item.src || item.href ).replace( this.baseUri, "" )}` );
-        } else if ( item instanceof RegExp || item instanceof String ) {
+        } 
+        else if ( item instanceof RegExp || typeof item == "string" ) {
             let pattern = new RegExp( item );
-            this.loaded = item.reduce( ( result, current ) => {
+            this.loaded = this.loaded.reduce( ( result, current ) => {
                 let uri = current.src || current.href;
                 if ( uri.replace( this.baseUri, "" ).match( pattern ) ) {
-                    item.remove();
-                    log( `Detaching... ${( item.src || item.href ).replace( this.baseUri, "" )}` );
+                    current.remove();
+                    log( `Detaching... ${( current.src || current.href ).replace( this.baseUri, "" )}` );
                 }
                 else result.push( current );
 

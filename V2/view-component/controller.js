@@ -24,12 +24,23 @@ class Controller extends EventTarget {
 
     async chekcStorage ( raw, holder ) {
         let info = await raw;
-        let title = sessionStorage.getItem( "title" );
-        if ( title && info.title.match( title ) ) {
-            info.title = title;
-            info.episode = info.raw.replace( title, "" ).trim();
+        if ( typeof info.raw == "string" ) {
+            let title = sessionStorage.getItem( "title" );
+            if ( title && info.title.match( title ) ) {
+                info.title = title.toFilename();
+                info.episode = info.raw.replace( title, "" ).toFilename();
+            }
+            else {
+                sessionStorage.removeItem( "title" );
+                info.title = info.title?.toFilename() || "";
+                info.episode = info.episode?.toFilename() || "";
+    
+            }
         }
-        else sessionStorage.removeItem( "title" );
+        else {
+            info.title = "";
+            info.episode = "";
+        }
         for ( let key of [ "saveOnLoad", "moveOnSave" ] ) info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
         let downloadFolder = localStorage.getItem( "downloadFolder" );
         if ( downloadFolder ) info.downloadFolder = downloadFolder;
@@ -69,8 +80,6 @@ class Controller extends EventTarget {
             moveNext: { value: await moveNext, writable: false, configurable: false, enumerable: true },
             movePrev: { value: await movePrev, writable: false, configurable: false, enumerable: true },
         } );
-        this.info.title = this.info.title;
-        this.info.episode = this.info.episode;
         this.info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics"; //Dev
         return "Data processing completed";
     }
@@ -265,6 +274,10 @@ class Controller extends EventTarget {
                     .catch( filename => holder.notify( `Failed to download ${filename}` ) )
             } );
 
+            window.addEventListener( "keydown", ( { code, repeat } ) => {
+                if ( !repeat && code == "F2" ) holder.refresh();
+            } );
+
         }
         holder.addEventListener( "statechange", ( { target: { state } } ) => {
             if ( holder.info.saveOnLoad && state === constant.__ready__ ) holder.UINode.querySelector( `#saveToLocal` ).click();
@@ -273,6 +286,11 @@ class Controller extends EventTarget {
         document.body.appendChild( this.UINode );
 
         return "UI activated";
+    }
+
+    refresh () {
+        this.resource.unload();
+        this.resource.load( "/ui/style.css" );
     }
 
     async deactivateUI () {

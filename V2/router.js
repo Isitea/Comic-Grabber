@@ -13,7 +13,7 @@ async function main () {
     const pageUid = uid();
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
-        let siteModule = "/modules/universal.js";
+        let siteModule;
         for ( const module of moduleList ) {
             if ( uri.match( module.matchPattern ) ) {
                 siteModule = ( module.uri ? module.uri : text2Blob( module.content ) );
@@ -36,10 +36,15 @@ async function main () {
             uri: "/modules/marumaru.js",//for Dev.
         }
     ];
-    let [ { pageModule }, { Controller } ] = await Promise.all( [ import( searchSiteModule( moduleList ) ), import( "/ui/controller.js" ) ] );
-    let grabber = new Controller( $baseUri, pageModule );
-    
-    return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
+    let matchedModule;
+    if ( matchedModule = searchSiteModule( moduleList ) ) {
+        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/ui/controller.js" ) ] );
+        let grabber = new Controller( $baseUri, pageModule );
+        return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
+    }
+    else {
+        return { message: "There is no module for this site. Manual selector is loaded for user action.", log: logger.log }
+    }
 }
 
 main()

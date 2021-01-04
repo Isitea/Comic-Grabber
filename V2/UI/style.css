@@ -1,9 +1,0 @@
-.ComicGrabber.CG-menu, .ComicGrabber.CG-menu * {
-    box-sizing: border-box !important;
-}
-.ComicGrabber.CG-menu {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    z-index: 65535;
-}
