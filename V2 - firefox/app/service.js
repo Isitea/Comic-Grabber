@@ -7,10 +7,9 @@ function imports ( list = [] ) {
 }
 
 async function main () {
-    const [ { $client }, { HTML, logger, text2Blob, uid }, { resourceManager }, { constant } ]
+    const [ { $client, pageUid }, { HTML, logger, text2Blob }, { resourceManager }, { constant } ]
     = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js", "/lib/constant.js" ] );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
-    const pageUid = uid();
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule;
