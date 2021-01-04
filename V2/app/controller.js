@@ -96,7 +96,7 @@ class Controller extends EventTarget {
                 className: "ComicGrabber CG-menu",
                 _child: [
                     {
-                        label: {
+                        div: {
                             className: "CG-menuButton",
                             id: "menuButton"
                         }
@@ -224,7 +224,7 @@ class Controller extends EventTarget {
                         }
                     },
                     {
-                        label: {
+                        div: {
                             className: "CG-moveChapter",
                             id: "moveNext",
                             textContent: $locale( "moveNext" )
@@ -265,13 +265,15 @@ class Controller extends EventTarget {
                 toggle( { target: node }, holder.info[id] );
                 node.addEventListener( "click", toggle );
             }
-            holder.UINode.querySelector( `#saveToLocal` ).addEventListener( "click", () => {
+            holder.UINode.querySelector( `#saveToLocal` ).addEventListener( "click", ( { target} ) => {
+                target.toggleAttribute( "active" );
                 holder.downloadImages( {} )
                     .then( filename => {
                         holder.notify( `${filename} is downloded` );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
                     .catch( filename => holder.notify( `Failed to download ${filename}` ) )
+                    .finally( () => target.toggleAttribute( "active" ) )
             } );
 
             window.addEventListener( "keydown", ( { code, repeat } ) => {

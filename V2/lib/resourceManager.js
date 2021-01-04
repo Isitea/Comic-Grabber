@@ -15,7 +15,7 @@ class resourceManager {
         else uri = this.baseUri + source;
         switch ( type || source.split( "." ).pop() ) {
             case "js": {
-                [ script ] = HTML.render( { script: { src: uri } } );
+                [ script ] = HTML.render( { script: { src: uri, type: "module" } } );
                 break;
             }
             case "css": {

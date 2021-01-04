@@ -1,5 +1,5 @@
 "use strict";
-navigator.serviceWorker.register( "/serviceWorker.js" );
+navigator.serviceWorker.register( "/services/serviceWorker.js" );
 
 function imports ( list = [] ) {
     let promises = [];

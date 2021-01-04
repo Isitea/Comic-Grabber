@@ -12,13 +12,13 @@
         "message": "자동 이동"
     },
     "downloadFolder": {
-        "message": "저장 폴더"
+        "message": "저장 폴더: "
     },
     "comicTitle": {
-        "message": "제목"
+        "message": "제목: "
     },
     "comicEpisode": {
-        "message": "부제목"
+        "message": "부제목: "
     },
     "movePrev": {
         "message": "이전화"

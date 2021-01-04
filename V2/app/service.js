@@ -38,7 +38,7 @@ async function main () {
     ];
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
-        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/ui/controller.js" ) ] );
+        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
         let grabber = new Controller( $baseUri, pageModule );
         return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
     }

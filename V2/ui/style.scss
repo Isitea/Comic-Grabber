@@ -1,36 +1,127 @@
 $transparent: rgba( 0, 0, 0, 0 );
 $black-50: rgba( 0, 0, 0, 0.5 );
 $black-75: rgba( 0, 0, 0, 0.75 );
+$white-10: rgba( 255, 255, 255, 0.1 );
 $white: rgba( 255, 255, 255, 1 );
 $green: rgba( 0, 255, 0, 0.9 );
 $cornerX: 1vw;
 $cornerY: 1vh;
 $itemWidth: calc( 256px * 1.2 );
-$itemMargin: 4px;
+$itemMargin: 8px;
 $square-Button: 48px;
 $height-ListItem: 24px;
 $letterSize: 16px;
 $border: 8px;
+$blockSize: 16px;
 
 .ComicGrabber {
     box-sizing: border-box !important;
+    max-width: 100vw;
+    height: 32px;
     * {
         box-sizing: border-box !important;
         float: left;
+        background: $black-50;
+        color: $white;
     }
     &.CG-menu {
         position: fixed;
         bottom: 0;
-        left: 0;
+        left: 50%;
+        transform: translateX( -50% );
         z-index: 65535;
-        background-color: rgba( 0, 0, 0, 0.25 );
         width: 100%;
-    }
-    .CG-checkbox {
-        background: $black-50;
-        border-radius: $border;
-        &[active] {
-            color: $green;
+        .CG-list {
+            padding: 4px;
+            line-height: 24px;
+            > .CG-item {
+                margin: 0 4px 0 4px;
+                border-radius: $border;
+                //background: $transparent;
+                * {
+                    height: 24px;
+                    border: 0;
+                }
+                .CG-label {
+                    border-radius: $border 0 0 $border;
+                    font-weight: bold;
+                    * {
+                        border-radius: $border 0 0 $border;
+                        font-weight: bold;
+                    }
+                }
+                .CG-text {
+                    border-radius: 0 $border $border 0;
+                    font-weight: normal;
+                    * {
+                        border-radius: 0 $border $border 0;
+                        background-color: $white-10;
+                        font-weight: normal;
+                        padding: 0 0 0 4px;
+                    }
+                    #episode {
+                        width: 96px;
+                    }
+                    #title {
+                        width: 256px;
+                    }
+                }
+                .CG-row {
+                    border-radius: $border;
+                    .CG-checkbox {
+                        border-radius: $border;
+                        &[active] {
+                            font-weight: bold;
+                            color: $green;
+                            &#saveToLocal {
+                                //color: $transparent;
+                                position: relative;
+                                &::before {
+                                    content: "";
+                                    position: absolute;
+                                    border-radius: $border;
+                                    background-color: rgb(153, 255, 238);
+                                    top: 50%;
+                                    left: 0;
+                                    height: 100%;
+                                    width: 0;
+                                    transform: translate( 0, -50% );
+                                    animation: V2 5s linear infinite;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+    >.CG-moveChapter {
+        height: 32px;
+        width: 32px;
+        overflow: hidden;
+        color: $transparent;
+        background-repeat: no-repeat;
+        background-image: url( "/ui/button.png" );
+        background-size: cover;
+        &#movePrev {
+            transform: rotate( 180deg );
+        }
+        &#moveNext {
+            transform: rotate( 0deg );
+        }
+    }
+}
+
+@keyframes onWorking {
+    0% { width: 0; opacity: 0; }
+    40% { width: 60%; opacity: 1; }
+    75% { width: 100%; opacity: 1; }
+    100% { width: 100%; opacity: 0; }
+}
+@keyframes V2 {
+    0% { width: 0; height: 10%; left: 0; }
+    7.5% { height: 100%; }
+    50% { width: 101%; height: 100%; left: 0; }
+    92.5% { height: 100%; }
+    100% { width: 0; height: 10%; left: 100% }
 }
