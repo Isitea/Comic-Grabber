@@ -1,0 +1,29 @@
+{
+    "extensionDescription": {
+        "message": "화면에 보여지는 이미지의 저장을 도와줍니다. 일부 사이트의 경우에는 자동화 템플릿을 제공하며, 자동화 템플릿을 직접 제작하여 적용할 수 있습니다."
+    },
+    "downloadImages": {
+        "message": "그림 저장"
+    },
+    "downloadOnLoad": {
+        "message": "자동 저장"
+    },
+    "moveOnDownload": {
+        "message": "자동 이동"
+    },
+    "downloadFolder": {
+        "message": "저장 폴더: "
+    },
+    "comicTitle": {
+        "message": "제목: "
+    },
+    "comicEpisode": {
+        "message": "부제목: "
+    },
+    "movePrev": {
+        "message": "이전화"
+    },
+    "moveNext": {
+        "message": "다음화"
+    }
+}
