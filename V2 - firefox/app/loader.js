@@ -1,6 +1,6 @@
 "use strict";
 let script = document.createElement( "script" );
-script.src = `${browser.runtime.getURL( "" ).replace( /\/$/, "" )}/app/service.js`;
+script.src = `${browser.runtime.getURL( "" ).replace( /\/$/, "" )}/app/service.js?uid=12322`;
 script.setAttribute( "type", "module" );
 document.head.appendChild( script );
 

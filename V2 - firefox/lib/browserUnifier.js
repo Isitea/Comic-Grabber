@@ -44,7 +44,8 @@ const $client = ( () => {
             }
         }
         catch {
-            let BC = new BroadcastChannel( `ComicGrabber.${pageUid}` );
+            let BC = new BroadcastChannel( `ComicGrabber` );
+            //let BC = new BroadcastChannel( `ComicGrabber.${pageUid}` );
             BC.addEventListener( "message", ev => console.log( ev ) );
             BC.postMessage( "TEST" );
             
@@ -52,7 +53,10 @@ const $client = ( () => {
                 runtime: {
                     getURL: function () {
                         try { throw new Error() }
-                        catch ( { fileName } ) { return fileName.match( /(?<baseUrl>^.+?\/\/.+?\/)/ ).groups; }
+                        catch ( { fileName } ) {
+                            console.log( fileName );
+                            return fileName.match( /(?<baseUrl>^.+?\/\/.+?\/)/ ).groups.baseUrl;
+                        }
                     }
                 }
             };
