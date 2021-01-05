@@ -275,11 +275,6 @@ class Controller extends EventTarget {
                     .catch( filename => holder.notify( `Failed to download ${filename}` ) )
                     .finally( () => target.toggleAttribute( "active" ) )
             } );
-
-            window.addEventListener( "keydown", ( { code, repeat } ) => {
-                if ( !repeat && code == "F2" ) holder.refresh();
-            } );
-
         }
         holder.addEventListener( "statechange", ( { target: { state } } ) => {
             if ( holder.info.saveOnLoad && state === constant.__ready__ ) holder.UINode.querySelector( `#saveToLocal` ).click();

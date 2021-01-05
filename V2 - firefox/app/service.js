@@ -1,14 +1,13 @@
 "use strict";
-function imports ( list = [] ) {
-    let promises = [];
-    for ( const module of list ) promises.push( import( module ) );
-
-    return Promise.all( promises );
-}
-
 async function main () {
-    const [ { $client, pageUid }, { HTML, logger, text2Blob }, { resourceManager }, { constant } ]
-    = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js", "/lib/constant.js" ] );
+    const { baseUri, pageUid } = ( () => {
+        try { throw new Error() }
+        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\?(?<pageUid>.+)?/ ).groups; }
+    } )();
+
+    const { $client } = await import( `/lib/browserUnifier.js?${pageUid}` );
+    await $client.complete; //Polyfill browser api for Firefox
+    const { logger, text2Blob } = await import( `/lib/extendVanilla.js` );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
@@ -24,17 +23,7 @@ async function main () {
     }
 
     logger.inform( `Comic grabber v2 ( http://isitea.net )` );
-    let moduleList;
-    //let moduleList = ( await $client.localStorage.get( "modules" ) ).modules;
-    //Test structure
-    moduleList = [
-        {
-            moduleName: "marumaru",
-            buildDate: "2020-12-24 18:00",
-            matchPattern: "marumaru.*\\.\\w+\\/",
-            uri: "/modules/marumaru.js",//for Dev.
-        }
-    ];
+    let { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
         let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );

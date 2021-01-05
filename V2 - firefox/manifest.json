@@ -9,8 +9,7 @@
 		"128": "icon-128.png"
 	},
 	"permissions": [
-		"downloads",
-		"storage"
+		"downloads"
 	],
 	"content_scripts": [
 		{

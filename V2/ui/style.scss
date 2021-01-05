@@ -69,6 +69,7 @@ $blockSize: 16px;
                 .CG-row {
                     border-radius: $border;
                     .CG-checkbox {
+                        min-width: 64px;
                         border-radius: $border;
                         &[active] {
                             font-weight: bold;
@@ -86,7 +87,7 @@ $blockSize: 16px;
                                     height: 100%;
                                     width: 0;
                                     transform: translate( 0, -50% );
-                                    animation: V2 5s linear infinite;
+                                    animation: onWorking 5s linear infinite;
                                 }
                             }
                         }
@@ -113,15 +114,9 @@ $blockSize: 16px;
 }
 
 @keyframes onWorking {
-    0% { width: 0; opacity: 0; }
-    40% { width: 60%; opacity: 1; }
-    75% { width: 100%; opacity: 1; }
-    100% { width: 100%; opacity: 0; }
-}
-@keyframes V2 {
     0% { width: 0; height: 10%; left: 0; }
-    7.5% { height: 100%; }
+    12.5% { height: 100%; }
     50% { width: 101%; height: 100%; left: 0; }
-    92.5% { height: 100%; }
+    87.5% { height: 100%; }
     100% { width: 0; height: 10%; left: 100% }
 }

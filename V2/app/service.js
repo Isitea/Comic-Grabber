@@ -1,14 +1,7 @@
 "use strict";
-function imports ( list = [] ) {
-    let promises = [];
-    for ( const module of list ) promises.push( import( module ) );
-
-    return Promise.all( promises );
-}
-
 async function main () {
-    const [ { $client }, { HTML, logger, text2Blob, uid }, { resourceManager }, { constant } ]
-    = await imports( [ "/lib/browserUnifier.js",  "/lib/extendVanilla.js", "/lib/resourceManager.js", "/lib/constant.js" ] );
+    const { $client } = await import( `/lib/browserUnifier.js` );
+    const { logger, text2Blob, uid } = await import( `/lib/extendVanilla.js` );
     const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
     const pageUid = uid();
 
@@ -25,17 +18,7 @@ async function main () {
     }
 
     logger.inform( `Comic grabber v2 ( http://isitea.net )` );
-    let moduleList;
-    //let moduleList = ( await $client.localStorage.get( "modules" ) ).modules;
-    //Test structure
-    moduleList = [
-        {
-            moduleName: "marumaru",
-            buildDate: "2020-12-24 18:00",
-            matchPattern: "marumaru.*\\.\\w+\\/",
-            uri: "/modules/marumaru.js",//for Dev.
-        }
-    ];
+    let { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
         let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );

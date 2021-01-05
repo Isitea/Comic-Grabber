@@ -9,11 +9,11 @@ const $client = ( () => {
             delete client.downloads;
             client.dl = browser.downloads;
         }
-        //move storage api as [area]Storage
-        delete client.storage;
-        for ( let area of [ "sync", "local" ] ) {
-            client[ `${area}Storage` ] = browser.storage[area];
-        }
+//        //move storage api as [area]Storage
+//        delete client.storage;
+//        for ( let area of [ "sync", "local" ] ) {
+//            client[ `${area}Storage` ] = browser.storage[area];
+//        }
     }
     catch {
         client = { ...chrome };
@@ -28,16 +28,16 @@ const $client = ( () => {
             for ( let method of [ "acceptDanger", "cancel", "download", "erase", "pause", "removeFile", "resume", "search" ] )
                 client.dl[method] = arg => new Promise( resolve => chrome.downloads[method]( arg, resolve ) );
         }
-        //move storage api and change return values in promise.
-        delete client.storage;
-        for ( let area of [ "sync", "local" ] ) {
-            client[ `${area}Storage` ] = {
-                clear: () => new Promise( resolve => chrome.storage[area].clear( resolve ) ),
-                onChanged: chrome.storage[area].onChanged,
-            };
-            for ( let method of [ "getBytesInUse", "get", "set", "remove" ] ) 
-                client[ `${area}Storage` ][method] = arg => new Promise( resolve => chrome.storage[area][method]( arg, resolve ) );
-        }
+//        //move storage api and change return values in promise.
+//        delete client.storage;
+//        for ( let area of [ "sync", "local" ] ) {
+//            client[ `${area}Storage` ] = {
+//                clear: () => new Promise( resolve => chrome.storage[area].clear( resolve ) ),
+//                onChanged: chrome.storage[area].onChanged,
+//            };
+//            for ( let method of [ "getBytesInUse", "get", "set", "remove" ] ) 
+//                client[ `${area}Storage` ][method] = arg => new Promise( resolve => chrome.storage[area][method]( arg, resolve ) );
+//        }
     }
 
     return client;
