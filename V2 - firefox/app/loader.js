@@ -9,12 +9,28 @@ function uid () {
 async function main () {
     const pageUid = uid();
     let locale = browser.runtime.getURL( `_locales/${browser.i18n.getMessage( "locale" )}/messages.json`);
-    let i82n = await fetch( locale ).then( response => response.json() );
+    let i18n = await fetch( locale ).then( response => response.json() );
     let BC = new BroadcastChannel( `ComicGrabber.${pageUid}` );
-    BC.addEventListener( "message", ev => console.log( ev ) );
+    BC.addEventListener( "message", ( { data } ) => {
+        switch ( data.action ) {
+            case "manifest": {
+                BC.postMessage( browser.runtime.getManifest() );
+                break;
+            }
+            case "i18n": {
+                BC.postMessage( i18n );
+                break;
+            }
+            default: {
+                browser.runtime.sendMessage( data );
+                break;
+            }
+        }
+    } );
+    browser.runtime.onMessage.addListener( msg => BC.postMessage( msg ) );
 
     let script = document.createElement( "script" );
-    script.src = `${browser.runtime.getURL( "" ).replace( /\/$/, "" )}/app/service.js?${pageUid}`;
+    script.src = `${browser.runtime.getURL( "" ).replace( /\/$/, "" )}/app/service.js#${pageUid}`;
     script.setAttribute( "type", "module" );
     document.head.appendChild( script );
 

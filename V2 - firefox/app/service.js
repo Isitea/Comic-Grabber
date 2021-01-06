@@ -2,13 +2,10 @@
 async function main () {
     const { baseUri, pageUid } = ( () => {
         try { throw new Error() }
-        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\?(?<pageUid>.+)?/ ).groups; }
+        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)?/ ).groups; }
     } )();
 
-    const { $client } = await import( `/lib/browserUnifier.js?${pageUid}` );
-    await $client.complete; //Polyfill browser api for Firefox
     const { logger, text2Blob } = await import( `/lib/extendVanilla.js` );
-    const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule;
@@ -26,8 +23,8 @@ async function main () {
     let { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
-        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
-        let grabber = new Controller( $baseUri, pageModule );
+        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( `/app/controller.js#${pageUid}` ) ] );
+        let grabber = new Controller( pageModule );
         return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
     }
     else {

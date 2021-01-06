@@ -6,13 +6,13 @@ import { $client } from '/lib/browserUnifier.js';
 const $locale = $client.i18n.getMessage;
 
 class Controller extends EventTarget {
-    constructor ( baseUri, pageModule ) {
+    constructor ( pageModule ) {
         super();
         Object.defineProperties( this, {
             clientUid: { value: uid(), writable: false, configurable: false, enumerable: false },
             pageModule: { value: pageModule, writable: false, configurable: false, enumerable: false },
             state: { value: constant.__loaded__, writable: true, configurable: false, enumerable: false },
-            resource: { value: new resourceManager( baseUri ), writable: false, configurable: false, enumerable: false },
+            resource: { value: new resourceManager( $client.runtime.getURL( "" ).replace( /\/$/, "" ) ), writable: false, configurable: false, enumerable: false },
             UINode: { writable: true, configurable: true, enumerable: false },
         } );
         this.init( this.pageModule() )
@@ -34,7 +34,6 @@ class Controller extends EventTarget {
                 sessionStorage.removeItem( "title" );
                 info.title = info.title?.toFilename() || "";
                 info.episode = info.episode?.toFilename() || "";
-    
             }
         }
         else {

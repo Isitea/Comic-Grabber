@@ -1,9 +1,6 @@
 "use strict";
 async function main () {
-    const { $client } = await import( `/lib/browserUnifier.js` );
-    const { logger, text2Blob, uid } = await import( `/lib/extendVanilla.js` );
-    const $baseUri = $client.runtime.getURL( "" ).replace( /\/$/, "" );
-    const pageUid = uid();
+    const { logger, text2Blob } = await import( `/lib/extendVanilla.js` );
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule;
@@ -22,7 +19,7 @@ async function main () {
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
         let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
-        let grabber = new Controller( $baseUri, pageModule );
+        let grabber = new Controller( pageModule );
         return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
     }
     else {

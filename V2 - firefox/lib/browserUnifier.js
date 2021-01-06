@@ -42,28 +42,36 @@ const $client = ( () => {
         catch {
             const { baseUri, pageUid } = ( () => {
                 try { throw new Error() }
-                catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\?(?<pageUid>.+)?/ ).groups; }
+                catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)/ ).groups; }
             } )();
 
+            let pseudoClient = new EventTarget();
+            pseudoClient.addListener = ( listener ) => pseudoClient.addEventListener( "message", listener );
+            pseudoClient.removeListener = ( listener ) => pseudoClient.removeEventListener( "message", listener );
             let BC = new BroadcastChannel( `ComicGrabber.${pageUid}` );
-            BC.addEventListener( "message", ev => console.log( ev ) );
-            BC.postMessage( "TEST" );
+            BC.addEventListener( "message", ( { data } ) => pseudoClient.dispatchEvent( Object.assign( new Event( "message" ), data ) ) );
 
-            async function failSafe ( resolve ) {
-                
-                
-                return resolve();
+            function geti18n ( resolve ) {
+                BC.addEventListener( "message", ( { data } ) => resolve( pseudoClient.i18n = data ), { once: true } );
+                BC.postMessage( { action: "i18n" } );
+            }
+            function getManifest ( resolve ) {
+                BC.addEventListener( "message", ( { data } ) => resolve( pseudoClient.manifest = data ), { once: true } );
+                BC.postMessage( { action: "manifest" } );
             }
             
             client = {
                 runtime: {
                     getURL: ( uri = "" ) => baseUri + uri,
-                    onMessage: ()=>{ 'EventTarget' },
-                    sendMessage: ()=>{},
+                    onMessage: pseudoClient,
+                    getManifest: () => pseudoClient.manifest,
+                    sendMessage: msg => BC.postMessage( msg ),
                 },
-                i18n: {getMessage}
+                i18n: {
+                    getMessage: key => pseudoClient.i18n[key].message
+                }
             };
-            client.complete = new Promise( failSafe );
+            client.complete = new Promise( geti18n ).then( () => new Promise( getManifest ) );
         }
     }
 

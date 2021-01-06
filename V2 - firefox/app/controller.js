@@ -1,12 +1,15 @@
 "use strict";
+const { baseUri, pageUid } = ( () => {
+    try { throw new Error() }
+    catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)/ ).groups; }
+} )();
 import { constant } from '/lib/constant.js';
 import { HTML, logger, uid } from '/lib/extendVanilla.js';
 import { resourceManager } from '/lib/resourceManager.js';
-import { $client } from '/lib/browserUnifier.js';
-const $locale = $client.i18n.getMessage;
+let $client, $locale;
 
 class Controller extends EventTarget {
-    constructor ( baseUri, pageModule ) {
+    constructor ( pageModule ) {
         super();
         Object.defineProperties( this, {
             clientUid: { value: uid(), writable: false, configurable: false, enumerable: false },
@@ -18,7 +21,7 @@ class Controller extends EventTarget {
         this.init( this.pageModule() )
             .then( msg => this.constructUI( ) )
             .then( msg => this.activateUI( ) )
-            .then( msg => logger.log( `UI for ${$client.runtime.getManifest().name } is activated.` ) )
+            //.then( msg => logger.log( `UI for ${$client.runtime.getManifest().name } is activated.` ) )
             .then( () => this.changeState( constant.__ready__ ) );
     }
 
@@ -67,6 +70,9 @@ class Controller extends EventTarget {
     }
 
     async init ( { moveNext, movePrev, info, images } ) {
+        $client = ( await import( `/lib/browserUnifier.js#${pageUid}` ) ).$client;
+        await $client.complete; //Polyfill browser api for Firefox
+        $locale = $client.i18n.getMessage;
         let holder = this;
         Object.defineProperties( this, {
             images: { value: await images, writable: true, configurable: false, enumerable: false },
