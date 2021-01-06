@@ -18,7 +18,7 @@ class Controller extends EventTarget {
             resource: { value: new resourceManager( baseUri ), writable: false, configurable: false, enumerable: false },
             UINode: { writable: true, configurable: true, enumerable: false },
         } );
-        this.init( this.pageModule() )
+        this.init()
             .then( msg => this.constructUI( ) )
             .then( msg => this.activateUI( ) )
             //.then( msg => logger.log( `UI for ${$client.runtime.getManifest().name } is activated.` ) )
@@ -69,10 +69,11 @@ class Controller extends EventTarget {
         return info;
     }
 
-    async init ( { moveNext, movePrev, info, images } ) {
+    async init () {
         $client = ( await import( `/lib/browserUnifier.js#${pageUid}` ) ).$client;
         await $client.complete; //Polyfill browser api for Firefox
         $locale = $client.i18n.getMessage;
+        let { moveNext, movePrev, info, images } = await this.pageModule();
         let holder = this;
         Object.defineProperties( this, {
             images: { value: await images, writable: true, configurable: false, enumerable: false },
