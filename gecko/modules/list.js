@@ -7,6 +7,12 @@ const moduleList = [
         uri: "/modules/marumaru.js",//for Dev.
     },
     {
+        moduleName: "manatoki",
+        buildDate: "2021-01-07 16:00",
+        matchPattern: /manatoki.*\.\w+\//,
+        uri: "/modules/manatoki.js",
+    },
+    {
         moduleName: "naver comic",
         buildDate: "2021-01-06 18:00",
         matchPattern: /comic\.naver\.com\/.+?\/detail\.nhn.+?titleId/,

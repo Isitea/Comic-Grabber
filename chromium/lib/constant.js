@@ -5,7 +5,7 @@ const constant = {
     __download__: "download",
     __downloading__: "downloading",
     __downloaded__: "downloaded",
-    __nothingToDownload__: "nothing",
+    __nothing__: "(no image detected)",
 };
 Object.freeze( constant );
 
