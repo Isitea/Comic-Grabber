@@ -31,9 +31,9 @@ class Controller extends EventTarget {
                 info.episode = info.raw.replace( title, "" ).toFilename();
             }
             else {
-                sessionStorage.removeItem( "title" );
                 info.title = info.title?.toFilename() || "";
                 info.episode = info.episode?.toFilename() || "";
+                sessionStorage.setItem( "title", info.title );
             }
         }
         else {
