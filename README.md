@@ -1,4 +1,5 @@
-Image beholder
+Comic grabber v2
 
-This extensino is made for Chromium based browsers and Firefox 56+.
-This extension watches loaded images and serves the downloading function of them.
+This web extension is made for Chromium-based browsers and Firefox 70+.
+This extension has different behavior by the site.
+But the goal of action is the same, recognizing title and subtitle and downloading images as an archived zip file.
