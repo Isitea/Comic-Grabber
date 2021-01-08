@@ -364,7 +364,7 @@ class Controller extends EventTarget {
                 this.changeState( constant.__downloading__ );
                 return new Promise( ( resolve, reject ) => {
                     let holder = this;
-                    holder.notify( { brief: "Download started", msg: `Downloading ${filename}` } );
+                    holder.notify( { brief: "Download started", msg: `${filename}` } );
                     function listener ( { action, clientUid, data: { result, filename } }, sender ) {
                         if ( clientUid === holder.clientUid && action === "download" ) {
                             switch ( result ) {
