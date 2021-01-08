@@ -34,7 +34,7 @@ class Controller extends EventTarget {
         if ( raw ) {
             let stored = sessionStorage.getItem( "title" ) || "";
             if ( stored && title.match( stored ) && title.length > stored.length ) {
-                episode = raw.replace( title = stored, "" );
+                episode = raw.replace( title = stored, "" ).toFilename();
             }
         }
         if ( title ) sessionStorage.setItem( "title", title );
@@ -368,11 +368,12 @@ class Controller extends EventTarget {
                     function listener ( { action, clientUid, data: { result, filename } }, sender ) {
                         if ( clientUid === holder.clientUid && action === "download" ) {
                             switch ( result ) {
-                                case "interrupted" : {
-                                    reject( filename );
+                                case "Invalid filename":
+                                case "interrupted": {
+                                    reject( result );
                                     break;
                                 }
-                                case "complete" : {
+                                case "complete": {
                                     resolve( filename );
                                     break;
                                 }

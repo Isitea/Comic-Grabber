@@ -26,8 +26,13 @@ const $client = ( () => {
                 for ( let method of [ "open", "setShelfEnabled", "show", "showDefaultFolder", "onChanged" ] )
                     client.dl[method] = chrome.downloads[method];
                 for ( let method of [ "acceptDanger", "cancel", "download", "erase", "pause", "removeFile", "resume", "search" ] )
-                    client.dl[method] = arg => new Promise( resolve => chrome.downloads[method]( arg, resolve ) );
-            }
+                client.dl[method] = arg => new Promise( ( resolve, reject ) => {
+                    chrome.downloads[method]( arg, function ( msg ) {
+                        if ( chrome.runtime.lastError ) reject( chrome.runtime.lastError.message );
+                        else resolve( msg );
+                    } );
+                } );
+        }
 //            //move storage api and change return values in promise.
 //            delete client.storage;
 //            for ( let area of [ "sync", "local" ] ) {

@@ -26,24 +26,26 @@ async function main () {
         }
         zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
-        let id = await $client.dl.download( { url, filename, conflictAction } );
-        return new Promise( resolve => {
-            function onComplete ( item ) {
-                if ( item.id === id && item.state ) {
-                    switch ( item.state.current ) {
-                        case "interrupted":
-                        case "complete": {
-                            $client.dl.onChanged.removeListener( onComplete );
-                            URL.revokeObjectURL( url );
-                            resolve( { result: item.state.current, filename } );
-                            break;
+        
+        return $client.dl.download( { url, filename, conflictAction } )
+            .then( id => new Promise( resolve => {
+                function onComplete ( item ) {
+                    if ( item.id === id && item.state ) {
+                        switch ( item.state.current ) {
+                            case "interrupted":
+                            case "complete": {
+                                $client.dl.onChanged.removeListener( onComplete );
+                                URL.revokeObjectURL( url );
+                                resolve( { result: item.state.current, filename } );
+                                break;
+                            }
+                            default:
                         }
-                        default:
                     }
                 }
-            };
-            $client.dl.onChanged.addListener( onComplete );
-        } );
+                $client.dl.onChanged.addListener( onComplete );
+            } ) )
+            .catch( msg => ( { result: "Invalid filename", filename } ) )
     }
 
     const [ { $client }, { logger, text2Blob, uid }, { constant }, {} ]
@@ -59,7 +61,7 @@ async function main () {
             let result = undefined;
             switch ( action ) {
                 case constant.__download__: {
-                    result = await downloadImages( data );
+                    result = await downloadImages( data ).catch( data => data );
                 }
             }
             $client.tabs.sendMessage( sender.tab.id, { action, clientUid, data: result } );
