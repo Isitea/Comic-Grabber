@@ -20,7 +20,7 @@ let pageModule = async () => new Promise( resolve => {
     try {
         let id = document.querySelector( ".view-padding > div > p" ).className;
         let altId = document.querySelector( ".view-padding > div > p" ).parentNode.className;
-        [ ...document.querySelectorAll( `.view-padding > div.${altId} > p.${id}` ) ].map( item => item.remove() ) ;
+        [ ...document.querySelectorAll( `div.${altId} > p.${id}` ) ].map( item => item.remove() ) ;
         let raw = document.querySelector( `.toon-info .toon-title` ).firstChild.textContent;
         let { title, episode } = raw?.match( regex )?.groups || {};
         
