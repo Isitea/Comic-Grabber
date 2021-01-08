@@ -25,28 +25,24 @@ class Controller extends EventTarget {
             .then( () => this.changeState( constant.__ready__ ) );
     }
 
-    async chekcStorage ( raw, holder ) {
-        let info = await raw;
-        if ( typeof info.raw == "string" ) {
-            let title = sessionStorage.getItem( "title" );
-            if ( title && info.title.match( title ) ) {
-                info.title = title.toFilename();
-                info.episode = info.raw.replace( title, "" ).toFilename();
-            }
-            else {
-                info.title = info.title?.toFilename() || "";
-                info.episode = info.episode?.toFilename() || "";
-                sessionStorage.setItem( "title", info.title );
-    
+    async chekcStorage ( rawData, holder ) {
+        let info = await rawData;
+        let { title, episode, raw } = info;
+        raw = raw?.toFilename() || "";
+        title = title?.toFilename() || "";
+        episode = episode?.toFilename() || "";
+        if ( raw ) {
+            let stored = sessionStorage.getItem( "title" ) || "";
+            if ( stored && title.match( stored ) && title.length > stored.length ) {
+                episode = raw.replace( title = stored, "" );
             }
         }
-        else {
-            info.title = "";
-            info.episode = "";
-        }
+        if ( title ) sessionStorage.setItem( "title", title );
+        Object.assign( info, { title, episode, raw } );
+
         for ( let key of [ "saveOnLoad", "moveOnSave" ] ) info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
-        let downloadFolder = localStorage.getItem( "downloadFolder" );
-        if ( downloadFolder ) info.downloadFolder = downloadFolder;
+        for ( let key of [ "includeTitle" ] ) info[key] = JSON.parse( localStorage.getItem( key ) )?.value || false;
+        info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics";
 
         holder.addEventListener( "infochange", ( { data: { key, value } } ) => {
             switch ( key ) {
@@ -57,6 +53,10 @@ class Controller extends EventTarget {
                 }
                 case "title": {
                     sessionStorage.setItem( key, value );
+                    break;
+                }
+                case "includeTitle": {
+                    sessionStorage.setItem( key, JSON.stringify( { value } ) );
                     break;
                 }
                 case "downloadFolder": {
@@ -87,7 +87,6 @@ class Controller extends EventTarget {
             moveNext: { value: await moveNext, writable: false, configurable: false, enumerable: true },
             movePrev: { value: await movePrev, writable: false, configurable: false, enumerable: true },
         } );
-        this.info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics"; //Dev
         return "Data processing completed";
     }
 
@@ -98,150 +97,172 @@ class Controller extends EventTarget {
 
     async constructUI () {
         if ( this.UINode ) return "UI already generated";
-        let [ node ] = HTML.render( {
-            div: {
-                className: "ComicGrabber CG-menu",
-                _child: [
-                    {
-                        div: {
-                            className: "CG-menuButton",
-                            id: "menuButton"
-                        }
-                    },
-                    {
-                        label: {
-                            className: "CG-moveChapter",
-                            id: "movePrev",
-                            textContent: $locale( "movePrev" )
-                        }
-                    },
-                    {
-                        div: {
-                            className: "CG-list",
-                            _child: [
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-label",
-                                                    _child: [ { label: { htmlFor: "downloadFolder", textContent: $locale( "downloadFolder" ) } } ]
+        let [ node, notification ] = HTML.render( [
+            {
+                div: {
+                    className: "ComicGrabber CG-menu",
+                    _child: [
+                        {
+                            div: {
+                                className: "CG-menuButton",
+                                id: "menuButton"
+                            }
+                        },
+                        {
+                            div: {
+                                className: "CG-moveChapter",
+                                id: "movePrev",
+                                textContent: $locale( "movePrev" )
+                            }
+                        },
+                        {
+                            div: {
+                                className: "CG-list",
+                                _child: [
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-label",
+                                                        _child: [ { label: { htmlFor: "downloadFolder", textContent: $locale( "downloadFolder" ) } } ]
+                                                    }
+                                                },
+                                                {
+                                                    div: {
+                                                        className: "CG-text",
+                                                        _child: [ { input: { id: "downloadFolder", type: "text" } } ]
+                                                    }
                                                 }
-                                            },
-                                            {
-                                                div: {
-                                                    className: "CG-text",
-                                                    _child: [ { input: { id: "downloadFolder", type: "text" } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-label",
+                                                        _child: [ { label: { htmlFor: "title", textContent: $locale( "comicTitle" ) } } ]
+                                                    }
+                                                },
+                                                {
+                                                    div: {
+                                                        className: "CG-text",
+                                                        _child: [ { input: { id: "title", type: "text" } } ]
+                                                    }
                                                 }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-label",
-                                                    _child: [ { label: { htmlFor: "title", textContent: $locale( "comicTitle" ) } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-label",
+                                                        _child: [ { label: { htmlFor: "episode", textContent: $locale( "comicEpisode" ) } } ]
+                                                    }
+                                                },
+                                                {
+                                                    div: {
+                                                        className: "CG-text",
+                                                        _child: [ { input: { id: "episode", type: "text" } } ]
+                                                    }
                                                 }
-                                            },
-                                            {
-                                                div: {
-                                                    className: "CG-text",
-                                                    _child: [ { input: { id: "title", type: "text" } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-row", id: "filenameRuleResult", _child: [ { label: {} }, { label: {} }, ]
+                                                    }
                                                 }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-label",
-                                                    _child: [ { label: { htmlFor: "episode", textContent: $locale( "comicEpisode" ) } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-row",
+                                                        _child: [ { label: { className: "CG-checkbox", id: "saveToLocal", textContent: $locale( "downloadImages" ) } } ]
+                                                    }
                                                 }
-                                            },
-                                            {
-                                                div: {
-                                                    className: "CG-text",
-                                                    _child: [ { input: { id: "episode", type: "text" } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-row",
+                                                        _child: [ { label: { className: "CG-checkbox", id: "includeTitle", textContent: $locale( "includeTitle" ) } } ]
+                                                    }
                                                 }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-row", id: "filenameRuleResult", _child: [ { label: {} }, { label: {} }, ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-row",
+                                                        _child: [ { label: { className: "CG-checkbox", id: "saveOnLoad", textContent: $locale( "downloadOnLoad" ) } } ]
+                                                    }
                                                 }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-row",
-                                                    _child: [ { label: { className: "CG-checkbox", id: "saveToLocal", textContent: $locale( "downloadImages" ) } } ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-row",
+                                                        _child: [ { label: { className: "CG-checkbox", id: "moveOnSave", textContent: $locale( "moveOnDownload" ) } } ]
+                                                    }
                                                 }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-row",
-                                                    _child: [ { label: { className: "CG-checkbox", id: "saveOnLoad", textContent: $locale( "downloadOnLoad" ) } } ]
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    div: {
-                                        className: "CG-item",
-                                        _child: [
-                                            {
-                                                div: {
-                                                    className: "CG-row",
-                                                    _child: [ { label: { className: "CG-checkbox", id: "moveOnSave", textContent: $locale( "moveOnDownload" ) } } ]
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                            ]
-                        }
-                    },
-                    {
-                        div: {
-                            className: "CG-moveChapter",
-                            id: "moveNext",
-                            textContent: $locale( "moveNext" )
-                        }
-                    },
-                ],
+                                            ]
+                                        }
+                                    },
+                                ]
+                            }
+                        },
+                        {
+                            div: {
+                                className: "CG-moveChapter",
+                                id: "moveNext",
+                                textContent: $locale( "moveNext" )
+                            }
+                        },
+                    ],
+                }
+            },
+            {
+                div: {
+                    className: "CG-notification",
+                    id: "CG-notification",
+                    dataset: { count: 0 },
+                }
             }
-        } );
+        ] );
         this.UINode = node;
-
+        this.nBox = notification;
         return "UI structure generated";
     }
 
@@ -267,7 +288,7 @@ class Controller extends EventTarget {
 
             holder.UINode.querySelector( `#movePrev` ).addEventListener( "click", holder.movePrev );
             holder.UINode.querySelector( `#moveNext` ).addEventListener( "click", holder.moveNext );
-            for ( let id of [ "saveOnLoad", "moveOnSave" ] ) {
+            for ( let id of [ "saveOnLoad", "moveOnSave", "includeTitle" ] ) {
                 let node = holder.UINode.querySelector( `#${id}` );
                 toggle( { target: node }, holder.info[id] );
                 node.addEventListener( "click", toggle );
@@ -276,10 +297,10 @@ class Controller extends EventTarget {
                 target.toggleAttribute( "active" );
                 holder.downloadImages( {} )
                     .then( filename => {
-                        holder.notify( `${filename} is downloded` );
+                        holder.notify( { brief: "Download completed", msg: `${filename} is downloded` } );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
-                    .catch( filename => holder.notify( `Failed to download ${filename}` ) )
+                    .catch( filename => holder.notify( { brief: "Download failed", msg: `Failed to download. Reason: ${filename}` } ) )
                     .finally( () => target.toggleAttribute( "active" ) )
             } );
         }
@@ -288,13 +309,9 @@ class Controller extends EventTarget {
         }, { once: true } );
 
         document.body.appendChild( this.UINode );
+        document.body.appendChild( this.nBox );
 
         return "UI activated";
-    }
-
-    refresh () {
-        this.resource.unload();
-        this.resource.load( "/ui/style.css" );
     }
 
     async deactivateUI () {
@@ -305,11 +322,38 @@ class Controller extends EventTarget {
         return "UI deactivated";
     }
 
-    notify ( msg ) {
-        logger.inform( msg );
+    notify ( msg, duration = 5000 ) {
+        let nBox = this.nBox;
+        ( function ( n, { brief, msg } ) {
+            let [ layer ] = HTML.render( {
+                div: {
+                    className: "message",
+                    _child: [
+                        { div: { className: "notiTitle", _child: [ brief ] } },
+                        { div: { className: "notiMsg", _child: [ msg ] } }
+                    ],
+                    dataset: { n },
+                    _todo: [
+                        function ( node ) {
+                            setTimeout( () => {
+                                //node.remove();
+                                nBox.toggleAttribute( "active", nBox.childNodes.length );
+                            }, duration );
+                        }
+                    ]
+                }
+            } );
+            nBox.appendChild( layer );
+            nBox.toggleAttribute( "active", nBox.childNodes.length );
+        } )( ++nBox.dataset.count, msg );
     }
 
-    downloadImages ( { filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`, conflictAction, uri = document.URL } ) {
+    downloadImages ( { filename, conflictAction, uri = document.URL } ) {
+        if ( !filename ) {
+            if ( this.info.title === this.info.episode ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
+            else if ( this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
+            else filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`;
+        }
         switch ( this.state ) {
             case constant.__loaded__:
             case constant.__downloading__: {
@@ -320,7 +364,7 @@ class Controller extends EventTarget {
                 this.changeState( constant.__downloading__ );
                 return new Promise( ( resolve, reject ) => {
                     let holder = this;
-                    holder.notify( `Downloading ${filename}` )
+                    holder.notify( { brief: "Download started", msg: `Downloading ${filename}` } );
                     function listener ( { action, clientUid, data: { result, filename } }, sender ) {
                         if ( clientUid === holder.clientUid && action === "download" ) {
                             switch ( result ) {

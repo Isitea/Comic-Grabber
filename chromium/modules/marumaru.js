@@ -21,7 +21,7 @@ let pageModule = () => ( {
     movePrev: Promise.resolve( async function () { return document.querySelector( '.chapter_prev.fa-chevron-circle-left' )?.click(); } ),
     info: ( async () => {
         let raw = document.head.querySelector( "meta[name=title]" )?.content;
-        let result = raw?.match( regex )?.groups || { title: document.head.querySelector( "meta[name=title]" )?.content };
+        let result = raw?.match( regex )?.groups || {};
         return { ...result, raw };
     } )(),
     images: Promise.resolve( [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src ) )

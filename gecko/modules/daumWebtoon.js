@@ -6,7 +6,7 @@ let pageModule = () => ( {
         return {
             title: document.querySelector( '.list_info .txt_title a.link_title' ).textContent,
             episode: document.querySelector( '.list_info .txt_episode' ).textContent,
-            raw: document.head.querySelector( 'meta[property=title]' ).content
+//            raw: document.head.querySelector( 'meta[property=title]' ).content
         };
     } )(),
     images: Promise.resolve( [ ...document.querySelectorAll( '.cont_view#imgView > img' ) ].map( item => item.src ) )

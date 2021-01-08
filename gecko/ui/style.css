@@ -1,3 +1,48 @@
+#CG-notification {
+  position: fixed;
+  display: none;
+  left: 32px;
+  top: 32px;
+  z-index: 65535;
+}
+
+#CG-notification[active] {
+  display: flow-root;
+  width: 256px;
+  max-height: 100%;
+}
+
+#CG-notification[active] > .message {
+  width: 256px;
+  display: block;
+  overflow: hidden;
+  animation: notify 5s linear 1 forwards;
+  color: white;
+}
+
+#CG-notification[active] > .message > div {
+  background: rgba(0, 0, 0, 0.75);
+  border: solid rgba(0, 0, 0, 0.5);
+}
+
+#CG-notification[active] > .message .notiTitle {
+  border-width: 3px 3px 0 3px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+#CG-notification[active] > .message .notiMsg {
+  border-width: 0 3px 3px 3px;
+  font-weight: normal;
+}
+
+#CG-notification[active] > .message::before {
+  content: "";
+  display: block;
+  height: 16px;
+  width: 100%;
+}
+
 .ComicGrabber {
   box-sizing: border-box !important;
   max-width: 100vw;
@@ -70,6 +115,7 @@
 }
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-row .CG-checkbox {
+  min-width: 64px;
   border-radius: 8px;
 }
 
@@ -92,7 +138,7 @@
   height: 100%;
   width: 0;
   transform: translate(0, -50%);
-  animation: V2 5s linear infinite;
+  animation: onWorking 5s linear infinite;
 }
 
 .ComicGrabber > .CG-moveChapter {
@@ -113,32 +159,31 @@
   transform: rotate(0deg);
 }
 
-@keyframes onWorking {
+@keyframes notify {
   0% {
-    width: 0;
-    opacity: 0;
+    max-height: 0;
   }
-  40% {
-    width: 60%;
-    opacity: 1;
+  25% {
+    max-height: 128px;
   }
   75% {
-    width: 100%;
-    opacity: 1;
+    max-height: 128px;
+  }
+  95% {
+    max-height: 0;
   }
   100% {
-    width: 100%;
-    opacity: 0;
+    max-height: 0;
   }
 }
 
-@keyframes V2 {
+@keyframes onWorking {
   0% {
     width: 0;
     height: 10%;
     left: 0;
   }
-  7.5% {
+  12.5% {
     height: 100%;
   }
   50% {
@@ -146,7 +191,7 @@
     height: 100%;
     left: 0;
   }
-  92.5% {
+  87.5% {
     height: 100%;
   }
   100% {
