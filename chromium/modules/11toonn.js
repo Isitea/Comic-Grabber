@@ -1,4 +1,6 @@
 "use strict";
+import { regex } from '/lib/generalExpression.js';
+
 let pageModule = async () => {
     let uri = document.URL;
     let { id, parent } = uri.match( /11toon.*?\/content\/(?<id>\d+)\/(?<parent>\d+)\?.*page=toon/ ).groups;
@@ -10,7 +12,7 @@ let pageModule = async () => {
         }, {} );
     
     let { data: { SucData: page } } = await ( await fetch( `/iapi/t5?id=${id}&parent=${parent}&page=toon` ) ).json();
-    let result = query.subject?.match( /^(?<title>.+?|(?:[\(\[]?단편[\]?\)]?.+?))\s*(?<episode>(?:\d[.\d\s\-\~화권전후편]+|(?:번외|특별).+)|(?:\#\d+)|(stage\s*\d+))/i )?.groups || query.subject;
+    let result = query.subject?.match( regex )?.groups || query.subject;
     let { file, imagelist } = page.Image;
     let { Next, Prev } = page.PrevNext;
 

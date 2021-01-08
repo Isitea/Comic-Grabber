@@ -1,5 +1,6 @@
 "use strict";
 import { regex } from '/lib/generalExpression.js';
+
 async function removeAds ( method ) {
     let Ads = [ ...document.querySelectorAll( ".basic-banner, .board-tail-banner" ) ];
     switch ( method ) {
@@ -33,4 +34,5 @@ let pageModule = async () => new Promise( resolve => {
     }
     catch {}
 } ) ;
+
 export { pageModule };
