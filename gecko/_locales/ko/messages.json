@@ -23,6 +23,9 @@
     "comicEpisode": {
         "message": "부제목: "
     },
+    "includeTitle": {
+        "message": "제목 포함"
+    },
     "movePrev": {
         "message": "이전화"
     },

@@ -10,16 +10,16 @@ let pageModule = async () => {
             a[ key.toLowerCase() ] = value;
             return a;
         }, {} );
-    
+    let raw = query.subject;
     let { data: { SucData: page } } = await ( await fetch( `/iapi/t5?id=${id}&parent=${parent}&page=toon` ) ).json();
-    let result = query.subject?.match( regex )?.groups || query.subject;
+    let result = raw?.match( regex )?.groups || {};
     let { file, imagelist } = page.Image;
     let { Next, Prev } = page.PrevNext;
 
     return {
         moveNext: Promise.resolve( async function () { return location.replace( `/content/${Next.ID}/${parent}?page=toon&subject=${Next.Subject}` ); } ),
         movePrev: Promise.resolve( async function () { return location.replace( `/content/${Prev.ID}/${parent}?page=toon&subject=${Prev.Subject}` ); } ),
-        info: Promise.resolve( { raw: query.subject, ...result } ),
+        info: Promise.resolve( { raw, ...result } ),
         images: Promise.resolve( JSON.parse( imagelist ).map( loc => `${file}${loc}` ) ),
     }
 }

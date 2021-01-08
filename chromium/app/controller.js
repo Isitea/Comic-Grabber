@@ -22,27 +22,24 @@ class Controller extends EventTarget {
             .then( () => this.changeState( constant.__ready__ ) );
     }
 
-    async chekcStorage ( raw, holder ) {
-        let info = await raw;
-        if ( typeof info.raw == "string" ) {
-            let title = sessionStorage.getItem( "title" );
-            if ( title && info.title.match( title ) ) {
-                info.title = title.toFilename();
-                info.episode = info.raw.replace( title, "" ).toFilename();
-            }
-            else {
-                info.title = info.title?.toFilename() || "";
-                info.episode = info.episode?.toFilename() || "";
-                sessionStorage.setItem( "title", info.title );
+    async chekcStorage ( rawData, holder ) {
+        let info = await rawData;
+        let { title, episode, raw } = info;
+        raw = raw?.toFilename() || "";
+        title = title?.toFilename() || "";
+        episode = episode?.toFilename() || "";
+        if ( raw ) {
+            let stored = sessionStorage.getItem( "title" ) || "";
+            if ( stored && title.match( stored ) && title.length > stored.length ) {
+                episode = raw.replace( title = stored, "" );
             }
         }
-        else {
-            info.title = "";
-            info.episode = "";
-        }
+        if ( title ) sessionStorage.setItem( "title", title );
+        Object.assign( info, { title, episode, raw } );
+
         for ( let key of [ "saveOnLoad", "moveOnSave" ] ) info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
-        let downloadFolder = localStorage.getItem( "downloadFolder" );
-        if ( downloadFolder ) info.downloadFolder = downloadFolder;
+        for ( let key of [ "includeTitle" ] ) info[key] = JSON.parse( localStorage.getItem( key ) )?.value || false;
+        info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics";
 
         holder.addEventListener( "infochange", ( { data: { key, value } } ) => {
             switch ( key ) {
@@ -53,6 +50,10 @@ class Controller extends EventTarget {
                 }
                 case "title": {
                     sessionStorage.setItem( key, value );
+                    break;
+                }
+                case "includeTitle": {
+                    sessionStorage.setItem( key, JSON.stringify( { value } ) );
                     break;
                 }
                 case "downloadFolder": {
@@ -80,7 +81,6 @@ class Controller extends EventTarget {
             moveNext: { value: await moveNext, writable: false, configurable: false, enumerable: true },
             movePrev: { value: await movePrev, writable: false, configurable: false, enumerable: true },
         } );
-        this.info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics"; //Dev
         return "Data processing completed";
     }
 
@@ -201,6 +201,19 @@ class Controller extends EventTarget {
                                             {
                                                 div: {
                                                     className: "CG-row",
+                                                    _child: [ { label: { className: "CG-checkbox", id: "includeTitle", textContent: $locale( "includeTitle" ) } } ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    div: {
+                                        className: "CG-item",
+                                        _child: [
+                                            {
+                                                div: {
+                                                    className: "CG-row",
                                                     _child: [ { label: { className: "CG-checkbox", id: "saveOnLoad", textContent: $locale( "downloadOnLoad" ) } } ]
                                                 }
                                             }
@@ -230,6 +243,12 @@ class Controller extends EventTarget {
                             textContent: $locale( "moveNext" )
                         }
                     },
+                    {
+                        div: {
+                            className: "CG-notification",
+                            id: "CG-notification",
+                        }
+                    }
                 ],
             }
         } );
@@ -260,7 +279,7 @@ class Controller extends EventTarget {
 
             holder.UINode.querySelector( `#movePrev` ).addEventListener( "click", holder.movePrev );
             holder.UINode.querySelector( `#moveNext` ).addEventListener( "click", holder.moveNext );
-            for ( let id of [ "saveOnLoad", "moveOnSave" ] ) {
+            for ( let id of [ "saveOnLoad", "moveOnSave", "includeTitle" ] ) {
                 let node = holder.UINode.querySelector( `#${id}` );
                 toggle( { target: node }, holder.info[id] );
                 node.addEventListener( "click", toggle );
@@ -272,7 +291,7 @@ class Controller extends EventTarget {
                         holder.notify( `${filename} is downloded` );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
-                    .catch( filename => holder.notify( `Failed to download ${filename}` ) )
+                    .catch( filename => holder.notify( `Failed to download. Reason: ${filename}` ) )
                     .finally( () => target.toggleAttribute( "active" ) )
             } );
         }
@@ -283,11 +302,6 @@ class Controller extends EventTarget {
         document.body.appendChild( this.UINode );
 
         return "UI activated";
-    }
-
-    refresh () {
-        this.resource.unload();
-        this.resource.load( "/ui/style.css" );
     }
 
     async deactivateUI () {
@@ -302,7 +316,12 @@ class Controller extends EventTarget {
         logger.inform( msg );
     }
 
-    downloadImages ( { filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`, conflictAction, uri = document.URL } ) {
+    downloadImages ( { filename, conflictAction, uri = document.URL } ) {
+        if ( !filename ) {
+            if ( this.info.title === this.info.episode ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
+            else if ( this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
+            else filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`;
+        }
         switch ( this.state ) {
             case constant.__loaded__:
             case constant.__downloading__: {
