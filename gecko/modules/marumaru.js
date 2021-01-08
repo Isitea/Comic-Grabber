@@ -1,5 +1,6 @@
 "use strict";
 import { regex } from '/lib/generalExpression.js';
+
 async function removeAds ( method ) {
     let Ads = document.querySelectorAll( ".w_banner" );
     switch ( method ) {
