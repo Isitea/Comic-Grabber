@@ -13,12 +13,6 @@ const moduleList = [
         uri: "/modules/manatoki.js",
     },
     {
-        moduleName: "jmana",
-        buildDate: "2021-01-08 15:00",
-        matchPattern: /jmana.*\.\w+\//,
-        uri: "/modules/jmana.js",
-    },
-    {
         moduleName: "naver comic",
         buildDate: "2021-01-06 18:00",
         matchPattern: /comic\.naver\.com\/.+?\/detail\.nhn.+?titleId/,
