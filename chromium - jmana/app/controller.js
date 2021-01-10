@@ -53,7 +53,7 @@ class Controller extends EventTarget {
                     break;
                 }
                 case "includeTitle": {
-                    sessionStorage.setItem( key, JSON.stringify( { value } ) );
+                    localStorage.setItem( key, JSON.stringify( { value } ) );
                     break;
                 }
                 case "downloadFolder": {

@@ -4,8 +4,8 @@ let pageModule = () => ( {
     movePrev: Promise.resolve( async function () { return document.querySelector( '.pre a' )?.click(); } ),
     info: ( async () => {
         return {
-            title: document.querySelector( '.comicinfo .detail h2:first-child' ).firstChild.textContent,
-            episode: document.querySelector( '.tit_area .view h3' ).textContent,
+            title: document.querySelector( '.comicinfo .detail h2:first-child' ).firstChild.textContent.trim(),
+            episode: document.querySelector( '.tit_area .view h3' ).textContent.trim(),
         };
     } )(),
     images: Promise.resolve( [ ...document.querySelectorAll( '.view_area .wt_viewer img' ) ].map( item => item.src ) )

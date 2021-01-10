@@ -4,8 +4,8 @@ let pageModule = () => ( {
     movePrev: Promise.resolve( async function () { return document.querySelector( 'a.btn_comm.btn_prev' )?.click(); } ),
     info: ( async () => {
         return {
-            title: document.querySelector( '.list_info .txt_title a.link_title' ).textContent,
-            episode: document.querySelector( '.list_info .txt_episode' ).textContent,
+            title: document.querySelector( '.list_info .txt_title a.link_title' ).textContent.trim(),
+            episode: document.querySelector( '.list_info .txt_episode' ).textContent.trim(),
 //            raw: document.head.querySelector( 'meta[property=title]' ).content
         };
     } )(),

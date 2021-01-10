@@ -10,7 +10,7 @@ let pageModule = async () => {
             a[ key.toLowerCase() ] = value;
             return a;
         }, {} );
-    let raw = query.subject;
+    let raw = query.subject.trim();
     let { data: { SucData: page } } = await ( await fetch( `/iapi/t5?id=${id}&parent=${parent}&page=toon` ) ).json();
     let result = raw?.match( regex )?.groups || {};
     let { file, imagelist } = page.Image;

@@ -8,11 +8,10 @@ function imports ( list = [] ) {
 
 async function main () {
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer } ) {
-        console.log( ...arguments )
         let list = await Promise.all( images.map( uri => fetch( uri, { headers: { creferer: referer, [referer]: "creferer" }, mothod: "GET" } ).then( response => response.blob() ) ) );
         let zip = new JSZip();
         for ( let i = 0; i < list.length; i++ ) {
-            let ext, name = i.toString().padStart( 4, "0" );
+            let ext, name = i.toString().padStart( 3, "0" ) + "0";
             switch ( ext = list[i].type.split( "/" ).pop() ) {
                 default: {
                     name += `.${ext}`;
