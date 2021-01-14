@@ -370,7 +370,8 @@ class Controller extends EventTarget {
     downloadImages ( { filename, conflictAction, uri = document.URL } ) {
         if ( !filename ) {
             if ( this.info.title === this.info.episode ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
-            else if ( this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title} ${this.info.episode}.zip`;
+            else if ( this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
+            else if ( !this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title} ${this.info.episode}.zip`;
             else filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`;
         }
         switch ( this.state ) {
