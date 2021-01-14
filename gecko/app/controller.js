@@ -40,8 +40,10 @@ class Controller extends EventTarget {
         if ( title ) sessionStorage.setItem( "title", title );
         Object.assign( info, { title, episode, raw } );
 
-        for ( let key of [ "saveOnLoad", "moveOnSave" ] ) info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
-        for ( let key of [ "includeTitle" ] ) info[key] = JSON.parse( localStorage.getItem( key ) )?.value || false;
+        for ( let key of [ "saveOnLoad", "moveOnSave" ] )
+            info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
+        for ( let key of [ "includeTitle", "autoCategorize" ] )
+            info[key] = ( JSON.parse( localStorage.getItem( key ) )?.value ? JSON.parse( localStorage.getItem( key ) )?.value : constant[key] );
         info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics";
 
         holder.addEventListener( "infochange", ( { data: { key, value } } ) => {
@@ -55,6 +57,7 @@ class Controller extends EventTarget {
                     sessionStorage.setItem( key, value );
                     break;
                 }
+                case "autoCategorize":
                 case "includeTitle": {
                     localStorage.setItem( key, JSON.stringify( { value } ) );
                     break;
@@ -182,18 +185,6 @@ class Controller extends EventTarget {
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-row", id: "filenameRuleResult", _child: [ { label: {} }, { label: {} }, ]
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        div: {
-                                            className: "CG-item",
-                                            _child: [
-                                                {
-                                                    div: {
                                                         className: "CG-row",
                                                         _child: [ { label: { className: "CG-checkbox", id: "saveToLocal", textContent: $locale( "downloadImages" ) } } ]
                                                     }
@@ -221,7 +212,7 @@ class Controller extends EventTarget {
                                                 {
                                                     div: {
                                                         className: "CG-row",
-                                                        _child: [ { label: { className: "CG-checkbox", id: "saveOnLoad", textContent: $locale( "downloadOnLoad" ) } } ]
+                                                        _child: [ { label: { className: "CG-checkbox", id: "autoCategorize", textContent: $locale( "autoCategorize" ) } } ]
                                                     }
                                                 }
                                             ]
@@ -233,8 +224,29 @@ class Controller extends EventTarget {
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-row",
-                                                        _child: [ { label: { className: "CG-checkbox", id: "moveOnSave", textContent: $locale( "moveOnDownload" ) } } ]
+                                                        className: "CG-icon",
+                                                        id: "saveOnLoad",
+                                                        _child: [
+                                                            { div: { className: "CG-rotate images circle" } },
+                                                            { div: { className: "CG-static images download", dataset: { for: "saveOnLoad" }, title: $locale( "downloadOnLoad" ) } }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-icon",
+                                                        id: "moveOnSave",
+                                                        _child: [
+                                                            { div: { className: "CG-rotate images circle" } },
+                                                            { div: { className: "CG-static images move", dataset: { for: "moveOnSave" }, title: $locale( "moveOnDownload" ) } }
+                                                        ]
                                                     }
                                                 }
                                             ]
@@ -269,6 +281,9 @@ class Controller extends EventTarget {
     async activateUI () {
         if ( !this.UINode ) throw "UI not ready";
         this.resource.load( "/ui/style.css" );
+        document.body.appendChild( this.UINode );
+        document.body.appendChild( this.nBox );
+
         let holder = this;
         if ( holder.state === constant.__loaded__ ) {
             //Attach event listeners
@@ -279,7 +294,12 @@ class Controller extends EventTarget {
                 contentBox.addEventListener( "change", ( { target } ) => holder.info[id] = target.value.toFilename() );
             }
             function toggle ( { target }, force ) {
-                holder.info[target.id] = target.toggleAttribute( "active", force );
+                let id = target.id || target.dataset.for;
+                holder.info[id] = document.querySelector( `#${id}` ).toggleAttribute( "active", force );
+                if ( id === "includeTitle" && !holder.info.includeTitle )
+                    toggle( { target: document.querySelector( '#autoCategorize' ) } , holder.info.autoCategorize = true );
+                if ( id === "autoCategorize" && !holder.info.autoCategorize )
+                    toggle( { target: document.querySelector( '#includeTitle' ) } , holder.info.includeTitle = true );
             }
 
             bind( "title", holder );
@@ -307,9 +327,6 @@ class Controller extends EventTarget {
         holder.addEventListener( "statechange", ( { target: { state } } ) => {
             if ( holder.info.saveOnLoad && state === constant.__ready__ ) holder.UINode.querySelector( `#saveToLocal` ).click();
         }, { once: true } );
-
-        document.body.appendChild( this.UINode );
-        document.body.appendChild( this.nBox );
 
         return "UI activated";
     }

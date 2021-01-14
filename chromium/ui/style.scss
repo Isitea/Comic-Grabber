@@ -11,7 +11,7 @@ $itemMargin: 8px;
 $square-Button: 48px;
 $height-ListItem: 24px;
 $letterSize: 16px;
-$border: 8px;
+$border: 16px;
 $blockSize: 16px;
 
 #CG-notification {
@@ -57,10 +57,11 @@ $blockSize: 16px;
     box-sizing: border-box !important;
     max-width: 100vw;
     height: 32px;
+    border-radius: $border;
+    background: $black-50;
     * {
         box-sizing: border-box !important;
         float: left;
-        background: $black-50;
         color: $white;
     }
     &.CG-menu {
@@ -69,21 +70,23 @@ $blockSize: 16px;
         left: 50%;
         transform: translateX( -50% );
         z-index: 65535;
-        width: 100%;
+        display: table;
         .CG-list {
             padding: 4px;
-            line-height: 24px;
+            height: 32px;
+            line-height: 26px;
             > .CG-item {
                 margin: 0 4px 0 4px;
-                border-radius: $border;
-                //background: $transparent;
                 * {
+                    border-radius: $border;
+                    background: $black-75;
                     height: 24px;
                     border: 0;
                 }
                 .CG-label {
                     border-radius: $border 0 0 $border;
                     font-weight: bold;
+                    padding: 0 0 0 4px;
                     * {
                         border-radius: $border 0 0 $border;
                         font-weight: bold;
@@ -107,11 +110,12 @@ $blockSize: 16px;
                 }
                 .CG-row {
                     border-radius: $border;
+                    text-align: center;
                     .CG-checkbox {
                         min-width: 64px;
                         border-radius: $border;
+                        background: $transparent;
                         &[active] {
-                            font-weight: bold;
                             color: $green;
                             &#saveToLocal {
                                 //color: $transparent;
@@ -128,6 +132,52 @@ $blockSize: 16px;
                                     transform: translate( 0, -50% );
                                     animation: onWorking 5s linear infinite;
                                 }
+                            }
+                        }
+                    }
+                }
+                .CG-icon {
+                    position: relative;
+                    margin: -4px 0 0 0;
+                    height: 32px;
+                    width: 32px;
+                    border-radius: $border;
+                    > .images {
+                        background: $transparent;
+                        background-image: url( "/ui/lime-icon.png" );
+                        height: 32px;
+                        width: 32px;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                    }
+                    > .CG-rotate {
+                        transform-origin: 50% 50%;
+                        &.circle {
+                            background-position: -64px 0;
+                        }
+                    }
+                    > .CG-static {
+                        &.download {
+                            background-position: 0 0;
+                        }
+                        &.move {
+                            background-position: -32px 0;
+                        }
+                    }
+                    &[active] {
+                        > .CG-rotate {
+                            animation: circulation 5s linear 0s infinite normal both;
+                            &.circle {
+                                background-position: -64px -32px;
+                            }
+                        }
+                        > .CG-static {
+                            &.download {
+                                background-position: 0 -32px;;
+                            }
+                            &.move {
+                                background-position: -32px -32px;;
                             }
                         }
                     }
@@ -150,6 +200,14 @@ $blockSize: 16px;
             transform: rotate( 0deg );
         }
     }
+}
+
+@keyframes circulation {
+    0% { transform: rotate( 0deg ); }
+    25% { transform: rotate( 90deg ); }
+    50% { transform: rotate( 180deg ); }
+    75% { transform: rotate( 270deg ); }
+    100% { transform: rotate( 360deg ); }
 }
 
 @keyframes notify {
