@@ -101,12 +101,6 @@ class Controller extends EventTarget {
                     _child: [
                         {
                             div: {
-                                className: "CG-menuButton",
-                                id: "menuButton"
-                            }
-                        },
-                        {
-                            div: {
                                 className: "CG-moveChapter",
                                 id: "movePrev",
                                 textContent: $locale( "movePrev" )
