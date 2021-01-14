@@ -23,6 +23,9 @@
     "comicEpisode": {
         "message": "부제목: "
     },
+    "autoCategorize": {
+        "message": "자동 분류"
+    },
     "includeTitle": {
         "message": "제목 포함"
     },
