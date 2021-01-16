@@ -83,13 +83,13 @@ $blockSize: 16px;
                     background: $black-75;
                     height: 24px;
                     border: 0;
-                    display: ruby;
                 }
                 .CG-label {
                     border-radius: $border 0 0 $border;
                     font-weight: bold;
                     padding: 0 0 0 4px;
                     * {
+                        display: ruby;
                         border-radius: $border 0 0 $border;
                         font-weight: bold;
                     }

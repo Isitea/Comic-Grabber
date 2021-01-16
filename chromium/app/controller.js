@@ -40,7 +40,7 @@ class Controller extends EventTarget {
         for ( let key of [ "saveOnLoad", "moveOnSave" ] )
             info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
         for ( let key of [ "includeTitle", "autoCategorize" ] )
-            info[key] = ( JSON.parse( localStorage.getItem( key ) )?.value ? JSON.parse( localStorage.getItem( key ) )?.value : constant[key] );
+            info[key] = ( JSON.parse( localStorage.getItem( key ) )?.value !== undefined ? JSON.parse( localStorage.getItem( key ) )?.value : constant[key] );
         info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics";
 
         holder.addEventListener( "infochange", ( { data: { key, value } } ) => {
