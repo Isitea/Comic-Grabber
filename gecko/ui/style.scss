@@ -4,21 +4,18 @@ $black-75: rgba( 0, 0, 0, 0.75 );
 $white-10: rgba( 255, 255, 255, 0.1 );
 $white: rgba( 255, 255, 255, 1 );
 $green: rgba( 0, 255, 0, 0.9 );
-$cornerX: 1vw;
-$cornerY: 1vh;
-$itemWidth: calc( 256px * 1.2 );
-$itemMargin: 8px;
-$square-Button: 48px;
+$skyblue: rgba( 16, 140, 197, 1 );
 $height-ListItem: 24px;
 $letterSize: 16px;
 $border: 16px;
-$blockSize: 16px;
+$halfblock: 16px;
+$block: 32px;
 
 #CG-notification {
     position: fixed;
     display: none;
-    left: 32px;
-    top: 32px;
+    left: $block;
+    top: $block;
     z-index: 65535;
     &[active] {
         display: flow-root;
@@ -29,7 +26,7 @@ $blockSize: 16px;
             display: block;
             overflow: hidden;
             animation: notify 5s linear 1 forwards;
-            color: white;
+            color: $white;
             > div {
                 background: $black-75;
                 border: solid $black-50;
@@ -56,7 +53,7 @@ $blockSize: 16px;
 .ComicGrabber {
     box-sizing: border-box !important;
     max-width: 100vw;
-    height: 32px;
+    height: $block;
     border-radius: $border;
     background: $black-50;
     display: flex;
@@ -74,7 +71,7 @@ $blockSize: 16px;
         z-index: 65535;
         .CG-list {
             padding: 4px;
-            height: 32px;
+            height: $block;
             line-height: 26px;
             > .CG-item {
                 margin: 0 4px 0 4px;
@@ -110,50 +107,24 @@ $blockSize: 16px;
                         width: 256px;
                     }
                 }
-                .CG-row {
-                    border-radius: $border;
-                    text-align: center;
-                    .CG-checkbox {
-                        min-width: 64px;
-                        border-radius: $border;
-                        background: $transparent;
-                        &[active] {
-                            color: $green;
-                            &#saveToLocal {
-                                //color: $transparent;
-                                position: relative;
-                                &::before {
-                                    content: "";
-                                    position: absolute;
-                                    border-radius: $border;
-                                    background-color: rgb(153, 255, 238);
-                                    top: 50%;
-                                    left: 0;
-                                    height: 100%;
-                                    width: 0;
-                                    transform: translate( 0, -50% );
-                                    animation: onWorking 5s linear infinite;
-                                }
-                            }
-                        }
-                    }
-                }
                 .CG-icon {
                     position: relative;
                     margin: -4px 0 0 0;
-                    height: 32px;
-                    width: 32px;
+                    height: $block;
+                    width: $block;
                     border-radius: $border;
                     > .images {
                         background: $transparent;
                         background-image: url( "/ui/lime-icon.png" );
-                        height: 32px;
-                        width: 32px;
+                        height: $block;
+                        width: $block;
                         position: absolute;
                         top: 0;
                         left: 0;
                     }
                     > .CG-rotate {
+                        animation: circulation 5s linear 0s infinite forwards;
+                        animation-play-state: paused;
                         transform-origin: 50% 50%;
                         &.circle {
                             background-position: -64px 0;
@@ -166,10 +137,16 @@ $blockSize: 16px;
                         &.move {
                             background-position: -32px 0;
                         }
+                        &.category {
+                            background-position: -96px 0;
+                        }
+                        &.includeTitle {
+                            background-position: -128px 0;
+                        }
                     }
                     &[active] {
                         > .CG-rotate {
-                            animation: circulation 5s linear 0s infinite normal both;
+                            animation-play-state: running;
                             &.circle {
                                 background-position: -64px -32px;
                             }
@@ -181,6 +158,24 @@ $blockSize: 16px;
                             &.move {
                                 background-position: -32px -32px;;
                             }
+                            &.category {
+                                background-position: -96px -32px;;
+                            }
+                            &.includeTitle {
+                                background-position: -128px -32px;;
+                            }
+                        }
+                        &#saveToLocal {
+                            //color: $transparent;
+                            position: relative;
+                            &::before {
+                                content: "";
+                                position: absolute;
+                                border-radius: $border;
+                                background-color: $skyblue;
+                                animation: onWorking 3s ease-out infinite;
+                                z-index: 65535;
+                            }
                         }
                     }
                 }
@@ -188,8 +183,8 @@ $blockSize: 16px;
         }
     }
     >.CG-moveChapter {
-        height: 32px;
-        width: 32px;
+        height: $block;
+        width: $block;
         overflow: hidden;
         color: $transparent;
         background-repeat: no-repeat;
@@ -221,9 +216,9 @@ $blockSize: 16px;
 }
 
 @keyframes onWorking {
-    0% { width: 0; height: 10%; left: 0; }
-    12.5% { height: 100%; }
-    50% { width: 101%; height: 100%; left: 0; }
-    87.5% { height: 100%; }
-    100% { width: 0; height: 10%; left: 100% }
+    0% { width: $block; height: $block; top: $halfblock; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 0; }
+    25% { width: $block; height: $block; top: $halfblock; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 1; }
+    60% { width: 50%; height: 50%; top: #{$halfblock - 5px}; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); }
+    95% { opacity: 1; }
+    100% { width: 25%; height: 25%; top: #{$halfblock + 5px}; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 0; }
 }

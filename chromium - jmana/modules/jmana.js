@@ -3,6 +3,8 @@ import { regex } from '/lib/generalExpression.js';
 
 let pageModule = async () => new Promise( resolve => {
     try {
+        let redundant = [ ...( document.querySelectorAll( 'img[style*=none]' ) || [] ) ];
+        redundant.map( item => item.remove() );
         let raw = document.querySelector( `.view-top-wrap p.tit` ).textContent;
         let title, episode;
         if ( episode = document.querySelector( `.view-top-wrap .v-float-rgt-wrap select option[selected]` ).textContent ) {

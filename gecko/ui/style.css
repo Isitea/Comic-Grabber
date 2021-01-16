@@ -116,38 +116,6 @@
   width: 256px;
 }
 
-.ComicGrabber.CG-menu .CG-list > .CG-item .CG-row {
-  border-radius: 16px;
-  text-align: center;
-}
-
-.ComicGrabber.CG-menu .CG-list > .CG-item .CG-row .CG-checkbox {
-  min-width: 64px;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0);
-}
-
-.ComicGrabber.CG-menu .CG-list > .CG-item .CG-row .CG-checkbox[active] {
-  color: rgba(0, 255, 0, 0.9);
-}
-
-.ComicGrabber.CG-menu .CG-list > .CG-item .CG-row .CG-checkbox[active]#saveToLocal {
-  position: relative;
-}
-
-.ComicGrabber.CG-menu .CG-list > .CG-item .CG-row .CG-checkbox[active]#saveToLocal::before {
-  content: "";
-  position: absolute;
-  border-radius: 16px;
-  background-color: #99ffee;
-  top: 50%;
-  left: 0;
-  height: 100%;
-  width: 0;
-  transform: translate(0, -50%);
-  animation: onWorking 5s linear infinite;
-}
-
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon {
   position: relative;
   margin: -4px 0 0 0;
@@ -167,6 +135,8 @@
 }
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon > .CG-rotate {
+  animation: circulation 5s linear 0s infinite forwards;
+  animation-play-state: paused;
   transform-origin: 50% 50%;
 }
 
@@ -182,8 +152,16 @@
   background-position: -32px 0;
 }
 
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon > .CG-static.category {
+  background-position: -96px 0;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon > .CG-static.includeTitle {
+  background-position: -128px 0;
+}
+
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-rotate {
-  animation: circulation 5s linear 0s infinite normal both;
+  animation-play-state: running;
 }
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-rotate.circle {
@@ -196,6 +174,27 @@
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-static.move {
   background-position: -32px -32px;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-static.category {
+  background-position: -96px -32px;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-static.includeTitle {
+  background-position: -128px -32px;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active]#saveToLocal {
+  position: relative;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active]#saveToLocal::before {
+  content: "";
+  position: absolute;
+  border-radius: 16px;
+  background-color: #108cc5;
+  animation: onWorking 3s ease-out infinite;
+  z-index: 65535;
 }
 
 .ComicGrabber > .CG-moveChapter {
@@ -254,25 +253,42 @@
 
 @keyframes onWorking {
   0% {
-    width: 0;
-    height: 10%;
-    left: 0;
+    width: 32px;
+    height: 32px;
+    top: 16px;
+    left: 16px;
+    border-radius: 16px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
   }
-  12.5% {
-    height: 100%;
+  25% {
+    width: 32px;
+    height: 32px;
+    top: 16px;
+    left: 16px;
+    border-radius: 16px;
+    transform: translate(-50%, -50%);
+    opacity: 1;
   }
-  50% {
-    width: 101%;
-    height: 100%;
-    left: 0;
+  60% {
+    width: 50%;
+    height: 50%;
+    top: 11px;
+    left: 16px;
+    border-radius: 16px;
+    transform: translate(-50%, -50%);
   }
-  87.5% {
-    height: 100%;
+  95% {
+    opacity: 1;
   }
   100% {
-    width: 0;
-    height: 10%;
-    left: 100%;
+    width: 25%;
+    height: 25%;
+    top: 21px;
+    left: 16px;
+    border-radius: 16px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
   }
 }
 /*# sourceMappingURL=style.css.map */

@@ -18,7 +18,6 @@ class Controller extends EventTarget {
         this.init()
             .then( msg => this.constructUI( ) )
             .then( msg => this.activateUI( ) )
-            .then( msg => logger.log( `UI for ${$client.runtime.getManifest().name } is activated.` ) )
             .then( () => this.changeState( constant.__ready__ ) );
     }
 
@@ -103,7 +102,7 @@ class Controller extends EventTarget {
                             div: {
                                 className: "CG-moveChapter",
                                 id: "movePrev",
-                                textContent: $locale( "movePrev" )
+                                title: $locale( "movePrev" )
                             }
                         },
                         {
@@ -173,8 +172,11 @@ class Controller extends EventTarget {
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-row",
-                                                        _child: [ { label: { className: "CG-checkbox", id: "saveToLocal", textContent: $locale( "downloadImages" ) } } ]
+                                                        className: "CG-icon",
+                                                        id: "saveToLocal",
+                                                        _child: [
+                                                            { div: { className: "CG-static images download", dataset: { for: "saveToLocal" }, title: $locale( "saveToLocal" ) } }
+                                                        ]
                                                     }
                                                 }
                                             ]
@@ -186,8 +188,12 @@ class Controller extends EventTarget {
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-row",
-                                                        _child: [ { label: { className: "CG-checkbox", id: "includeTitle", textContent: $locale( "includeTitle" ) } } ]
+                                                        className: "CG-icon",
+                                                        id: "includeTitle",
+                                                        _child: [
+                                                            { div: { className: "CG-rotate images circle" } },
+                                                            { div: { className: "CG-static images includeTitle", dataset: { for: "includeTitle" }, title: $locale( "includeTitle" ) } }
+                                                        ]
                                                     }
                                                 }
                                             ]
@@ -199,8 +205,12 @@ class Controller extends EventTarget {
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-row",
-                                                        _child: [ { label: { className: "CG-checkbox", id: "autoCategorize", textContent: $locale( "autoCategorize" ) } } ]
+                                                        className: "CG-icon",
+                                                        id: "autoCategorize",
+                                                        _child: [
+                                                            { div: { className: "CG-rotate images circle" } },
+                                                            { div: { className: "CG-static images category", dataset: { for: "autoCategorize" }, title: $locale( "autoCategorize" ) } }
+                                                        ]
                                                     }
                                                 }
                                             ]
@@ -247,7 +257,7 @@ class Controller extends EventTarget {
                             div: {
                                 className: "CG-moveChapter",
                                 id: "moveNext",
-                                textContent: $locale( "moveNext" )
+                                title: $locale( "moveNext" )
                             }
                         },
                     ],
@@ -273,6 +283,7 @@ class Controller extends EventTarget {
         document.body.appendChild( this.nBox );
 
         let holder = this;
+        let ui = holder.UINode;
         if ( holder.state === constant.__loaded__ ) {
             //Attach event listeners
             function bind ( id, holder ) {
@@ -282,51 +293,62 @@ class Controller extends EventTarget {
                 contentBox.addEventListener( "change", ( { target } ) => holder.info[id] = target.value.toFilename() );
             }
             function toggle ( { target }, force ) {
-                let id = target.id || target.dataset.for;
-                holder.info[id] = document.querySelector( `#${id}` ).toggleAttribute( "active", force );
+                let id = target.id || target.dataset.for, ui = holder.UINode;
+                holder.info[id] = ui.querySelector( `#${id}` ).toggleAttribute( "active", force );
                 if ( id === "includeTitle" && !holder.info.includeTitle )
-                    toggle( { target: document.querySelector( '#autoCategorize' ) } , holder.info.autoCategorize = true );
+                    toggle( { target: ui.querySelector( '#autoCategorize' ) } , holder.info.autoCategorize = true );
                 if ( id === "autoCategorize" && !holder.info.autoCategorize )
-                    toggle( { target: document.querySelector( '#includeTitle' ) } , holder.info.includeTitle = true );
+                    toggle( { target: ui.querySelector( '#includeTitle' ) } , holder.info.includeTitle = true );
             }
 
             bind( "title", holder );
             bind( "episode", holder );
             bind( "downloadFolder", holder );
 
-            holder.UINode.querySelector( `#movePrev` ).addEventListener( "click", holder.movePrev );
-            holder.UINode.querySelector( `#moveNext` ).addEventListener( "click", holder.moveNext );
+            ui.querySelector( `#movePrev` ).addEventListener( "click", holder.movePrev );
+            ui.querySelector( `#moveNext` ).addEventListener( "click", holder.moveNext );
             for ( let id of [ "saveOnLoad", "moveOnSave", "includeTitle", "autoCategorize" ] ) {
-                let node = holder.UINode.querySelector( `#${id}` );
+                let node = ui.querySelector( `#${id}` );
                 toggle( { target: node }, holder.info[id] );
                 node.addEventListener( "click", toggle );
             }
-            holder.UINode.querySelector( `#saveToLocal` ).addEventListener( "click", ( { target} ) => {
-                target.toggleAttribute( "active" );
-                holder.downloadImages( {} )
+            ui.querySelector( `#saveToLocal` ).addEventListener( "click", ( { target } ) => {
+                let id = target.dataset.for;
+                holder.downloadImages( {}, ui.querySelector( `#${id}` ) )
                     .then( filename => {
                         holder.notify( { brief: "Download completed", msg: `${filename} is downloded` } );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
-                    .catch( filename => holder.notify( { brief: "Download failed", msg: `Failed to download. Reason: ${filename}` } ) )
-                    .finally( () => target.toggleAttribute( "active" ) )
+                    .catch( filename => holder.notify( { brief: "Download failed", msg: `Failed to download. Reason: ${filename}` } ) );
             } );
         }
         holder.addEventListener( "statechange", ( { target: { state } } ) => {
-            if ( holder.info.saveOnLoad && state === constant.__ready__ ) holder.UINode.querySelector( `#saveToLocal` ).click();
+            switch ( state ) {
+                case constant.__downloading__: {
+                    ui.querySelector( `#saveToLocal` ).toggleAttribute( "active", true );
+                    break;
+                }
+                case constant.__ready__: {
+                    ui.querySelector( `#saveToLocal` ).toggleAttribute( "active", false );
+                    break;
+                }
+            }
+        } );
+        holder.addEventListener( "statechange", ( { target: { state } } ) => {
+            if ( holder.info.saveOnLoad && state === constant.__ready__ ) ui.querySelector( `#saveToLocal` ).click();
         }, { once: true } );
 
-//        window.addEventListener( "keydown", ( { code, repeat } ) => {
-//            if ( !repeat && code == "F4" ) holder.refresh();
-//        } );
+        window.addEventListener( "keydown", ( { code, repeat } ) => {
+            if ( !repeat && code == "F4" ) holder.refresh();
+        } );
 
         return "UI activated";
     }
 
-//    refresh () {
-//        this.resource.unload();
-//        this.resource.load( "/ui/style.css" );
-//    }
+    refresh () {
+        this.resource.unload();
+        this.resource.load( "/ui/style.css" );
+    }
     async deactivateUI () {
         if ( !this.UINode.parentNode ) return "Already inactive";
         this.UINode.remove();
