@@ -3,8 +3,6 @@ import { regex } from '/lib/generalExpression.js';
 
 let pageModule = async () => new Promise( resolve => {
     try {
-        let redundant = [ ...( document.querySelectorAll( 'img[style*=none]' ) || [] ) ];
-        redundant.map( item => item.remove() );
         let raw = document.querySelector( `.view-top-wrap p.tit` ).textContent;
         let title, episode;
         if ( episode = document.querySelector( `.view-top-wrap .v-float-rgt-wrap select option[selected]` ).textContent ) {
@@ -17,7 +15,7 @@ let pageModule = async () => new Promise( resolve => {
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Next]' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Previous]' )?.click(); } ),
-            images: Promise.resolve( [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ].map( item => item.src || item.dataset.src ) ),
+            images: Promise.resolve( [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ].map( item => item.src || item.dataset.src ).filter( src => src.match( raw ) ) ),
             info: Promise.resolve( { raw, title, episode } )
         } );
     }
