@@ -20,8 +20,8 @@ const moduleList = [
     },
     {
         moduleName: "daum webtoon",
-        buildDate: "2021-01-06 18:00",
-        matchPattern: /webtoon\.daum\.net\/webtoon\/viewer\/\d+/,
+        buildDate: "2021-01-17 18:00",
+        matchPattern: /webtoon\.daum\.net\/(?:webtoon|league)\/viewer\/\d+/,
         uri: "/modules/daumWebtoon.js",
     },
     {
