@@ -41,7 +41,7 @@ class Controller extends EventTarget {
 
         for ( let key of [ "saveOnLoad", "moveOnSave" ] )
             info[key] = JSON.parse( sessionStorage.getItem( key ) )?.value || false;
-        for ( let key of [ "includeTitle", "autoCategorize" ] )
+        for ( let key of [ "includeTitle", "autoCategorize", "autoRename" ] )
             info[key] = ( JSON.parse( localStorage.getItem( key ) )?.value !== undefined ? JSON.parse( localStorage.getItem( key ) )?.value : constant[key] );
         info.downloadFolder = localStorage.getItem( "downloadFolder" ) || "Downloaded Comics";
 
@@ -56,6 +56,7 @@ class Controller extends EventTarget {
                     sessionStorage.setItem( key, value );
                     break;
                 }
+                case "autoRename":
                 case "autoCategorize":
                 case "includeTitle": {
                     localStorage.setItem( key, JSON.stringify( { value } ) );
@@ -195,6 +196,22 @@ class Controller extends EventTarget {
                                                 {
                                                     div: {
                                                         className: "CG-icon",
+                                                        id: "autoRename",
+                                                        _child: [
+                                                            { div: { className: "CG-static images autoRename", dataset: { for: "autoRename" }, title: $locale( "autoRename" ) } }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        div: {
+                                            className: "CG-item",
+                                            _child: [
+                                                {
+                                                    div: {
+                                                        className: "CG-icon",
                                                         id: "includeTitle",
                                                         _child: [
                                                             { div: { className: "CG-rotate images circle" } },
@@ -313,7 +330,7 @@ class Controller extends EventTarget {
 
             ui.querySelector( `#movePrev` ).addEventListener( "click", holder.movePrev );
             ui.querySelector( `#moveNext` ).addEventListener( "click", holder.moveNext );
-            for ( let id of [ "saveOnLoad", "moveOnSave", "includeTitle", "autoCategorize" ] ) {
+            for ( let id of [ "saveOnLoad", "moveOnSave", "includeTitle", "autoCategorize", "autoRename" ] ) {
                 let node = ui.querySelector( `#${id}` );
                 toggle( { target: node }, holder.info[id] );
                 node.addEventListener( "click", toggle );
@@ -388,6 +405,7 @@ class Controller extends EventTarget {
             else if ( !this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title} ${this.info.episode}.zip`;
             else filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`;
         }
+        if ( this.info.autoRename ) conflictAction = "uniquify";
         switch ( this.state ) {
             case constant.__loaded__:
             case constant.__downloading__: {

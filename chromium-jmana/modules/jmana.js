@@ -11,11 +11,19 @@ let pageModule = async () => new Promise( resolve => {
         else {
             ( { title, episode } = raw?.match( regex )?.groups || {} );
         }
+        let images =
+        [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ]
+            .map( item => decodeURIComponent( item.src || item.dataset.src ) );
+        let mostMatched = Object.entries( images.reduce( ( counter, src ) => {
+            let { bundle } = src.match( /.+:\/\/(?<bundle>.+)\// ).groups;
+            counter[bundle] = ( counter[bundle] ? counter[bundle] + 1 : 1 );
+            return counter;
+        }, {} ) ).reduce( ( result, item ) => { result[ item[1] ] = item[0]; return result; }, [] ).pop()
         
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Next]' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Previous]' )?.click(); } ),
-            images: Promise.resolve( [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ].map( item => decodeURIComponent( item.src || item.dataset.src ) ).filter( src => src.match( raw ) ) ),
+            images: Promise.resolve( images.filter( src => src.match( mostMatched ) ) ),
             info: Promise.resolve( { raw, title, episode } )
         } );
     }

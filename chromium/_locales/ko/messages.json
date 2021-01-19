@@ -8,6 +8,9 @@
     "saveToLocal": {
         "message": "저장하기"
     },
+    "autoRename": {
+        "message": "이름 자동 변경"
+    },
     "downloadOnLoad": {
         "message": "자동 저장"
     },

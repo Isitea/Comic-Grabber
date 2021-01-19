@@ -8,6 +8,7 @@ const constant = {
     __nothing__: "(no image detected)",
     autoCategorize: true,
     includeTitle: false,
+    autoRename: false,
 };
 Object.freeze( constant );
 

@@ -141,6 +141,9 @@ $block: 32px;
                         &.includeTitle {
                             background-position: -128px 0;
                         }
+                        &.autoRename {
+                            background-position: -160px 0;
+                        }
                     }
                     &[active] {
                         > .CG-rotate {
@@ -161,6 +164,9 @@ $block: 32px;
                             }
                             &.includeTitle {
                                 background-position: -128px -32px;;
+                            }
+                            &.autoRename {
+                                background-position: -160px -32px;;
                             }
                         }
                         &#saveToLocal {

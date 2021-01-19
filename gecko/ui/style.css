@@ -160,6 +160,10 @@
   background-position: -128px 0;
 }
 
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon > .CG-static.autoRename {
+  background-position: -160px 0;
+}
+
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-rotate {
   animation-play-state: running;
 }
@@ -182,6 +186,10 @@
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-static.includeTitle {
   background-position: -128px -32px;
+}
+
+.ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active] > .CG-static.autoRename {
+  background-position: -160px -32px;
 }
 
 .ComicGrabber.CG-menu .CG-list > .CG-item .CG-icon[active]#saveToLocal {
