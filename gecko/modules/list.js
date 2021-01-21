@@ -30,6 +30,12 @@ const moduleList = [
         matchPattern: /11toon.*?\/content\/(?<id>\d+)\/(?<parent>\d+)\?.*page=toon/,
         uri: "/modules/11toonn.js",
     },
+    {
+        moduleName: "universalTool",
+        buildDate: "2021-01-21 16:00",
+        matchPattern: /.+/,
+        uri: "/modules/universal.js",
+    },
 ];
 
 export { moduleList };

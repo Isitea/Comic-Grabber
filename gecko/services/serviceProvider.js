@@ -68,7 +68,34 @@ async function main () {
         }
     );
 
+    contextMenus( { $client } );
+    
     return { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log };
+}
+
+function contextMenus ( { $client } ) {
+    const $locale = $client.i18n.getMessage;
+    const $menus = $client.contextMenus;
+    $menus.removeAll();
+//    $menus.create( { 
+//        id: "CG-contextMenu",
+//        title: $locale( "contextMenu" ),
+//        contexts: [ 'all' ]
+//    } );
+    $menus.create( {
+        id: "CG-toggleMode",
+        title: $locale( "toggleMode" ),
+        contexts: [ 'all' ],
+//        parentId: "CG-contextMenu"
+    } );
+    $menus.onClicked.addListener( function ( info, tab ) {
+        switch ( info.menuItemId ) {
+            case "CG-toggleMode": {
+                $client.tabs.sendMessage( tab.id, { action: "toggleMode", data: { info, tab } } );
+                break;
+            }
+        }
+    } );
 }
 
 main()

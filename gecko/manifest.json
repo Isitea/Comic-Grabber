@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Comic grabber 2",
-    "version": "2.0.11",
+    "version": "2.0.12",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
 	"author": "Isitea",
@@ -10,6 +10,7 @@
 	},
 	"permissions": [
 		"downloads",
+		"contextMenus",
 		"<all_urls>"
 	],
 	"content_scripts": [
