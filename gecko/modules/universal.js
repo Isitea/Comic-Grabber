@@ -1,7 +1,14 @@
 "use strict";
-import { $client } from '/lib/browserUnifier.js';
 
 async function pageModule() {
+    const { baseUri, pageUid } = ( () => {
+        try { throw new Error() }
+        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)?/ ).groups; }
+    } )();
+    console.log( pageUid );
+    const $client = ( await import( `/lib/browserUnifier.js#${pageUid}` ) ).$client;
+    await $client.complete; //Polyfill browser api for Firefox
+
     function getAbsolutePosition ( dom ) {
         let { top, left, width } = dom.getBoundingClientRect();
         let { x, y } = document.body.getBoundingClientRect();

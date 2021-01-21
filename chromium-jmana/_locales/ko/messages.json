@@ -37,5 +37,17 @@
     },
     "moveNext": {
         "message": "다음화"
+    },
+    "contextMenu": {
+        "message": "Comic grabber"
+    },
+    "activateManualMode": {
+        "message": "그림 선택 시작"
+    },
+    "deactivateManualMode": {
+        "message": "그림 선택 종료"
+    },
+    "toggleMode": {
+        "message": "그림 선택 시작/종료"
     }
 }
