@@ -15,6 +15,7 @@ class Controller extends EventTarget {
             resource: { value: new resourceManager( $client.runtime.getURL( "" ).replace( /\/$/, "" ) ), writable: false, configurable: false, enumerable: false },
             UINode: { writable: true, configurable: true, enumerable: false },
         } );
+        this.resource.load( "/ui/style.css" );
         this.init()
             .then( msg => this.constructUI( ) )
             .then( msg => this.activateUI( ) )
@@ -70,7 +71,7 @@ class Controller extends EventTarget {
     }
 
     async init () {
-        let { moveNext, movePrev, info, images } = await this.pageModule();
+        let { moveNext, movePrev, info, images, universal } = await this.pageModule();
         let holder = this;
         Object.defineProperties( this, {
             images: { value: await images, writable: true, configurable: false, enumerable: false },
@@ -84,6 +85,8 @@ class Controller extends EventTarget {
             moveNext: { value: await moveNext, writable: false, configurable: false, enumerable: true },
             movePrev: { value: await movePrev, writable: false, configurable: false, enumerable: true },
         } );
+        universal?.activateListener( holder );
+        
         return "Data processing completed";
     }
 
@@ -295,7 +298,6 @@ class Controller extends EventTarget {
 
     async activateUI () {
         if ( !this.UINode ) throw "UI not ready";
-        this.resource.load( "/ui/style.css" );
         document.body.appendChild( this.UINode );
         document.body.appendChild( this.nBox );
 
@@ -355,17 +357,10 @@ class Controller extends EventTarget {
             if ( holder.info.saveOnLoad && state === constant.__ready__ ) ui.querySelector( `#saveToLocal` ).click();
         }, { once: true } );
 
-        window.addEventListener( "keydown", ( { code, repeat } ) => {
-            if ( !repeat && code == "F4" ) holder.refresh();
-        } );
-
+//        window.addEventListener( "keydown", ( { code, repeat } ) => { if ( !repeat && code == "F4" ) { this.resource.unload(); this.resource.load( "/ui/style.css" ); } } );
         return "UI activated";
     }
 
-    refresh () {
-        this.resource.unload();
-        this.resource.load( "/ui/style.css" );
-    }
     async deactivateUI () {
         if ( !this.UINode.parentNode ) return "Already inactive";
         this.UINode.remove();

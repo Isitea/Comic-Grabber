@@ -2,14 +2,14 @@ $transparent: rgba( 0, 0, 0, 0 );
 $black-50: rgba( 0, 0, 0, 0.5 );
 $black-75: rgba( 0, 0, 0, 0.75 );
 $white-10: rgba( 255, 255, 255, 0.1 );
-$white: rgba( 255, 255, 255, 1 );
 $green: rgba( 0, 255, 0, 0.9 );
 $skyblue: rgba( 16, 140, 197, 1 );
 $height-ListItem: 24px;
 $letterSize: 16px;
 $border: 16px;
-$halfblock: 16px;
 $block: 32px;
+$halfblock: #{ $block / 2 };
+$quarterblock: #{ $block / 4 };
 
 #CG-notification {
     position: fixed;
@@ -26,7 +26,7 @@ $block: 32px;
             display: block;
             overflow: hidden;
             animation: notify 5s linear 1 forwards;
-            color: $white;
+            color: white;
             > div {
                 background: $black-75;
                 border: solid $black-50;
@@ -60,7 +60,7 @@ $block: 32px;
     * {
         box-sizing: border-box !important;
         float: left;
-        color: $white;
+        color: white;
     }
     &.CG-menu {
         position: fixed;
@@ -199,6 +199,29 @@ $block: 32px;
         }
         &#moveNext {
             transform: rotate( 0deg );
+        }
+    }
+}
+
+body {
+    > .CG-selector-marker {
+        position: absolute;
+        width: $block;
+        height: $block;
+        background: $black-50;
+        color: white;
+        font-size: $halfblock;
+        text-align: center;
+        line-height: $block;
+        z-index: 65535;
+    }
+    .CG-selected {
+        box-shadow: 0 0 $halfblock $quarterblock rgba(204, 181, 105, 0.5), 0 0 $halfblock $quarterblock rgba(255, 58, 212, 0.75) !important;
+    }
+    &.CG-selector-active {
+        .CG-selectable {
+            box-shadow: 0 0 $halfblock $quarterblock rgba(145, 105, 204, 0.5), 0 0 $halfblock $quarterblock rgba(58, 255, 200, 0.75);
+            z-index: 32767;
         }
     }
 }
