@@ -16,7 +16,7 @@ async function pageModule() {
         let { target } = event;
         let index;
         if ( ( index = images.indexOf( target ) ) > -1 ) {
-            images.splice( index, 1 );
+            ( images.splice( index, 1 ) )[0].classList.remove( "CG-selected" );
             ( markers.splice( index, 1 ) )[0].remove();
             markers.map( ( item, index ) => item.textContent = index + 1 );
         }
@@ -24,6 +24,7 @@ async function pageModule() {
             let { top, left, width } = getAbsolutePosition( target );
             let marker = document.createElement( "div" );
             images.push( target );
+            target.classList.add( "CG-selected" )
             markers.push( marker );
             marker.classList.add( "CG-selector-marker" );
             marker.textContent = markers.length;

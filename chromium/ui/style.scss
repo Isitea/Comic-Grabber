@@ -7,8 +7,9 @@ $skyblue: rgba( 16, 140, 197, 1 );
 $height-ListItem: 24px;
 $letterSize: 16px;
 $border: 16px;
-$halfblock: 16px;
 $block: 32px;
+$halfblock: #{ $block / 2 };
+$quarterblock: #{ $block / 4 };
 
 #CG-notification {
     position: fixed;
@@ -202,18 +203,8 @@ $block: 32px;
     }
 }
 
-img.CG-selectable {
-    box-sizing: border-box;
-    box-shadow: 0 0 $block black;
-    border: solid white 4px;
-    z-index: 32767;
-}
 body {
     > .CG-selector-marker {
-        display: none;
-    }
-    &.CG-selector-active > div.CG-selector-marker {
-        display: block;
         position: absolute;
         width: $block;
         height: $block;
@@ -223,6 +214,15 @@ body {
         text-align: center;
         line-height: $block;
         z-index: 65535;
+    }
+    .CG-selected {
+        box-shadow: 0 0 $halfblock $quarterblock rgba(204, 181, 105, 0.5), 0 0 $halfblock $quarterblock rgba(255, 58, 212, 0.75) !important;
+    }
+    &.CG-selector-active {
+        .CG-selectable {
+            box-shadow: 0 0 $halfblock $quarterblock rgba(145, 105, 204, 0.5), 0 0 $halfblock $quarterblock rgba(58, 255, 200, 0.75);
+            z-index: 32767;
+        }
     }
 }
 
