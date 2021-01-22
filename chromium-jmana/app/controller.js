@@ -381,10 +381,10 @@ class Controller extends EventTarget {
                     dataset: { n },
                     _todo: [
                         function ( node ) {
-                            setTimeout( () => {
-                                //node.remove();
+                            node.addEventListener( "animationend", () => {
+                                node.remove();
                                 nBox.toggleAttribute( "active", nBox.childNodes.length );
-                            }, duration );
+                            }, { once: true } );
                         }
                     ]
                 }

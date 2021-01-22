@@ -203,6 +203,10 @@ $quarterblock: #{ $block / 4 };
     }
 }
 
+#CG-selection-helper {
+    display: none;
+}
+
 body {
     > .CG-selector-marker {
         position: absolute;
@@ -219,9 +223,66 @@ body {
         box-shadow: 0 0 $halfblock $quarterblock rgba(204, 181, 105, 0.5), 0 0 $halfblock $quarterblock rgba(255, 58, 212, 0.75) !important;
     }
     &.CG-selector-active {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
         .CG-selectable {
             box-shadow: 0 0 $halfblock $quarterblock rgba(145, 105, 204, 0.5), 0 0 $halfblock $quarterblock rgba(58, 255, 200, 0.75);
             z-index: 32767;
+        }
+        #CG-selection-helper {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            background: $black-75;
+            z-index: 65535;
+            > div {
+                height: 100vh;
+                float: left;
+                &.selectableImages, &.selectedImages {
+                    width: 15vw;
+                    > .imagelist {
+                        width: 100%;
+                        height: 100%;
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        > img {
+                            width: 13vw;
+                            margin: 1vw;
+                            &.selected {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+                &.viewer {
+                    width: 70vw;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    #CG-canvas {
+                        max-width: 70vw;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate( -50%, -50% );
+                    }
+                    #CG-canvas-select {
+                        width: $block;
+                        height: $block;
+                        position: absolute;
+                        top: 0;
+                        left: 50%;
+                        transform: translate( -50%, 0 );
+                        background-image: url( "/ui/lime-icon.png" );
+                        background-position: 0 -32px;;
+                        z-index: 65536;
+                    }
+                }
+            }
         }
     }
 }

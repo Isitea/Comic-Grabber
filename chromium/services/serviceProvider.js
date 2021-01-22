@@ -62,13 +62,15 @@ async function main () {
             switch ( action ) {
                 case constant.__download__: {
                     result = await downloadImages( data ).catch( data => data );
+                    break;
                 }
             }
             $client.tabs.sendMessage( sender.tab.id, { action, clientUid, data: result } );
         }
     );
 
-    contextMenus( { $client } );
+    //contextMenus( { $client } );
+    $client.browserAction.onClicked.addListener( function ( tab ) { $client.tabs.sendMessage( tab.id, { action: "toggleMode" } ); } );
     
     return { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log };
 }

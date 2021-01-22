@@ -221,6 +221,10 @@
   transform: rotate(0deg);
 }
 
+#CG-selection-helper {
+  display: none;
+}
+
 body > .CG-selector-marker {
   position: absolute;
   width: 32px;
@@ -237,9 +241,78 @@ body .CG-selected {
   box-shadow: 0 0 16px 8px rgba(204, 181, 105, 0.5), 0 0 16px 8px rgba(255, 58, 212, 0.75) !important;
 }
 
+body.CG-selector-active {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
 body.CG-selector-active .CG-selectable {
   box-shadow: 0 0 16px 8px rgba(145, 105, 204, 0.5), 0 0 16px 8px rgba(58, 255, 200, 0.75);
   z-index: 32767;
+}
+
+body.CG-selector-active #CG-selection-helper {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 65535;
+}
+
+body.CG-selector-active #CG-selection-helper > div {
+  height: 100vh;
+  float: left;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages, body.CG-selector-active #CG-selection-helper > div.selectedImages {
+  width: 15vw;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img {
+  width: 13vw;
+  margin: 1vw;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img.selected, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img.selected {
+  display: none;
+}
+
+body.CG-selector-active #CG-selection-helper > div.viewer {
+  width: 70vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
+  max-width: 70vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas-select {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-image: url("/ui/lime-icon.png");
+  background-position: 0 -32px;
+  z-index: 65536;
 }
 
 @keyframes circulation {

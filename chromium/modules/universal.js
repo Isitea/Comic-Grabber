@@ -34,7 +34,6 @@ async function pageModule() {
     }
 
     function reactor ( { action, data } ) {
-        console.log( action, data );
         switch ( action ) {
             case "toggleMode": {
                 modeStatus = !modeStatus;
