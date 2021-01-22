@@ -369,15 +369,15 @@ class Controller extends EventTarget {
         return "UI deactivated";
     }
 
-    notify ( msg, duration = 5000 ) {
+    notify ( msg ) {
         let nBox = this.nBox;
-        ( function ( n, { brief, msg } ) {
+        ( function ( n, { brief, msg, src } ) {
             let [ layer ] = HTML.render( {
                 div: {
-                    className: "message",
+                    className: "CG-message",
                     _child: [
                         { div: { className: "notiTitle", _child: [ brief ] } },
-                        { div: { className: "notiMsg", _child: [ msg ] } }
+                        { div: { className: "notiMsg", _child: [ msg, ( src ? { img: { src, CGNode: 1 } } : [] ) ] } },
                     ],
                     dataset: { n },
                     _todo: [
