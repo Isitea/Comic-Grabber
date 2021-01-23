@@ -12,35 +12,41 @@
   max-height: 100%;
 }
 
-#CG-notification[active] > .message {
+#CG-notification[active] > .CG-message {
+  margin: 16px 0 0 0;
   width: 256px;
   display: block;
   overflow: hidden;
   animation: notify 5s linear 1 forwards;
+  box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
+  border-radius: 4px;
   color: white;
 }
 
-#CG-notification[active] > .message > div {
+#CG-notification[active] > .CG-message > div {
   background: rgba(0, 0, 0, 0.75);
   border: solid rgba(0, 0, 0, 0.5);
 }
 
-#CG-notification[active] > .message .notiTitle {
-  border-width: 3px 3px 0 3px;
+#CG-notification[active] > .CG-message .notiTitle {
+  border-radius: 4px 4px 0 0;
+  border-width: 1px 1px 0 1px;
   font-weight: bold;
   font-size: 16px;
 }
 
-#CG-notification[active] > .message .notiMsg {
-  border-width: 0 3px 3px 3px;
+#CG-notification[active] > .CG-message .notiMsg {
+  border-radius: 0 0 4px 4px;
+  border-width: 0 1px 1px 1px;
   font-weight: normal;
 }
 
-#CG-notification[active] > .message::before {
-  content: "";
-  display: block;
-  height: 16px;
-  width: 100%;
+#CG-notification[active] > .CG-message .notiMsg img {
+  max-width: 256px;
+  max-height: 150px;
+  position: relative;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
 
 .ComicGrabber {
@@ -223,6 +229,10 @@
   transform: rotate(0deg);
 }
 
+#CG-selection-helper {
+  display: none;
+}
+
 body > .CG-selector-marker {
   position: absolute;
   width: 32px;
@@ -242,6 +252,77 @@ body .CG-selected {
 body.CG-selector-active .CG-selectable {
   box-shadow: 0 0 16px 8px rgba(145, 105, 204, 0.5), 0 0 16px 8px rgba(58, 255, 200, 0.75);
   z-index: 32767;
+}
+
+body.CG-selector-active #CG-selection-helper {
+  display: block;
+  width: calc( 80vw + 2px);
+  height: 80vh;
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  background: rgba(64, 64, 64, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
+  z-index: 65535;
+}
+
+body.CG-selector-active #CG-selection-helper > div {
+  height: 80vh;
+  float: left;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages, body.CG-selector-active #CG-selection-helper > div.selectedImages {
+  width: 12vw;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > #selectAll, body.CG-selector-active #CG-selection-helper > div.selectableImages > #unselectAll, body.CG-selector-active #CG-selection-helper > div.selectedImages > #selectAll, body.CG-selector-active #CG-selection-helper > div.selectedImages > #unselectAll {
+  height: 32px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: black;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist {
+  height: calc( 100% - 32px);
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img {
+  width: calc( 12vw - 4px * 2 - 16px);
+  min-height: 2vh;
+  box-shadow: 0 0 4px 4px rgba(255, 255, 255, 0.8);
+  margin: 8px 4px 8px 4px;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img.showing, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img.showing {
+  border-radius: 50%;
+  box-shadow: 0 0 16px 8px rgba(0, 255, 0, 0.9);
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img.selected, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img.selected {
+  display: none;
+}
+
+body.CG-selector-active #CG-selection-helper > div.viewer {
+  width: 56vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: solid rgba(0, 0, 0, 0.75);
+  border-width: 0 1px 0 1px;
+}
+
+body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
+  max-width: 56vw;
+  max-height: 80vh;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 @keyframes circulation {
@@ -267,16 +348,20 @@ body.CG-selector-active .CG-selectable {
     max-height: 0;
   }
   25% {
-    max-height: 128px;
+    max-height: 196px;
   }
   75% {
-    max-height: 128px;
+    max-height: 196px;
   }
   95% {
     max-height: 0;
+    margin: 16px 0 0 0;
+    box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
   }
   100% {
     max-height: 0;
+    margin: 0 0 0 0;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
 
@@ -300,9 +385,9 @@ body.CG-selector-active .CG-selectable {
     opacity: 1;
   }
   60% {
-    width: 50%;
-    height: 50%;
-    top: 16px-5px;
+    width: 16px;
+    height: 16px;
+    top: 11px;
     left: 16px;
     border-radius: 16px;
     transform: translate(-50%, -50%);
@@ -311,9 +396,9 @@ body.CG-selector-active .CG-selectable {
     opacity: 1;
   }
   100% {
-    width: 25%;
-    height: 25%;
-    top: 16px5px;
+    width: 8px;
+    height: 8px;
+    top: 21px;
     left: 16px;
     border-radius: 16px;
     transform: translate(-50%, -50%);

@@ -6,9 +6,40 @@ function imports ( list = [] ) {
     return Promise.all( promises );
 }
 
+async function getExtension ( blob ) {
+    switch ( blob.type ) {
+        case "image/x-icon":
+        case "image/vnd.microsoft.icon": { return "ico"; }
+        case "image/tiff": { return ".tif"; }
+        case "image/svg+xml": { return "svg"; }
+        case "image/jpeg": { return "jpg"; }
+        case "application/octet-stream": {
+            const signatures = {
+                "png": /89504e470d0a1a0a/i,
+                "jpg": /ffd8ff(db|ee)|ffd8ffe(000104a4649460001|1.{4,4}457869660000)/i,
+                "gif": /474946383(7|9)61/i,
+                "tif": /49492a00|4d4d002a/i,
+                "bmp": /424d/i,
+                "psd": /38425053/i,
+                "webp": /52494646.{8,8}57454250/i,
+            };
+            const binSign = ( new Uint8Array( await blob.slice( 0, 24 ).arrayBuffer() ) )
+                .reduce( ( hex, bin ) => hex + bin.toString( 16 ).padStart( 2, "0" ), "" );
+            console.log( binSign );
+            return Object.entries( signatures ).find( ( [ , hexHeader ] ) => binSign.match( hexHeader ) )?.[0] || blob.type;
+        }
+        default: { return blob.type.split( "/" ).pop(); }
+    }
+}
+
 async function main () {
-    async function downloadImages ( { filename, conflictAction = "overwrite", images, uri } ) {
-        let list = await Promise.all( images.map( uri => fetch( uri ).then( response => response.blob() ) ) );
+    async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer } ) {
+        let list = await Promise.all(
+            images.map(
+                uri => fetch( uri )
+                .then( response => response.blob() )
+            )
+        );
         let zip = new JSZip();
         await Promise.all( list.map( async ( blob, n ) => zip.file( `${n.toString().padStart( 3, "0" )}0.${await getExtension( blob )}`, blob ) ) );
         zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
@@ -59,33 +90,6 @@ async function main () {
     $client.browserAction.onClicked.addListener( function ( tab ) { $client.tabs.sendMessage( tab.id, { action: "toggleMode" } ); } );
     
     return { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log };
-}
-
-async function getExtension ( blob ) {
-    switch ( blob.type ) {
-        case "image/x-icon":
-        case "image/vnd.microsoft.icon": { return "ico"; }
-        case "image/tiff": { return ".tif"; }
-        case "image/svg+xml": { return "svg"; }
-        case "image/jpeg": { return "jpg"; }
-        case "application/octet-stream": {
-            const signatures = {
-                "png": /89504e470d0a1a0a/i,
-                "jpg": /ffd8ff(db|ee)|ffd8ffe(000104a4649460001|1.{4,4}457869660000)/i,
-                "gif": /474946383(7|9)61/i,
-                "tif": /49492a00|4d4d002a/i,
-                "bmp": /424d/i,
-                "psd": /38425053/i,
-                "webp": /52494646.{8,8}57454250/i,
-            };
-            const binSign = ( new Uint8Array( await blob.slice( 0, 24 ).arrayBuffer() ) )
-                .reduce( ( hex, bin ) => hex + bin.toString( 16 ).padStart( 2, "0" ), "" );
-            console.log( binSign );
-            return Object.entries( signatures ).find( ( [ , hexHeader ] ) => binSign.match( hexHeader ) )?.[0] || blob.type;
-        }
-        default: { return blob.type.split( "/" ).pop(); }
-    }
-
 }
 
 main()

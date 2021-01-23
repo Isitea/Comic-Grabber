@@ -395,7 +395,7 @@ class Controller extends EventTarget {
         } )( ++nBox.dataset.count, msg );
     }
 
-    downloadImages ( { filename, conflictAction, uri = document.URL } ) {
+    downloadImages ( { filename, conflictAction, uri = document.URL, referer = location.hostname } ) {
         if ( !filename ) {
             if ( this.info.title === this.info.episode || this.info.episode === "" ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
             else if ( this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
@@ -432,7 +432,7 @@ class Controller extends EventTarget {
                             holder.changeState( constant.__ready__ );
                         }
                     }
-                    $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, images: this.images, uri } } );
+                    $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, images: this.images, uri } } );
                     $client.runtime.onMessage.addListener( listener );
                 } );
             }
