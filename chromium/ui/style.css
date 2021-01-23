@@ -247,12 +247,6 @@ body .CG-selected {
   box-shadow: 0 0 16px 8px rgba(204, 181, 105, 0.5), 0 0 16px 8px rgba(255, 58, 212, 0.75) !important;
 }
 
-body.CG-selector-active {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
 body.CG-selector-active .CG-selectable {
   box-shadow: 0 0 16px 8px rgba(145, 105, 204, 0.5), 0 0 16px 8px rgba(58, 255, 200, 0.75);
   z-index: 32767;
@@ -260,35 +254,52 @@ body.CG-selector-active .CG-selectable {
 
 body.CG-selector-active #CG-selection-helper {
   display: block;
-  width: 100vw;
-  height: 100vh;
+  width: calc( 80vw + 2px);
+  height: 80vh;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(64, 64, 64, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
   z-index: 65535;
 }
 
 body.CG-selector-active #CG-selection-helper > div {
-  height: 100vh;
+  height: 80vh;
   float: left;
 }
 
 body.CG-selector-active #CG-selection-helper > div.selectableImages, body.CG-selector-active #CG-selection-helper > div.selectedImages {
-  width: 15vw;
+  width: 12vw;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > #selectAll, body.CG-selector-active #CG-selection-helper > div.selectableImages > #unselectAll, body.CG-selector-active #CG-selection-helper > div.selectedImages > #selectAll, body.CG-selector-active #CG-selection-helper > div.selectedImages > #unselectAll {
+  height: 32px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: black;
 }
 
 body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist {
+  height: calc( 100% - 32px);
   width: 100%;
-  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img {
-  width: 13vw;
-  margin: 1vw;
+  width: calc( 12vw - 4px * 2 - 16px);
+  min-height: 2vh;
+  box-shadow: 0 0 4px 4px rgba(255, 255, 255, 0.8);
+  margin: 8px 4px 8px 4px;
+}
+
+body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img.showing, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img.showing {
+  border-radius: 50%;
+  box-shadow: 0 0 16px 8px rgba(0, 255, 0, 0.9);
 }
 
 body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist > img.selected, body.CG-selector-active #CG-selection-helper > div.selectedImages > .imagelist > img.selected {
@@ -296,30 +307,20 @@ body.CG-selector-active #CG-selection-helper > div.selectableImages > .imagelist
 }
 
 body.CG-selector-active #CG-selection-helper > div.viewer {
-  width: 70vw;
+  width: 56vw;
   overflow-x: hidden;
   overflow-y: auto;
+  border: solid rgba(0, 0, 0, 0.75);
+  border-width: 0 1px 0 1px;
 }
 
 body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
-  max-width: 70vw;
-  max-height: 100vh;
+  max-width: 56vw;
+  max-height: 80vh;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas-select {
-  width: 32px;
-  height: 32px;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  background-image: url("/ui/lime-icon.png");
-  background-position: 0 -32px;
-  z-index: 65536;
 }
 
 @keyframes circulation {
