@@ -374,23 +374,23 @@ class Controller extends EventTarget {
         return "UI deactivated";
     }
 
-    notify ( msg, duration = 5000 ) {
+    notify ( msg ) {
         let nBox = this.nBox;
-        ( function ( n, { brief, msg } ) {
+        ( function ( n, { brief, msg, src } ) {
             let [ layer ] = HTML.render( {
                 div: {
-                    className: "message",
+                    className: "CG-message",
                     _child: [
                         { div: { className: "notiTitle", _child: [ brief ] } },
-                        { div: { className: "notiMsg", _child: [ msg ] } }
+                        { div: { className: "notiMsg", _child: [ msg, ( src ? { img: { src, CGNode: 1 } } : [] ) ] } },
                     ],
                     dataset: { n },
                     _todo: [
                         function ( node ) {
-                            setTimeout( () => {
-                                //node.remove();
+                            node.addEventListener( "animationend", () => {
+                                node.remove();
                                 nBox.toggleAttribute( "active", nBox.childNodes.length );
-                            }, duration );
+                            }, { once: true } );
                         }
                     ]
                 }
@@ -400,9 +400,9 @@ class Controller extends EventTarget {
         } )( ++nBox.dataset.count, msg );
     }
 
-    downloadImages ( { filename, conflictAction, uri = document.URL } ) {
+    downloadImages ( { filename, conflictAction, uri = document.URL, referer = location.hostname } ) {
         if ( !filename ) {
-            if ( this.info.title === this.info.episode ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
+            if ( this.info.title === this.info.episode || this.info.episode === "" ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
             else if ( this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
             else if ( !this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title} ${this.info.episode}.zip`;
             else filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.episode}.zip`;
@@ -414,7 +414,7 @@ class Controller extends EventTarget {
                 return Promise.reject( this.state );
             }
             case constant.__ready__: {
-                if ( !this.images.length ) return Promise.reject( constant.__nothing__ );
+                if ( !this.images?.length ) return Promise.reject( constant.__nothing__ );
                 this.changeState( constant.__downloading__ );
                 return new Promise( ( resolve, reject ) => {
                     let holder = this;
@@ -437,7 +437,7 @@ class Controller extends EventTarget {
                             holder.changeState( constant.__ready__ );
                         }
                     }
-                    $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, images: this.images, uri } } );
+                    $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, images: this.images, uri } } );
                     $client.runtime.onMessage.addListener( listener );
                 } );
             }

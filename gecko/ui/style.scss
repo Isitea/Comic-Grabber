@@ -2,14 +2,21 @@ $transparent: rgba( 0, 0, 0, 0 );
 $black-50: rgba( 0, 0, 0, 0.5 );
 $black-75: rgba( 0, 0, 0, 0.75 );
 $white-10: rgba( 255, 255, 255, 0.1 );
+$white-80: rgba( 255, 255, 255, 0.8 );
+$grey-80: rgba( 64, 64, 64, 0.8 );
 $green: rgba( 0, 255, 0, 0.9 );
 $skyblue: rgba( 16, 140, 197, 1 );
 $height-ListItem: 24px;
 $letterSize: 16px;
 $border: 16px;
 $block: 32px;
-$halfblock: #{ $block / 2 };
-$quarterblock: #{ $block / 4 };
+$hblock: #{ $block / 2 };
+$qblock: #{ $block / 4 };
+$hqblock: #{ $block / 8 };
+$notiBoxHeight: 196px;
+$notiBoxBorder: 1px;
+$notiBoxShadow: 0 0 $qblock $qblock $black-75;
+$noShadow: 0 0 0 0 $transparent;
 
 #CG-notification {
     position: fixed;
@@ -21,30 +28,36 @@ $quarterblock: #{ $block / 4 };
         display: flow-root;
         width: 256px;
         max-height: 100%;
-        > .message {
+        > .CG-message {
+            margin: $hblock 0 0 0;
             width: 256px;
             display: block;
             overflow: hidden;
             animation: notify 5s linear 1 forwards;
+            box-shadow: $notiBoxShadow;
+            border-radius: $hqblock;
             color: white;
             > div {
                 background: $black-75;
                 border: solid $black-50;
             }
             .notiTitle {
-                border-width: 3px 3px 0 3px;
+                border-radius: $hqblock $hqblock 0 0;
+                border-width: $notiBoxBorder $notiBoxBorder 0 $notiBoxBorder;
                 font-weight: bold;
                 font-size: $letterSize;
             }
             .notiMsg {
-                border-width: 0 3px 3px 3px;
+                border-radius: 0 0 $hqblock $hqblock;
+                border-width: 0 $notiBoxBorder $notiBoxBorder $notiBoxBorder;
                 font-weight: normal;
-            }
-            &::before {
-                content: "";
-                display: block;
-                height: 16px;
-                width: 100%;
+                img {
+                    max-width: 256px;
+                    max-height: #{$notiBoxHeight - 46px};
+                    position: relative;
+                    left: 50%;
+                    transform: translate( -50%, 0 );
+                }
             }
         }
     }
@@ -74,7 +87,7 @@ $quarterblock: #{ $block / 4 };
             height: $block;
             line-height: 26px;
             > .CG-item {
-                margin: 0 4px 0 4px;
+                margin: 0 $hqblock 0 $hqblock;
                 * {
                     border-radius: $border;
                     background: $black-75;
@@ -84,7 +97,7 @@ $quarterblock: #{ $block / 4 };
                 .CG-label {
                     border-radius: $border 0 0 $border;
                     font-weight: bold;
-                    padding: 0 0 0 4px;
+                    padding: 0 0 0 $hqblock;
                     * {
                         display: ruby;
                         border-radius: $border 0 0 $border;
@@ -98,7 +111,7 @@ $quarterblock: #{ $block / 4 };
                         border-radius: 0 $border $border 0;
                         background-color: $white-10;
                         font-weight: normal;
-                        padding: 0 0 0 4px;
+                        padding: 0 0 0 $hqblock;
                     }
                     #episode {
                         width: 96px;
@@ -146,7 +159,7 @@ $quarterblock: #{ $block / 4 };
                         &.autoRename {
                             background-position: -160px 0;
                         }
-                }
+                    }
                     &[active] {
                         > .CG-rotate {
                             animation-play-state: running;
@@ -205,6 +218,10 @@ $quarterblock: #{ $block / 4 };
     }
 }
 
+#CG-selection-helper {
+    display: none;
+}
+
 body {
     > .CG-selector-marker {
         position: absolute;
@@ -212,18 +229,82 @@ body {
         height: $block;
         background: $black-50;
         color: white;
-        font-size: $halfblock;
+        font-size: $hblock;
         text-align: center;
         line-height: $block;
         z-index: 65535;
     }
     .CG-selected {
-        box-shadow: 0 0 $halfblock $quarterblock rgba(204, 181, 105, 0.5), 0 0 $halfblock $quarterblock rgba(255, 58, 212, 0.75) !important;
+        box-shadow: 0 0 $hblock $qblock rgba(204, 181, 105, 0.5), 0 0 $hblock $qblock rgba(255, 58, 212, 0.75) !important;
     }
     &.CG-selector-active {
+//        width: 100vw;
+//        height: 100vh;
+//        overflow: hidden;
         .CG-selectable {
-            box-shadow: 0 0 $halfblock $quarterblock rgba(145, 105, 204, 0.5), 0 0 $halfblock $quarterblock rgba(58, 255, 200, 0.75);
+            box-shadow: 0 0 $hblock $qblock rgba(145, 105, 204, 0.5), 0 0 $hblock $qblock rgba(58, 255, 200, 0.75);
             z-index: 32767;
+        }
+        #CG-selection-helper {
+            display: block;
+            width: calc( 80vw + 2px );
+            height: 80vh;
+            position: fixed;
+            top: 50vh;
+            left: 50vw;
+            transform: translate( -50%, -50% );
+            overflow: hidden;
+            background: $grey-80;
+            border-radius: $qblock;
+            box-shadow: $notiBoxShadow;
+            z-index: 65535;
+            > div {
+                height: 80vh;
+                float: left;
+                &.selectableImages, &.selectedImages {
+                    width: 12vw;
+                    > #selectAll, > #unselectAll {
+                        height: $block;
+                        width: 100%;
+                        background-color: $white-80;
+                        color: black;
+                    }
+                    > .imagelist {
+                        height: calc( 100% - #{$block} );
+                        width: 100%;
+                        overflow-x: hidden;
+                        overflow-y: auto;
+                        > img {
+                            width: calc( 12vw - #{$hqblock} * 2 - #{$hblock} );
+                            min-height: 2vh;
+                            box-shadow: 0 0 $hqblock $hqblock $white-80;
+                            margin: $qblock $hqblock $qblock $hqblock;
+                            &.showing {
+                                border-radius: 50%;
+                                box-shadow: 0 0 $hblock $qblock $green;
+                            }
+                            &.selected {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+                &.viewer {
+                    width: 56vw;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    border: solid $black-75;
+                    border-width: 0 $notiBoxBorder 0 $notiBoxBorder;
+                    #CG-canvas {
+                        max-width: 56vw;
+                        max-height: 80vh;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate( -50%, -50% );
+                    }
+                }
+            }
         }
     }
 }
@@ -238,16 +319,16 @@ body {
 
 @keyframes notify {
     0% { max-height: 0; }
-    25% { max-height: 128px; }
-    75% { max-height: 128px; }
-    95% { max-height: 0; }
-    100% { max-height: 0; }
+    25% { max-height: $notiBoxHeight; }
+    75% { max-height: $notiBoxHeight; }
+    95% { max-height: 0; margin: $hblock 0 0 0; box-shadow: $notiBoxShadow; }
+    100% { max-height: 0; margin: 0 0 0 0; box-shadow: $noShadow; }
 }
 
 @keyframes onWorking {
-    0% { width: $block; height: $block; top: $halfblock; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 0; }
-    25% { width: $block; height: $block; top: $halfblock; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 1; }
-    60% { width: 50%; height: 50%; top: #{$halfblock - 5px}; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); }
+    0% { width: $block; height: $block; top: $hblock; left: $hblock; border-radius: $hblock; transform: translate( -50%, -50% ); opacity: 0; }
+    25% { width: $block; height: $block; top: $hblock; left: $hblock; border-radius: $hblock; transform: translate( -50%, -50% ); opacity: 1; }
+    60% { width: $hblock; height: $hblock; top: #{$block / 2 - 5px}; left: $hblock; border-radius: $hblock; transform: translate( -50%, -50% ); }
     95% { opacity: 1; }
-    100% { width: 25%; height: 25%; top: #{$halfblock + 5px}; left: $halfblock; border-radius: $halfblock; transform: translate( -50%, -50% ); opacity: 0; }
+    100% { width: $qblock; height: $qblock; top: #{$block / 2 + 5px}; left: $hblock; border-radius: $hblock; transform: translate( -50%, -50% ); opacity: 0; }
 }

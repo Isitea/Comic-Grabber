@@ -34,7 +34,7 @@ const moduleList = [
         moduleName: "universalTool",
         buildDate: "2021-01-21 16:00",
         matchPattern: /.+/,
-        uri: "/modules/universal.js",
+        uri: "/modules/universalv2.js",
     },
 ];
 

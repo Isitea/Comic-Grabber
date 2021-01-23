@@ -41,11 +41,11 @@
     "contextMenu": {
         "message": "Comic grabber"
     },
-    "activateManualMode": {
-        "message": "그림 선택 시작"
+    "selectAll": {
+        "message": "모두 선택"
     },
-    "deactivateManualMode": {
-        "message": "그림 선택 종료"
+    "unselectAll": {
+        "message": "모두 선택 해제"
     },
     "toggleMode": {
         "message": "그림 선택 시작/종료"
