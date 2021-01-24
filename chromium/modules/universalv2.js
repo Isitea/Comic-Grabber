@@ -33,6 +33,7 @@ async function pageModule() {
             else Object.assign( canvas, { src, link: image, selected: undefined } );
         }
         else Object.assign( canvas, { src: "", link: undefined, selected: undefined } );
+        canvasUri.value = canvas.src;
     }
     
     const listO = {},
@@ -42,34 +43,36 @@ async function pageModule() {
                 _child: [
                     {
                         div: {
-                            className: "selectableImages",
+                            class: [ "selectableImages" ],
                             _child: [
                                 { button: { id: "selectAll", textContent: $locale( "selectAll" ) } },
-                                { div: { className: "imagelist" } },
+                                { div: { class: [ "imagelist" ] } },
                             ]
                         }
                     },
                     {
                         div: {
-                            className: "viewer",
+                            class: [ "viewer" ],
                             _child: [
+                                { input: { id: "CG-canvas-uri", type: "input" } },
                                 { img: { id: "CG-canvas", CGNode: 1 } },
                             ]
                         }
                     },
                     {
                         div: {
-                            className: "selectedImages",
+                            class: [ "selectedImages" ],
                             _child: [
                                 { button: { id: "unselectAll", textContent: $locale( "unselectAll" ) } },
-                                { div: { className: "imagelist" } },
+                                { div: { class: [ "imagelist" ] } },
                             ]
                         }
                     },
                 ],
             }
         } );
-    const canvas = helper.querySelector( '#CG-canvas' );
+    const canvas = helper.querySelector( '#CG-canvas' ),
+          canvasUri = helper.querySelector( '#CG-canvas-uri' );
     [ ...helper.querySelectorAll( '.selectableImages .imagelist, .selectedImages .imagelist' ) ]
     .map( node => node.addEventListener( "click", selectImage ) );
     helper.querySelector( '#selectAll' ).addEventListener( "click", () => {

@@ -21,15 +21,16 @@ $noShadow: 0 0 0 0 $transparent;
 #CG-notification {
     position: fixed;
     display: none;
-    left: $block;
     top: $block;
+    right: $block;
+    overflow-y: auto;
     z-index: 65535;
     &[active] {
         display: flow-root;
-        width: 256px;
-        max-height: 100%;
+        width: calc( 256px + 1.5 * #{ $block } );
+        max-height: calc( 100vh - 2 * #{ $block } );
         > .CG-message {
-            margin: $hblock 0 0 0;
+            margin: $hblock 0 0 $hblock;
             width: 256px;
             display: block;
             overflow: hidden;
@@ -46,6 +47,7 @@ $noShadow: 0 0 0 0 $transparent;
                 border-width: $notiBoxBorder $notiBoxBorder 0 $notiBoxBorder;
                 font-weight: bold;
                 font-size: $letterSize;
+                text-align: center;
             }
             .notiMsg {
                 border-radius: 0 0 $hqblock $hqblock;
@@ -58,6 +60,11 @@ $noShadow: 0 0 0 0 $transparent;
                     left: 50%;
                     transform: translate( -50%, 0 );
                 }
+            }
+            &.CG-Caution {
+                color: red;
+                text-shadow: 0 0 $qblock $white-80;
+                animation-duration: 10s;
             }
         }
     }
@@ -183,7 +190,6 @@ $noShadow: 0 0 0 0 $transparent;
                             }
                         }
                         &#saveToLocal {
-                            //color: $transparent;
                             position: relative;
                             &::before {
                                 content: "";
@@ -236,9 +242,6 @@ body {
         box-shadow: 0 0 $hblock $qblock rgba(204, 181, 105, 0.5), 0 0 $hblock $qblock rgba(255, 58, 212, 0.75) !important;
     }
     &.CG-selector-active {
-//        width: 100vw;
-//        height: 100vh;
-//        overflow: hidden;
         .CG-selectable {
             box-shadow: 0 0 $hblock $qblock rgba(145, 105, 204, 0.5), 0 0 $hblock $qblock rgba(58, 255, 200, 0.75);
             z-index: 32767;
@@ -293,9 +296,16 @@ body {
                     overflow-y: auto;
                     border: solid $black-75;
                     border-width: 0 $notiBoxBorder 0 $notiBoxBorder;
+                    #CG-canvas-uri {
+                        width: 56vw;
+                        height: 24px;
+                        line-height: 24px;
+                        font-size: 16px;
+                        text-align: center;
+                    }
                     #CG-canvas {
                         max-width: 56vw;
-                        max-height: 80vh;
+                        max-height: calc( 80vh - #{ $block } );
                         position: absolute;
                         top: 50%;
                         left: 50%;

@@ -132,6 +132,10 @@ class HTML {
         const children = this.render( properties._child );
         for ( const [ key, value ] of Object.entries( properties ) ) {
             switch ( key ) {
+                case "class": {
+                    node.classList.add( ...value );
+                    break;
+                }
                 case "_child":
                 case "_todo": {
                     break;

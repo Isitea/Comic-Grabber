@@ -13,6 +13,10 @@ async function getExtension ( blob ) {
         case "image/tiff": { return ".tif"; }
         case "image/svg+xml": { return "svg"; }
         case "image/jpeg": { return "jpg"; }
+        default: {
+            if ( blob.type.match( /image/i ) ) return blob.type.split( "/" ).pop();
+            else if ( blob.type.length ) return Promise.reject( "Not an image file" );
+        }
         case "application/octet-stream": {
             const signatures = {
                 "png": /89504e470d0a1a0a/i,
@@ -25,23 +29,41 @@ async function getExtension ( blob ) {
             };
             const binSign = ( new Uint8Array( await blob.slice( 0, 24 ).arrayBuffer() ) )
                 .reduce( ( hex, bin ) => hex + bin.toString( 16 ).padStart( 2, "0" ), "" );
-            console.log( binSign );
-            return Object.entries( signatures ).find( ( [ , hexHeader ] ) => binSign.match( hexHeader ) )?.[0] || blob.type;
+            let ext = Object.entries( signatures ).find( ( [ , hexHeader ] ) => binSign.match( hexHeader ) )?.[0];
+            if ( ext ) return ext;
+            else return Promise.reject( "Not an image file" );
         }
-        default: { return blob.type.split( "/" ).pop(); }
     }
 }
 
 async function main () {
-    async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer } ) {
-        let list = await Promise.all(
+    async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
+        let list = await Promise.allSettled(
             images.map(
                 uri => fetch( uri )
-                .then( response => response.blob() )
+                .then( response => {
+                    if ( response.status !== 200 ) return Promise.reject( "Access denied" );
+                    return response.blob();
+                } )
+                .then( blob => ( { blob, uri } ) )
+                .catch( reason => Promise.reject( { reason, uri } ) )
             )
         );
         let zip = new JSZip();
-        await Promise.all( list.map( async ( blob, n ) => zip.file( `${n.toString().padStart( 3, "0" )}0.${await getExtension( blob )}`, blob ) ) );
+        await Promise.allSettled(
+            list.map(
+                async ( { status, value, reason }, n ) => {
+                    if ( value ) {
+                        return getExtension( value.blob )
+                            .then( ext => zip.file( `${n.toString().padStart( 3, "0" )}0.${ext}`, value.blob ) )
+                            .catch( reason => Promise.reject( { reason, uri: value.uri } ) );
+                    }
+                    else return Promise.reject( reason );
+                }
+            )
+        ).then( list => list.map( ( { reason } ) => {
+            if ( reason ) $client.tabs.sendMessage( tab.id, { action: constant.__caution__, data: { brief: reason.reason, src: reason.uri } } );
+        } ) );
         zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
         
@@ -79,7 +101,7 @@ async function main () {
             let result = undefined;
             switch ( action ) {
                 case constant.__download__: {
-                    result = await downloadImages( data ).catch( data => data );
+                    result = await downloadImages( data, sender.tab ).catch( data => data );
                     break;
                 }
             }

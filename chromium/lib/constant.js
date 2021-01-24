@@ -6,6 +6,7 @@ const constant = {
     __downloading__: "downloading",
     __downloaded__: "downloaded",
     __nothing__: "(no image detected)",
+    __caution__: "something to notify",
     autoCategorize: true,
     includeTitle: false,
     autoRename: false,
