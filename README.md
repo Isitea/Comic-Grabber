@@ -11,3 +11,5 @@ Edge: https://microsoftedge.microsoft.com/addons/detail/bddlgiikhigcaoplfgiejgfo
 Naver whale: Registration denied
 
 Firefox: https://addons.mozilla.org/en-US/firefox/addon/comic-grabber/
+
+Run make.ps1 before loading it into the browser except for chromium base version.

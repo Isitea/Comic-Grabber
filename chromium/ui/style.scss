@@ -26,11 +26,12 @@ $noShadow: 0 0 0 0 $transparent;
     overflow-y: auto;
     z-index: 65535;
     &[active] {
+        box-sizing: border-box;
         display: flow-root;
         width: calc( 256px + 1.5 * #{ $block } );
         max-height: calc( 100vh - 2 * #{ $block } );
         > .CG-message {
-            margin: $hblock 0 0 $hblock;
+            margin: $hblock 0 $hblock $hblock;
             width: 256px;
             display: block;
             overflow: hidden;
@@ -329,8 +330,8 @@ body {
     0% { max-height: 0; }
     25% { max-height: $notiBoxHeight; }
     75% { max-height: $notiBoxHeight; }
-    95% { max-height: 0; margin: $hblock 0 0 0; box-shadow: $notiBoxShadow; }
-    100% { max-height: 0; margin: 0 0 0 0; box-shadow: $noShadow; }
+    95% { max-height: 0; margin: $hblock 0 $hblock $hblock; box-shadow: $notiBoxShadow; }
+    100% { max-height: 0; margin: 0 0 $hblock $hblock; box-shadow: $noShadow; }
 }
 
 @keyframes onWorking {

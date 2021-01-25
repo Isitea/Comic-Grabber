@@ -8,13 +8,14 @@
 }
 
 #CG-notification[active] {
+  box-sizing: border-box;
   display: flow-root;
   width: calc( 256px + 1.5 * 32px);
   max-height: calc( 100vh - 2 * 32px);
 }
 
 #CG-notification[active] > .CG-message {
-  margin: 16px 0 0 16px;
+  margin: 16px 0 16px 16px;
   width: 256px;
   display: block;
   overflow: hidden;
@@ -369,12 +370,12 @@ body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
   }
   95% {
     max-height: 0;
-    margin: 16px 0 0 0;
+    margin: 16px 0 16px 16px;
     box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
   }
   100% {
     max-height: 0;
-    margin: 0 0 0 0;
+    margin: 0 0 16px 16px;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
