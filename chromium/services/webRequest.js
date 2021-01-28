@@ -62,15 +62,15 @@ function onBeforeSendHeaders ( { requestHeaders, type} ) {
 }
 
 class webRequest {
-    connect ( webRequest ) {
-        webRequest.onBeforeSendHeaders.addListener(
+    static connect ( webRequest ) {
+        webRequest?.onBeforeSendHeaders.addListener(
             onBeforeSendHeaders,
             { urls: [ '*://*/*' ] },
             [ 'blocking', 'requestHeaders', 'extraHeaders' ]
         )
     }
-    disconnect ( webRequest ) {
-        webRequest.onBeforeSendHeaders.removeListener( onBeforeSendHeaders )
+    static disconnect ( webRequest ) {
+        webRequest?.onBeforeSendHeaders.removeListener( onBeforeSendHeaders )
     }
 }
 

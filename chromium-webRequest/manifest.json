@@ -1,6 +1,6 @@
 {
 	"manifest_version": 2,
-	"name": "Comic grabber 2",
+	"name": "Comic grabber 2 (webRequest mod.)",
     "version": "2.1.0",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
@@ -10,7 +10,8 @@
 	},
 	"permissions": [
 		"downloads",
-		"contextMenus",
+		"webRequest",
+		"webRequestBlocking",
 		"<all_urls>"
 	],
 	"browser_action": {
@@ -23,7 +24,7 @@
                 "https://*/*"
 			],
 			"js": [
-				"app/loader.js"
+				"app/service.js"
 			],
 			"run_at": "document_end",
 			"all_frames": false
@@ -33,9 +34,5 @@
     "background": {
         "scripts": [ "services/serviceProvider.js" ]
 	},
-	"browser_specific_settings": {
-		"gecko": {
-			"strict_min_version": "70.0"
-		}
-	}
+	"minimum_chrome_version": "70"
 }

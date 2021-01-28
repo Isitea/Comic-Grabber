@@ -10,7 +10,7 @@ async function main () {
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
         let list = await Promise.allSettled(
             images.map(
-                uri => fetch( uri )
+                uri => fetch( uri, ( referer ? { headers: { creferer: referer, [referer]: "creferer" } } : {} ) )
                 .then( response => {
                     if ( response.status !== 200 ) return Promise.reject( "Access denied" );
                     return response.blob();
@@ -58,11 +58,12 @@ async function main () {
             .catch( msg => ( { result: "Invalid filename", filename } ) )
     }
 
-    const [ { $client }, { logger, text2Blob, uid, getExtension }, { constant }, {} ]
+    const [ { $client }, { logger, text2Blob, uid, getExtension }, { constant }, { webRequest }, {} ]
     = await imports( [
         "/lib/browserUnifier.js",
         "/lib/extendVanilla.js",
         "/lib/constant.js",
+        "/services/webRequest.js",
         "/3rdParty/jszip.js"
     ] );
 
@@ -71,7 +72,10 @@ async function main () {
             let result = undefined;
             switch ( action ) {
                 case constant.__download__: {
+                    webRequest.connect( $client.webRequest );
+                    if ( !$client.webRequest ) delete data.referer;
                     result = await downloadImages( data, sender.tab ).catch( data => data );
+                    webRequest.disconnect( $client.webRequest );
                     break;
                 }
             }
