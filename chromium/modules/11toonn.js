@@ -1,5 +1,5 @@
 "use strict";
-import { regex } from '/lib/generalExpression.js';
+import { genEx } from '/lib/constant.js';
 
 let pageModule = async () => {
     let uri = document.URL;
@@ -12,7 +12,7 @@ let pageModule = async () => {
         }, {} );
     let raw = query.subject.trim();
     let { data: { SucData: page } } = await ( await fetch( `/iapi/t5?id=${id}&parent=${parent}&page=toon` ) ).json();
-    let result = raw?.match( regex )?.groups || {};
+    let result = raw?.match( genEx )?.groups || {};
     let { file, imagelist } = page.Image;
     let { Next, Prev } = page.PrevNext;
 

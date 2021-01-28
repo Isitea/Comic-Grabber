@@ -1,5 +1,5 @@
 "use strict";
-import { regex } from '/lib/generalExpression.js';
+import { genEx } from '/lib/constant.js';
 
 async function removeAds ( method ) {
     let Ads = [ ...document.querySelectorAll( ".basic-banner, .board-tail-banner" ) ];
@@ -31,7 +31,7 @@ let pageModule = async () => new Promise( resolve => {
             raw = document.querySelector( `.view-wrap article[itemprop=articleBody] h1[itemprop=headline]` ).textContent.trim();
             images = Promise.resolve( [ ...document.querySelectorAll( `.view-content img` ) ].map( item => item.src ) );
         }
-        ( { title, episode } = raw?.match( regex )?.groups || {} );
+        ( { title, episode } = raw?.match( genEx )?.groups || {} );
         
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '#goNextBtn' )?.click(); } ),

@@ -1,19 +1,21 @@
 #CG-notification {
   position: fixed;
   display: none;
-  left: 32px;
   top: 32px;
+  right: 32px;
+  overflow-y: auto;
   z-index: 65535;
 }
 
 #CG-notification[active] {
+  box-sizing: border-box;
   display: flow-root;
-  width: 256px;
-  max-height: 100%;
+  width: calc( 256px + 1.5 * 32px);
+  max-height: calc( 100vh - 2 * 32px);
 }
 
 #CG-notification[active] > .CG-message {
-  margin: 16px 0 0 0;
+  margin: 16px 0 16px 16px;
   width: 256px;
   display: block;
   overflow: hidden;
@@ -33,6 +35,7 @@
   border-width: 1px 1px 0 1px;
   font-weight: bold;
   font-size: 16px;
+  text-align: center;
 }
 
 #CG-notification[active] > .CG-message .notiMsg {
@@ -47,6 +50,12 @@
   position: relative;
   left: 50%;
   transform: translate(-50%, 0);
+}
+
+#CG-notification[active] > .CG-message.CG-Caution {
+  color: red;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  animation-duration: 10s;
 }
 
 .ComicGrabber {
@@ -316,9 +325,17 @@ body.CG-selector-active #CG-selection-helper > div.viewer {
   border-width: 0 1px 0 1px;
 }
 
+body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas-uri {
+  width: 56vw;
+  height: 24px;
+  line-height: 24px;
+  font-size: 16px;
+  text-align: center;
+}
+
 body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
   max-width: 56vw;
-  max-height: 80vh;
+  max-height: calc( 80vh - 32px);
   position: absolute;
   top: 50%;
   left: 50%;
@@ -355,12 +372,12 @@ body.CG-selector-active #CG-selection-helper > div.viewer #CG-canvas {
   }
   95% {
     max-height: 0;
-    margin: 16px 0 0 0;
+    margin: 16px 0 16px 16px;
     box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.75);
   }
   100% {
     max-height: 0;
-    margin: 0 0 0 0;
+    margin: 0 0 16px 16px;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }

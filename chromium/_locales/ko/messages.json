@@ -38,9 +38,6 @@
     "moveNext": {
         "message": "다음화"
     },
-    "contextMenu": {
-        "message": "Comic grabber"
-    },
     "selectAll": {
         "message": "모두 선택"
     },

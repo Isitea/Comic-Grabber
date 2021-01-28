@@ -106,32 +106,32 @@ class Controller extends EventTarget {
         let [ node, notification ] = HTML.render( [
             {
                 div: {
-                    className: "ComicGrabber CG-menu",
+                    class: [ "ComicGrabber", "CG-menu" ],
                     _child: [
                         {
                             div: {
-                                className: "CG-moveChapter",
+                                class: [ "CG-moveChapter" ],
                                 id: "movePrev",
                                 title: $locale( "movePrev" )
                             }
                         },
                         {
                             div: {
-                                className: "CG-list",
+                                class: [ "CG-list" ],
                                 _child: [
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-label",
+                                                        class: [ "CG-label" ],
                                                         _child: [ { label: { htmlFor: "downloadFolder", textContent: $locale( "downloadFolder" ) } } ]
                                                     }
                                                 },
                                                 {
                                                     div: {
-                                                        className: "CG-text",
+                                                        class: [ "CG-text" ],
                                                         _child: [ { input: { id: "downloadFolder", type: "text" } } ]
                                                     }
                                                 }
@@ -140,17 +140,17 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-label",
+                                                        class: [ "CG-label" ],
                                                         _child: [ { label: { htmlFor: "title", textContent: $locale( "comicTitle" ) } } ]
                                                     }
                                                 },
                                                 {
                                                     div: {
-                                                        className: "CG-text",
+                                                        class: [ "CG-text" ],
                                                         _child: [ { input: { id: "title", type: "text" } } ]
                                                     }
                                                 }
@@ -159,17 +159,17 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-label",
+                                                        class: [ "CG-label" ],
                                                         _child: [ { label: { htmlFor: "episode", textContent: $locale( "comicEpisode" ) } } ]
                                                     }
                                                 },
                                                 {
                                                     div: {
-                                                        className: "CG-text",
+                                                        class: [ "CG-text" ],
                                                         _child: [ { input: { id: "episode", type: "text" } } ]
                                                     }
                                                 }
@@ -178,14 +178,14 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "saveToLocal",
                                                         _child: [
-                                                            { div: { className: "CG-static images download", dataset: { for: "saveToLocal" }, title: $locale( "saveToLocal" ) } }
+                                                            { div: { class: [ "CG-static", "images", "download" ], dataset: { for: "saveToLocal" }, title: $locale( "saveToLocal" ) } }
                                                         ]
                                                     }
                                                 }
@@ -194,14 +194,14 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "autoRename",
                                                         _child: [
-                                                            { div: { className: "CG-static images autoRename", dataset: { for: "autoRename" }, title: $locale( "autoRename" ) } }
+                                                            { div: { class: [ "CG-static", "images", "autoRename" ], dataset: { for: "autoRename" }, title: $locale( "autoRename" ) } }
                                                         ]
                                                     }
                                                 }
@@ -210,15 +210,15 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "includeTitle",
                                                         _child: [
-                                                            { div: { className: "CG-rotate images circle" } },
-                                                            { div: { className: "CG-static images includeTitle", dataset: { for: "includeTitle" }, title: $locale( "includeTitle" ) } }
+                                                            { div: { class: [ "CG-rotate", "images", "circle" ] } },
+                                                            { div: { class: [ "CG-static", "images", "includeTitle" ], dataset: { for: "includeTitle" }, title: $locale( "includeTitle" ) } }
                                                         ]
                                                     }
                                                 }
@@ -227,15 +227,15 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "autoCategorize",
                                                         _child: [
-                                                            { div: { className: "CG-rotate images circle" } },
-                                                            { div: { className: "CG-static images category", dataset: { for: "autoCategorize" }, title: $locale( "autoCategorize" ) } }
+                                                            { div: { class: [ "CG-rotate", "images", "circle" ] } },
+                                                            { div: { class: [ "CG-static", "images", "category" ], dataset: { for: "autoCategorize" }, title: $locale( "autoCategorize" ) } }
                                                         ]
                                                     }
                                                 }
@@ -244,15 +244,15 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "saveOnLoad",
                                                         _child: [
-                                                            { div: { className: "CG-rotate images circle" } },
-                                                            { div: { className: "CG-static images download", dataset: { for: "saveOnLoad" }, title: $locale( "downloadOnLoad" ) } }
+                                                            { div: { class: [ "CG-rotate", "images", "circle" ] } },
+                                                            { div: { class: [ "CG-static", "images", "download" ], dataset: { for: "saveOnLoad" }, title: $locale( "downloadOnLoad" ) } }
                                                         ]
                                                     }
                                                 }
@@ -261,15 +261,15 @@ class Controller extends EventTarget {
                                     },
                                     {
                                         div: {
-                                            className: "CG-item",
+                                            class: [ "CG-item" ],
                                             _child: [
                                                 {
                                                     div: {
-                                                        className: "CG-icon",
+                                                        class: [ "CG-icon" ],
                                                         id: "moveOnSave",
                                                         _child: [
-                                                            { div: { className: "CG-rotate images circle" } },
-                                                            { div: { className: "CG-static images move", dataset: { for: "moveOnSave" }, title: $locale( "moveOnDownload" ) } }
+                                                            { div: { class: [ "CG-rotate", "images", "circle" ] } },
+                                                            { div: { class: [ "CG-static", "images", "move" ], dataset: { for: "moveOnSave" }, title: $locale( "moveOnDownload" ) } }
                                                         ]
                                                     }
                                                 }
@@ -281,7 +281,7 @@ class Controller extends EventTarget {
                         },
                         {
                             div: {
-                                className: "CG-moveChapter",
+                                class: [ "CG-moveChapter" ],
                                 id: "moveNext",
                                 title: $locale( "moveNext" )
                             }
@@ -291,7 +291,7 @@ class Controller extends EventTarget {
             },
             {
                 div: {
-                    className: "CG-notification",
+                    class: [ "CG-notification" ],
                     id: "CG-notification",
                     dataset: { count: 0 },
                 }
@@ -363,6 +363,10 @@ class Controller extends EventTarget {
             if ( holder.info.saveOnLoad && state === constant.__ready__ ) ui.querySelector( `#saveToLocal` ).click();
         }, { once: true } );
 
+        $client.runtime.onMessage.addListener( ( { action, data } ) => {
+            if ( action === constant.__caution__ ) holder.notify( data, "CG-Caution" );
+        } );
+
         return "UI activated";
     }
 
@@ -374,15 +378,15 @@ class Controller extends EventTarget {
         return "UI deactivated";
     }
 
-    notify ( msg ) {
+    notify ( msg, errFlag = "" ) {
         let nBox = this.nBox;
         ( function ( n, { brief, msg, src } ) {
             let [ layer ] = HTML.render( {
                 div: {
-                    className: "CG-message",
+                    class: ( errFlag.length ? [ "CG-message", errFlag ] : [ "CG-message" ] ),
                     _child: [
-                        { div: { className: "notiTitle", _child: [ brief ] } },
-                        { div: { className: "notiMsg", _child: [ msg, ( src ? { img: { src, CGNode: 1 } } : [] ) ] } },
+                        { div: { class: [ "notiTitle" ], _child: [ brief ] } },
+                        { div: { class: [ "notiMsg" ], _child: [ msg, ( src ? { img: { src, CGNode: 1 } } : [] ) ] } },
                     ],
                     dataset: { n },
                     _todo: [
