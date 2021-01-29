@@ -12,6 +12,7 @@ Copy-Item -Path 'dist/chromium' -Destination 'dist/gecko' -Recurse
 Copy-Item -Path 'gecko/*' -Destination 'dist/gecko' -Recurse -Force
 Remove-Item -Path 'dist/gecko/ui/style.scss'
 
-Compress-Archive -Path 'dist/chromium/*' -DestinationPath 'dist/chromium.zip'
-Compress-Archive -Path 'dist/chromium-webRequest/*' -DestinationPath 'dist/chromium-webRequest.zip'
-Compress-Archive -Path 'dist/gecko/*' -DestinationPath 'dist/firefox.zip'
+$ArcOpt = @{ CompressionLevel = "NoCompression" }
+Compress-Archive -Path 'dist/chromium/*' -DestinationPath 'dist/chromium.zip' @ArcOpt
+Compress-Archive -Path 'dist/chromium-webRequest/*' -DestinationPath 'dist/chromium-webRequest.zip' @ArcOpt
+Compress-Archive -Path 'dist/gecko/*' -DestinationPath 'dist/firefox.zip' @ArcOpt

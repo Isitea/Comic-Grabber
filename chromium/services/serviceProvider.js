@@ -1,10 +1,9 @@
 "use strict";
-function imports ( list = [] ) {
-    let promises = [];
-    for ( const module of list ) promises.push( import( module ) );
-
-    return Promise.all( promises );
-}
+import { $client } from '/lib/browserUnifier.js';
+import { logger, text2Blob, uid, getExtension } from '/lib/extendVanilla.js';
+import { constant } from '/lib/constant.js';
+import { webRequest } from '/services/webRequest.js';
+import '/3rdParty/jszip.js';
 
 async function main () {
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
@@ -57,15 +56,6 @@ async function main () {
             } ) )
             .catch( msg => ( { result: "Invalid filename", filename } ) )
     }
-
-    const [ { $client }, { logger, text2Blob, uid, getExtension }, { constant }, { webRequest }, {} ]
-    = await imports( [
-        "/lib/browserUnifier.js",
-        "/lib/extendVanilla.js",
-        "/lib/constant.js",
-        "/services/webRequest.js",
-        "/3rdParty/jszip.js"
-    ] );
 
     $client.runtime.onMessage.addListener(
         async ( { message, action, clientUid, data }, sender ) => {

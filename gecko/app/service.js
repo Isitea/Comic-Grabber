@@ -4,6 +4,7 @@ async function main () {
         try { throw new Error() }
         catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)?/ ).groups; }
     } )();
+    window[baseUri] = pageUid;
 
     const { logger, text2Blob } = await import( `/lib/extendVanilla.js` );
 
@@ -22,8 +23,9 @@ async function main () {
     logger.inform( `Comic grabber v2 ( http://isitea.net )` );
     let { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
+    
     if ( matchedModule = searchSiteModule( moduleList ) ) {
-        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( `${matchedModule}#${pageUid}` ), import( `/app/controller.js#${pageUid}` ) ] );
+        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( '/app/controller.js' ) ] );
         let grabber = new Controller( pageModule );
         return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
     }

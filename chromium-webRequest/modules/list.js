@@ -43,6 +43,12 @@ const moduleList = [
 //        uri: "/modules/dcinside.js",
 //    },
     {
+        moduleName: "kakao page",
+        buildDate: "2021-01-29 20:00",
+        matchPattern: /page\.kakao\.com\/viewer\?productId/,
+        uri: "/modules/kakaoPage.js",
+    },
+    {
         moduleName: "universalTool",
         buildDate: "2021-01-21 16:00",
         matchPattern: /.+/,
