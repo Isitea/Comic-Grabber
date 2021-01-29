@@ -1,11 +1,11 @@
 "use strict";
-import { $client } from '/lib/browserUnifier.js';
-import { logger, text2Blob, uid, getExtension } from '/lib/extendVanilla.js';
-import { constant } from '/lib/constant.js';
-import { webRequest } from '/services/webRequest.js';
-import '/3rdParty/jszip.js';
-
 async function main () {
+    const { $client } = await import( '/lib/browserUnifier.js' );
+    const { logger, text2Blob, uid, getExtension } = await import( '/lib/extendVanilla.js' );
+    const { constant } = await import( '/lib/constant.js' );
+    const { webRequest } = await import( '/services/webRequest.js' );
+    await import( '/3rdParty/jszip.js' );
+
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
         let list = await Promise.allSettled(
             images.map(

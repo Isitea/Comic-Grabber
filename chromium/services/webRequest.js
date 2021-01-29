@@ -61,16 +61,20 @@ function onBeforeSendHeaders ( { requestHeaders, type} ) {
     if ( header.modified ) return { requestHeaders: header.arrayform };
 }
 
+let opened = 0;
 class webRequest {
     static connect ( webRequest ) {
-        webRequest?.onBeforeSendHeaders.addListener(
-            onBeforeSendHeaders,
-            { urls: [ '*://*/*' ] },
-            [ 'blocking', 'requestHeaders', 'extraHeaders' ]
-        )
+        if ( !opened ) 
+            webRequest?.onBeforeSendHeaders.addListener(
+                onBeforeSendHeaders,
+                { urls: [ '*://*/*' ] },
+                [ 'blocking', 'requestHeaders', 'extraHeaders' ]
+            );
+        opened++;
     }
     static disconnect ( webRequest ) {
-        webRequest?.onBeforeSendHeaders.removeListener( onBeforeSendHeaders )
+        opened--;
+        if ( !opened ) webRequest?.onBeforeSendHeaders.removeListener( onBeforeSendHeaders );
     }
 }
 
