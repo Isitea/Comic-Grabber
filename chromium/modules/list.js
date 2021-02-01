@@ -37,6 +37,12 @@ const moduleList = [
         uri: "/modules/kakaoPage.js",
     },
     {
+        moduleName: "spotv24",
+        buildDate: "2021-02-01 18:00",
+        matchPattern: /spotv.+\//,
+        uri: "/modules/spotv.js",
+    },
+    {
         moduleName: "universalTool",
         buildDate: "2021-01-21 16:00",
         matchPattern: /.+/,

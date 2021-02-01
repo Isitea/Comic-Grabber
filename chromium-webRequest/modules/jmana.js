@@ -1,5 +1,5 @@
 "use strict";
-import { regex } from '/lib/generalExpression.js';
+import { genEx } from '/lib/constant.js';
 
 let pageModule = async () => new Promise( resolve => {
     try {
@@ -9,7 +9,7 @@ let pageModule = async () => new Promise( resolve => {
             title = raw.replace( episode, "" );
         }
         else {
-            ( { title, episode } = raw?.match( regex )?.groups || {} );
+            ( { title, episode } = raw?.match( genEx )?.groups || {} );
         }
         let images =
         [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ]
@@ -27,7 +27,7 @@ let pageModule = async () => new Promise( resolve => {
             info: Promise.resolve( { raw, title, episode } )
         } );
     }
-    catch {}
+    catch ( error ) { console.log( error ); }
 } ) ;
 
 export { pageModule };
