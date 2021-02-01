@@ -49,10 +49,11 @@ const $client = ( () => {
             }
         }
         catch {
-            const { baseUri, pageUid } = ( () => {
+            const { baseUri } = ( () => {
                 try { throw new Error() }
-                catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)/ ).groups; }
+                catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/)/ ).groups; }
             } )();
+            const pageUid = window[baseUri];
 
             let pseudoClient = new EventTarget();
             pseudoClient.addListener = ( listener ) => pseudoClient.addEventListener( "message", listener );

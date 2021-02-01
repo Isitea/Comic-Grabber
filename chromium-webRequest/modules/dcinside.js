@@ -14,7 +14,7 @@ let pageModule = async () => new Promise( resolve => {
             info: Promise.resolve( { raw, title, episode } )
         } );
     }
-    catch {}
+    catch ( error ) { console.log( error ); }
 } ) ;
 
 export { pageModule };

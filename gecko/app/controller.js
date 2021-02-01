@@ -1,7 +1,7 @@
 "use strict";
-const { baseUri, pageUid } = ( () => {
+const { baseUri } = ( () => {
     try { throw new Error() }
-    catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)/ ).groups; }
+    catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/)/ ).groups; }
 } )();
 import { constant } from '/lib/constant.js';
 import { HTML, logger, uid } from '/lib/extendVanilla.js';
@@ -74,7 +74,7 @@ class Controller extends EventTarget {
     }
 
     async init () {
-        $client = ( await import( `/lib/browserUnifier.js#${pageUid}` ) ).$client;
+        $client = ( await import( '/lib/browserUnifier.js' ) ).$client;
         await $client.complete; //Polyfill browser api for Firefox
         $locale = $client.i18n.getMessage;
         let { moveNext, movePrev, info, images, universal } = await this.pageModule();

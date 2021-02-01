@@ -1,6 +1,6 @@
 "use strict";
 async function main () {
-    const { logger, text2Blob } = await import( `/lib/extendVanilla.js` );
+    const { logger, text2Blob } = await import( '/lib/extendVanilla.js' );
 
     function searchSiteModule ( moduleList, uri = document.URL ) {
         let siteModule;
@@ -14,19 +14,19 @@ async function main () {
         return siteModule;
     }
 
-    logger.inform( `Comic grabber v2 ( http://isitea.net )` );
+    logger.inform( 'Comic grabber v2 ( http://isitea.net )' );
     let { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
         let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
         let grabber = new Controller( pageModule );
-        return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action.", log: logger.log } );
+        return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action." } );
     }
     else {
-        return { message: "There is no module for this site. Manual selector is loaded for user action.", log: logger.log }
+        return { message: "There is no module for this site. Manual selector is loaded for user action." }
     }
 }
 
 main()
-    .then( ( { message, log } ) => log( message ) )
-    .catch( error => console.log( "Something goes wrong with a content script.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
+    .then( ( { message } ) => console.log( message ) )
+    //.catch( error => console.log( "Something goes wrong with a content script.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );

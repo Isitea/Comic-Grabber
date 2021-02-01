@@ -34,12 +34,13 @@ async function pageModule() {
         canvasUri.value = canvas.src;
     }
     
-    const { baseUri, pageUid } = ( () => {
+    const { baseUri } = ( () => {
         try { throw new Error() }
-        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/).*\#(?<pageUid>.+)?/ ).groups; }
+        catch ( { fileName } ) { return fileName.match( /(?<baseUri>^.+?\/\/.+?\/)/ ).groups; }
     } )();
+    const pageUid = window[baseUri];
     
-    const $client = ( await import( `/lib/browserUnifier.js#${pageUid}` ) ).$client;
+    const $client = ( await import( '/lib/browserUnifier.js' ) ).$client;
     await $client.complete; //Polyfill browser api for Firefox
     const $locale = $client.i18n.getMessage;
 
