@@ -28,19 +28,19 @@ async function pageModule() {
     } )( pageJSON );
     images = await fetch(
         "https://api2-page.kakao.com/api/v1/inven/get_download_data/web",
-        { method: 'POST', body: contentRequest }
+        { method: 'POST', body: contentRequest, credentials: "include" }
     )
     .then( response => response.json() )
     .then( json => json.downloadData.members.files.map( ( { secureUrl } ) => `${json.downloadData.members.sAtsServerUrl}${secureUrl}` ) );
 
     return {
         moveNext: Promise.resolve( async () => location.assign(
-            await fetch( "https://api2-page.kakao.com/api/v5/inven/get_next_item", { method: 'POST', body: infoRequest } )
+            await fetch( "https://api2-page.kakao.com/api/v5/inven/get_next_item", { method: 'POST', body: infoRequest, credentials: "include" } )
             .then( response => response.json() )
             .then( ( { item } ) => ( item ? `?${item.pid.replace( /^p/, "productId=")}` : '#It_is_lasest_episode' ) )
         ) ),
         movePrev: Promise.resolve( async () => location.assign(
-            await fetch( "https://api2-page.kakao.com/api/v5/inven/get_prev_item", { method: 'POST', body: infoRequest } )
+            await fetch( "https://api2-page.kakao.com/api/v5/inven/get_prev_item", { method: 'POST', body: infoRequest, credentials: "include" } )
             .then( response => response.json() )
             .then( ( { item } ) => ( item ? `?${item.pid.replace( /^p/, "productId=")}` : '#It_is_oldest_episode' ) )
         ) ),
