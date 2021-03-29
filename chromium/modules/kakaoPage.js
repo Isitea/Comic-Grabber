@@ -1,7 +1,11 @@
 "use strict";
 async function pageModule() {
     let images, contentRequest, infoRequest, pageJSON = JSON.parse( document.body.querySelector( '#__NEXT_DATA__' ).innerHTML );
-    let { title, authorName, seriesTitle } = pageJSON.props.initialState.viewer.viewers[pageJSON.props.initialState.viewer.currentViewerKey].singleForMeta
+    let singleForMeta = 
+        pageJSON.props.initialState.viewer.viewers[pageJSON.props.initialState.viewer.currentViewerKey].singleForMeta ||
+        pageJSON.props.initialState.product.productMap[pageJSON.props.initialState.viewer.currentViewerKey].singleForMeta;
+    let { title, authorName, seriesTitle } = singleForMeta;
+    console.log( singleForMeta )
     let episode = title.replace( seriesTitle, "" ).toFilename();
     let raw = title.toFilename();
     title = `${seriesTitle} (${authorName})`.toFilename();
@@ -10,7 +14,7 @@ async function pageModule() {
         let form = new FormData();
 
         form.set( 'singlePid', initialState.viewer.currentViewerKey );
-        form.set( 'seriesPid', initialState.viewer.viewers[initialState.viewer.currentViewerKey].singleForMeta.seriesId );
+        form.set( 'seriesPid', singleForMeta.seriesId );
         form.set( 'deviceId', initialState.common.constant.did );
 
         return form;
