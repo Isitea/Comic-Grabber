@@ -1,12 +1,17 @@
 "use strict";
 async function pageModule() {
     let images, contentRequest, infoRequest, pageJSON = JSON.parse( document.body.querySelector( '#__NEXT_DATA__' ).innerHTML );
+    //let User = {
+    //    deviceId: pageJSON.props.initialState.common.constant.did,
+    //    clientString: ( ( { name, osname } ) => `${name} - ${osname}` )( pageJSON.props.initialProps.userAgent )
+    //};
+    
     let currentViewerKey = location.search.match( /[?&]?productId=(?<id>\d+)&?/ )?.groups.id;
     let singleForMeta = 
         pageJSON.props.initialState.viewer.viewers[currentViewerKey]?.singleForMeta ||
         pageJSON.props.initialState.product.productMap[currentViewerKey]?.singleForMeta;
     let { title, authorName, seriesTitle } = singleForMeta;
-    console.log( singleForMeta )
+    
     let episode = title.replace( seriesTitle, "" ).toFilename();
     let raw = title.toFilename();
     title = `${seriesTitle} (${authorName})`.toFilename();
@@ -16,14 +21,18 @@ async function pageModule() {
 
         form.set( 'singlePid', currentViewerKey );
         form.set( 'seriesPid', singleForMeta.seriesId );
-        form.set( 'deviceId', initialState.common.constant.did );
+        form.set( 'deviceId', User.deviceId );
 
         return form;
     } )( pageJSON );
 
     contentRequest = ( function ( { props: { initialProps: { userAgent }, initialState } } ) {
-        let clientString = ( ( { name, osname } ) => `${name} - ${osname}` )( userAgent ), form = new FormData();
+        let form = new FormData();
         
+        //form.set( 'productId', initialState.viewer.currentViewerKey );
+        //form.set( 'device_mgr_uid', User.clientString );
+        //form.set( 'device_model', User.clientString );
+        //form.set( 'deviceId', User.deviceId );
         form.set( 'productId', currentViewerKey );
         form.set( 'device_mgr_uid', clientString );
         form.set( 'device_model', clientString );
