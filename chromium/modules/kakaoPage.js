@@ -1,10 +1,10 @@
 "use strict";
 async function pageModule() {
     let images, contentRequest, infoRequest, pageJSON = JSON.parse( document.body.querySelector( '#__NEXT_DATA__' ).innerHTML );
-    //let User = {
-    //    deviceId: pageJSON.props.initialState.common.constant.did,
-    //    clientString: ( ( { name, osname } ) => `${name} - ${osname}` )( pageJSON.props.initialProps.userAgent )
-    //};
+    let User = {
+        deviceId: pageJSON.props.initialState.common.constant.did,
+        clientString: ( ( { name, osname } ) => `${osname} - ${name}` )( pageJSON.props.initialProps.userAgent )
+    };
     
     let currentViewerKey = location.search.match( /[?&]?productId=(?<id>\d+)&?/ )?.groups.id;
     let singleForMeta = 
@@ -29,14 +29,10 @@ async function pageModule() {
     contentRequest = ( function ( { props: { initialProps: { userAgent }, initialState } } ) {
         let form = new FormData();
         
-        //form.set( 'productId', initialState.viewer.currentViewerKey );
-        //form.set( 'device_mgr_uid', User.clientString );
-        //form.set( 'device_model', User.clientString );
-        //form.set( 'deviceId', User.deviceId );
         form.set( 'productId', currentViewerKey );
-        form.set( 'device_mgr_uid', clientString );
-        form.set( 'device_model', clientString );
-        form.set( 'deviceId', initialState.common.constant.did );
+        form.set( 'device_mgr_uid', User.clientString );
+        form.set( 'device_model', User.clientString );
+        form.set( 'deviceId', User.deviceId );
 
         return form;
     } )( pageJSON );
