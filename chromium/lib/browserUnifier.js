@@ -25,7 +25,7 @@ const $client = ( () => {
                 client.dl = {
                     getFileIcon: ( downloadId, { size = 32 } ) => new Promise( resolve => chrome.downloads.getFileIcon( downloadId, { size }, resolve ) )
                 };
-                for ( let method of [ "open", "setShelfEnabled", "show", "showDefaultFolder", "onChanged" ] )
+                for ( let method of [ "open", "setShelfEnabled", "show", "showDefaultFolder", "onChanged", "onDeterminingFilename" ] )
                     client.dl[method] = chrome.downloads[method];
                 for ( let method of [ "acceptDanger", "cancel", "download", "erase", "pause", "removeFile", "resume", "search" ] )
                     client.dl[method] = arg => new Promise( ( resolve, reject ) => {
