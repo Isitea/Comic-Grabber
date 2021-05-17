@@ -4,7 +4,15 @@ async function main () {
     const { logger, text2Blob, uid, getExtension } = await import( '/lib/extendVanilla.js' );
     const { constant } = await import( '/lib/constant.js' );
     const { webRequest } = await import( '/services/webRequest.js' );
+    const nameStorage = {};
     await import( '/3rdParty/jszip.js' );
+    
+    $client.dl?.onDeterminingFilename.addListener( function ( item, suggest ) {
+        if ( item.byExtensionId === $client.runtime.id && nameStorage[item.url] )
+            suggest( { filename: nameStorage[item.url] } );
+
+        return false;
+    } );
 
     async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
         let list = await Promise.allSettled(
@@ -35,6 +43,7 @@ async function main () {
         } ) );
         zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
+        nameStorage [ url ] = filename;
         
         return $client.dl.download( { url, filename, conflictAction } )
             .then( id => new Promise( resolve => {
@@ -45,6 +54,7 @@ async function main () {
                             case "complete": {
                                 $client.dl.onChanged.removeListener( onComplete );
                                 URL.revokeObjectURL( url );
+                                delete nameStorage[ url ];
                                 resolve( { result: item.state.current, filename } );
                                 break;
                             }
