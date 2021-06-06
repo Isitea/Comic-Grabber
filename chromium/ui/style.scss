@@ -77,11 +77,12 @@ $noShadow: 0 0 0 0 $transparent;
     height: $block;
     border-radius: $border;
     background: $black-50;
-    display: table;
+    display: flex;
     * {
         box-sizing: border-box !important;
         float: left;
         color: white;
+        display: flex;
     }
     &.CG-menu {
         position: fixed;
@@ -106,6 +107,7 @@ $noShadow: 0 0 0 0 $transparent;
                     font-weight: bold;
                     padding: 0 0 0 $hqblock;
                     * {
+                        display: ruby;
                         border-radius: $border 0 0 $border;
                         font-weight: bold;
                     }

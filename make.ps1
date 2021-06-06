@@ -10,7 +10,7 @@ Copy-Item -Path 'chromium-webRequest/*' -Destination 'dist/chromium-webRequest' 
 
 Copy-Item -Path 'dist/chromium' -Destination 'dist/gecko' -Recurse
 Copy-Item -Path 'gecko/*' -Destination 'dist/gecko' -Recurse -Force
-Remove-Item -Path 'dist/gecko/ui/style.scss'
+#Remove-Item -Path 'dist/gecko/ui/style.scss'
 
 #$ArcOpt = @{ CompressionLevel = "Optimal" }
 #Compress-Archive -Path 'dist/chromium/*' -DestinationPath 'dist/chromium.zip' @ArcOpt
