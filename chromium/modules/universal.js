@@ -8,7 +8,7 @@ async function pageModule() {
         if ( target.localName === 'img' ) {
             if ( automation ) { moveCursor( target ); }
             if ( target === canvas.selected || target === canvas.link ) {
-                let list = application.images
+                let list = application.contents
                 if ( canvas.selected ) {
                     list.splice( list.indexOf( canvas.selected.src ), 1 );
                     canvas.selected.remove();
@@ -148,7 +148,7 @@ async function pageModule() {
         moveNext: Promise.resolve( async () => {} ),
         movePrev: Promise.resolve( async () => {} ),
         info: { raw, title, episode },
-        images: [],
+        contents: [],
         universal: {
             activateListener: function ( holder ) { application = holder; }
         }

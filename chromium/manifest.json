@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Comic grabber 2",
-    "version": "2.1.5",
+    "version": "2.1.6",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
 	"author": "Isitea",
@@ -31,5 +31,5 @@
     "background": {
         "scripts": [ "services/serviceProvider.js" ]
 	},
-	"minimum_chrome_version": "70"
+	"minimum_chrome_version": "92"
 }

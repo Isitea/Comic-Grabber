@@ -2,6 +2,7 @@
 const constant = {
     __loaded__: "loaded",
     __ready__: "ready",
+    __request__: "request",
     __download__: "download",
     __downloading__: "downloading",
     __downloaded__: "downloaded",

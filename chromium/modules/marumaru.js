@@ -24,7 +24,7 @@ let pageModule = () => ( {
         let result = raw?.match( genEx )?.groups || {};
         return { ...result, raw };
     } )(),
-    images: Promise.resolve( [ ...document.querySelectorAll( ".view-img img" ) ].map( item => item.src ) )
+    contents: Promise.resolve( [ ...document.querySelectorAll( ".view-img img" ) ].map( item => ( { uri: item.src } ) ) )
 } );
 
 export { pageModule };
