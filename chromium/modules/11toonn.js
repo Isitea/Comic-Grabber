@@ -20,7 +20,7 @@ let pageModule = async () => {
         moveNext: Promise.resolve( async function () { return location.replace( `/content/${Next.ID}/${parent}?page=toon&subject=${Next.Subject}` ); } ),
         movePrev: Promise.resolve( async function () { return location.replace( `/content/${Prev.ID}/${parent}?page=toon&subject=${Prev.Subject}` ); } ),
         info: Promise.resolve( { raw, ...result } ),
-        images: Promise.resolve( JSON.parse( imagelist ).map( loc => `${file}${loc}` ) ),
+        contents: Promise.resolve( JSON.parse( imagelist ).map( loc => ( { uri: `${file}${loc}` } ) ) ),
     }
 }
 

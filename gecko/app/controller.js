@@ -77,10 +77,10 @@ class Controller extends EventTarget {
         $client = ( await import( '/lib/browserUnifier.js' ) ).$client;
         await $client.complete; //Polyfill browser api for Firefox
         $locale = $client.i18n.getMessage;
-        let { moveNext, movePrev, info, images, universal } = await this.pageModule();
+        let { moveNext, movePrev, info, contents, universal } = await this.pageModule();
         let holder = this;
         Object.defineProperties( this, {
-            images: { value: await images, writable: true, configurable: false, enumerable: false },
+            contents: { value: await contents, writable: true, configurable: false, enumerable: false },
             info: { value: new Proxy( ( await this.chekcStorage( info, holder ) ), { set: function ( obj, key, value ) {
                 let event = new Event( "infochange" );
                 if ( typeof value === "string" ) value = value.toFilename();
@@ -339,7 +339,7 @@ class Controller extends EventTarget {
             }
             ui.querySelector( `#saveToLocal` ).addEventListener( "click", ( { target } ) => {
                 let id = target.dataset.for;
-                holder.downloadImages( {}, ui.querySelector( `#${id}` ) )
+                holder.downloadContents( {}, ui.querySelector( `#${id}` ) )
                     .then( filename => {
                         holder.notify( { brief: "Download completed", msg: `${filename} is downloded` } );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
@@ -404,7 +404,7 @@ class Controller extends EventTarget {
         } )( ++nBox.dataset.count, msg );
     }
 
-    downloadImages ( { filename, conflictAction, uri = document.URL, referer = location.hostname } ) {
+    downloadContents ( { filename, conflictAction, uri = document.URL, referer = location.hostname } ) {
         if ( !filename ) {
             if ( this.info.title === this.info.episode || this.info.episode === "" ) filename = `${this.info.downloadFolder}/${this.info.title}.zip`;
             else if ( this.info.autoCategorize && this.info.includeTitle ) filename = `${this.info.downloadFolder}/${this.info.title}/${this.info.title} ${this.info.episode}.zip`;
@@ -418,31 +418,24 @@ class Controller extends EventTarget {
                 return Promise.reject( this.state );
             }
             case constant.__ready__: {
-                if ( !this.images?.length ) return Promise.reject( constant.__nothing__ );
+                if ( !this.contents?.length ) return Promise.reject( constant.__nothing__ );
                 this.changeState( constant.__downloading__ );
-                return new Promise( ( resolve, reject ) => {
+                return new Promise( async ( resolve, reject ) => {
                     let holder = this;
                     holder.notify( { brief: "Download started", msg: `${filename}` } );
-                    function listener ( { action, clientUid, data: { result, filename } }, sender ) {
-                        if ( clientUid === holder.clientUid && action === "download" ) {
-                            switch ( result ) {
-                                case "Invalid filename":
-                                case "interrupted": {
-                                    reject( result );
-                                    break;
-                                }
-                                case "complete": {
-                                    resolve( filename );
-                                    break;
-                                }
-                                default:{ return; }
-                            }
-                            $client.runtime.onMessage.removeListener( listener );
-                            holder.changeState( constant.__ready__ );
+                    let { result } = await ( new Promise( response => $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, contents: this.contents, uri } }, response ) ) );
+                    holder.changeState( constant.__ready__ );
+                    switch ( result ) {
+                        case "Invalid filename":
+                        case "interrupted": {
+                            reject( result );
+                            break;
+                        }
+                        case "complete": {
+                            resolve( filename );
+                            break;
                         }
                     }
-                    $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, images: this.images, uri } } );
-                    $client.runtime.onMessage.addListener( listener );
                 } );
             }
         }

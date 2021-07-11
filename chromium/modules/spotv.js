@@ -19,18 +19,19 @@ removeAds();
 
 let pageModule = async () => new Promise( resolve => {
     try {
-        let raw, title, episode, images;
+        let raw, title, episode, contents;
         raw = document.querySelector( '.viewer-header__title' ).textContent;
         ( { title, episode } = raw?.match( genEx )?.groups || {} );
 
-        images = JSON.parse( [ ...document.querySelectorAll( 'script' ) ]
-            .filter( item => item.textContent.match( 'img_list' ) )
-            .map( item => item.textContent.match( /img_list.+?(?<images>\[.+?\])/ ).groups )[0].images );
-        
+        contents = JSON.parse( [ ...document.querySelectorAll( 'script' ) ]
+                .filter( item => item.textContent.match( 'img_list' ) )
+                .map( item => item.textContent.match( /img_list.+?(?<images>\[.+?\])/ ).groups )[0].images )
+            .map( item => ( { uri: item } ) );
+        console.log( contents )
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '#episode-nav .right-episode.next' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '#episode-nav .left-episode.prev' )?.click(); } ),
-            images,
+            contents,
             info: Promise.resolve( { raw, title, episode } )
         } );
     }

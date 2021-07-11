@@ -9,7 +9,7 @@ let pageModule = () => ( {
 //            raw: document.head.querySelector( 'meta[property=title]' ).content
         };
     } )(),
-    images: Promise.resolve( [ ...document.querySelectorAll( '.cont_view#imgView > img' ) ].map( item => item.src ) )
+    contents: Promise.resolve( [ ...document.querySelectorAll( '.cont_view#imgView > img' ) ].map( item => ( { uri: item.src } ) ) )
 } );
 
 export { pageModule };
