@@ -14,19 +14,26 @@ async function main () {
         return false;
     } );
 
-    async function downloadImages ( { filename, conflictAction = "overwrite", images, uri, referer }, tab ) {
+    async function downloadContents ( { filename, conflictAction = "overwrite", contents, uri, referer }, tab ) {
+        let zip = new JSZip();
         let list = await Promise.allSettled(
-            images.map(
-                uri => fetch( uri, ( referer ? { headers: { creferer: referer, [referer]: "creferer" } } : {} ) )
-                .then( response => {
-                    if ( response.status !== 200 ) return Promise.reject( "Access denied" );
-                    return response.blob();
-                } )
-                .then( blob => ( { blob, uri } ) )
-                .catch( reason => Promise.reject( { reason, uri } ) )
+            contents.map(
+                ( { uri, content } ) => {
+                    if ( uri ) {
+                        return fetch( uri, ( referer ? { headers: { creferer: referer, [referer]: "creferer" } } : {} ) )
+                            .then( response => {
+                                if ( response.status !== 200 ) return Promise.reject( `Network error ${response.status}` );
+                                return response.blob();
+                            } )
+                            .then( blob => ( { blob, uri } ) )
+                            .catch( reason => Promise.reject( { reason, uri } ) )
+                    }
+                    else if ( content ) {
+                        zip.file( content.name, new Blob( [ content.text ], { type: "text/plain" } ) );
+                    }
+                }
             )
         );
-        let zip = new JSZip();
         await Promise.allSettled(
             list.map(
                 async ( { status, value, reason }, n ) => {
@@ -41,7 +48,7 @@ async function main () {
         ).then( list => list.map( ( { reason } ) => {
             if ( reason ) $client.tabs.sendMessage( tab.id, { action: constant.__caution__, data: { brief: reason.reason, src: reason.uri } } );
         } ) );
-        zip.file( 'Downloaded from.txt', text2Blob( uri, "text/plain" ) );
+        zip.file( 'Downloaded from.txt', new Blob( [ uri ], { type: "text/plain" } ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
         nameStorage [ url ] = filename;
         
@@ -67,21 +74,25 @@ async function main () {
             .catch( msg => ( { result: "Invalid filename", filename } ) )
     }
 
-    $client.runtime.onMessage.addListener(
-        async ( { message, action, clientUid, data }, sender ) => {
-            let result = undefined;
-            switch ( action ) {
-                case constant.__download__: {
-                    webRequest.connect( $client.webRequest );
-                    if ( !$client.webRequest ) delete data.referer;
-                    result = await downloadImages( data, sender.tab ).catch( data => data );
-                    webRequest.disconnect( $client.webRequest );
-                    break;
-                }
+    async function communication ( { message, action, clientUid, data }, sender, response ) {
+        let result = undefined;
+        switch ( action ) {
+            case constant.__request__: {
+                fetch( data.uri ).then( body => body.text() ).then( text => response( text ) );
+                break;
             }
-            $client.tabs.sendMessage( sender.tab.id, { action, clientUid, data: result } );
+            case constant.__download__: {
+                webRequest.connect( $client.webRequest );
+                if ( !$client.webRequest ) delete data.referer;
+                result = await downloadContents( data, sender.tab ).catch( data => data );
+                webRequest.disconnect( $client.webRequest );
+                response( result );
+                break;
+            }
         }
-    );
+        $client.tabs.sendMessage( sender.tab.id, { action, clientUid, data: result } );
+    }
+    $client.runtime.onMessage.addListener( function () { communication( ...arguments ); return true; } );
 
     $client.browserAction.onClicked.addListener( function ( tab ) { $client.tabs.sendMessage( tab.id, { action: "toggleMode" } ); } );
     

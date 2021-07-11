@@ -8,7 +8,7 @@ let pageModule = () => ( {
             episode: document.querySelector( '.tit_area .view h3' ).textContent.trim(),
         };
     } )(),
-    images: Promise.resolve( [ ...document.querySelectorAll( '.view_area .wt_viewer img' ) ].map( item => item.src ) )
+    contents: Promise.resolve( [ ...document.querySelectorAll( '.view_area .wt_viewer img' ) ].map( item => ( { uri: item.src } ) ) )
 } );
 
 export { pageModule };
