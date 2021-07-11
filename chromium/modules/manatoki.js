@@ -2,7 +2,7 @@
 import { genEx } from '/lib/constant.js';
 
 async function removeAds ( method ) {
-    let Ads = [ ...document.querySelectorAll( ".basic-banner, .board-tail-banner, #id_mbv" ) ];
+    let Ads = [ ...document.querySelectorAll( ".basic-banner, .board-tail-banner, #id_mbv, #main-banner-view" ) ];
     switch ( method ) {
         case "invisible": {
             Ads.map( item => item.style = "display: none !important;" );
