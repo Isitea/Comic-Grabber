@@ -41,7 +41,19 @@ async function pageModule() {
         { method: 'POST', body: contentRequest, credentials: "include" }
     )
     .then( response => response.json() )
-    .then( json => json.downloadData.members.files.map( ( { secureUrl } ) => `${json.downloadData.members.sAtsServerUrl}${secureUrl}` ) );
+    .then( async ( { downloadData: { members } } ) => {
+        if ( members.slide ) {
+            return [ await ( async function ( id ) {
+                while( !document.querySelector( id ) ) {
+                    await Promise( res => setTimeout( res, 250 ) );
+                }
+                return document.querySelector( id ).src;
+            } )( `#epubScript_${currentViewerKey}` ) ];
+        }
+        else {
+            return members.files.map( ( { secureUrl } ) => `${members.sAtsServerUrl}${secureUrl}` )
+        }
+    } );
 
     return {
         moveNext: Promise.resolve( async () => location.assign(
