@@ -10,12 +10,12 @@ async function main () {
         let list = await Promise.allSettled(
             images.map(
                 uri => fetch( uri, ( referer ? { headers: { creferer: referer, [referer]: "creferer" } } : {} ) )
-                .then( response => {
-                    if ( response.status !== 200 ) return Promise.reject( "Access denied" );
-                    return response.blob();
-                } )
-                .then( blob => ( { blob, uri } ) )
-                .catch( reason => Promise.reject( { reason, uri } ) )
+                    .then( response => {
+                        if ( response.status !== 200 ) return Promise.reject( `Network error ${response.status}` );
+                        return response.blob();
+                    } )
+                    .then( blob => ( { blob, uri } ) )
+                    .catch( reason => Promise.reject( { reason, uri } ) )
             )
         );
         let zip = new JSZip();
