@@ -31,5 +31,5 @@
     "background": {
         "scripts": [ "services/serviceProvider.js" ]
 	},
-	"minimum_chrome_version": "92"
+	"minimum_chrome_version": "91"
 }
