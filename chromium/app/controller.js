@@ -338,7 +338,10 @@ class Controller extends EventTarget {
                         holder.notify( { brief: "Download completed", msg: `${filename} is downloded` } );
                         if ( holder.info.moveOnSave ) return holder.moveNext();
                     } )
-                    .catch( filename => holder.notify( { brief: "Download failed", msg: `Failed to download. Reason: ${filename}` } ) );
+                    .catch( filename => {
+                        holder.info.moveOnSave = false;
+                        holder.notify( { brief: "Download failed", msg: `Failed to download. Reason: ${filename}` } );
+                    } );
             } );
         }
         holder.addEventListener( "statechange", ( { target: { state } } ) => {
@@ -427,6 +430,10 @@ class Controller extends EventTarget {
                         }
                         case "complete": {
                             resolve( filename );
+                            break;
+                        }
+                        case "partial_complete": {
+                            reject( `Partial complete - ${filename}` );
                             break;
                         }
                     }

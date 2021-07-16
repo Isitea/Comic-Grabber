@@ -23,7 +23,7 @@ let pageModule = async () => new Promise( resolve => {
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Next]' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '.v-float-rgt-wrap > a[aria-label=Previous]' )?.click(); } ),
-            contents: Promise.resolve( contents.filter( src => src.includes( mostMatched ) ) ),
+            contents: Promise.resolve( contents.filter( src => src.includes( mostMatched ) ).map( uri => ( { uri } ) ) ),
             info: Promise.resolve( { raw, title, episode } )
         } );
     }

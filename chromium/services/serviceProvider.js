@@ -7,7 +7,7 @@ async function main () {
     await import( '/3rdParty/jszip.js' );
 
     async function downloadContents ( { filename, conflictAction = "overwrite", contents, uri, referer }, tab ) {
-        let zip = new JSZip();
+        let zip = new JSZip(), partial_complete;
         let list = await Promise.allSettled(
             contents.map(
                 ( { uri, content } ) => {
@@ -29,7 +29,7 @@ async function main () {
         await Promise.allSettled(
             list.map(
                 async ( { status, value, reason }, n ) => {
-                    if ( value ) {
+                    if ( !reason && value ) {
                         return getExtension( value.blob )
                             .then( ext => zip.file( `${n.toString().padStart( 3, "0" )}0.${ext}`, value.blob ) )
                             .catch( reason => Promise.reject( { reason, uri: value.uri } ) );
@@ -38,7 +38,10 @@ async function main () {
                 }
             )
         ).then( list => list.map( ( { reason } ) => {
-            if ( reason ) $client.tabs.sendMessage( tab.id, { action: constant.__caution__, data: { brief: reason.reason, src: reason.uri } } );
+            if ( reason ) {
+                partial_complete = true;
+                $client.tabs.sendMessage( tab.id, { action: constant.__caution__, data: { brief: reason.reason, src: reason.uri } } );
+            }
         } ) );
         zip.file( 'Downloaded from.txt', new Blob( [ uri ], { type: "text/plain" } ) );
         let url = URL.createObjectURL( await zip.generateAsync( { type: "blob" } ) );
@@ -52,7 +55,8 @@ async function main () {
                             case "complete": {
                                 $client.dl.onChanged.removeListener( onComplete );
                                 URL.revokeObjectURL( url );
-                                resolve( { result: item.state.current, filename } );
+                                if ( partial_complete ) { resolve( { result: "partial_complete", filename } ); }
+                                else { resolve( { result: item.state.current, filename } ); }
                                 break;
                             }
                             default:

@@ -5,8 +5,7 @@ let pageModule = async () => new Promise( resolve => {
         let title, episode;
         let contents =
         [ ...document.querySelectorAll( ".gallview_contents .inner .writing_view_box .write_div img" ) ]
-            .map( item => ( item.src.replace( /\/\/.+?\.dcinside\.co\.kr/i, "//image.dcinside.com" ) ) );
-        console.log( 1 )
+            .map( item => ( { uri: item.src.replace( /\/\/.+?\.dcinside\.co\.kr/i, "//image.dcinside.com" ) } ) );
         resolve( {
             moveNext: Promise.resolve( async function () {} ),
             movePrev: Promise.resolve( async function () {} ),

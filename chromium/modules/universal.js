@@ -10,13 +10,13 @@ async function pageModule() {
             if ( target === canvas.selected || target === canvas.link ) {
                 let list = application.contents
                 if ( canvas.selected ) {
-                    list.splice( list.indexOf( canvas.selected.src ), 1 );
+                    list.splice( list.findIndex( element => element?.uri === canvas.selected.src ), 1 );
                     canvas.selected.remove();
                 }
                 else {
                     let [ node ] = HTML.render( { img: { src: canvas.src, link: canvas.link, CGNode: 1 } } );
                     helper.querySelector( '.selectedImages .imagelist' ).appendChild( node );
-                    list.push( canvas.src );
+                    list.push( { uri: canvas.src } );
                 }
                 canvas.link.classList.toggle( "selected" );
                 moveCursor();
