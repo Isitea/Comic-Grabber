@@ -1,4 +1,5 @@
 "use strict";
+import { wRList } from "./wRList.js";
 const moduleList = [
     {
         moduleName: "marumaru",
@@ -15,7 +16,7 @@ const moduleList = [
     {
         moduleName: "naver comic",
         buildDate: "2021-01-06 18:00",
-        matchPattern: /comic\.naver\.com\/.+?\/detail\.nhn.+?titleId/,
+        matchPattern: /comic\.naver\.com\/.+?\/detail(\.nhn)?.+?titleId/,
         uri: "/modules/naverComic.js",
     },
     {
@@ -42,6 +43,7 @@ const moduleList = [
         matchPattern: /spotv.+\//,
         uri: "/modules/spotv.js",
     },
+    ...wRList,
     {
         moduleName: "universalTool",
         buildDate: "2021-01-21 16:00",

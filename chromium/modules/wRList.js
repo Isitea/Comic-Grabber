@@ -1,0 +1,3 @@
+const wRList = [];
+
+export { wRList };
