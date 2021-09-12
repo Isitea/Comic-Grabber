@@ -19,7 +19,7 @@ removeAds();
 let pageModule = async () => new Promise( resolve => {
     try {
         let raw, title, episode, contents;
-        if ( document.URL.match( /comic/ ) ) {
+        if ( document.URL.match( /comic|webtoon/ ) ) {
             let id, altId;
             id = document.querySelector( ".view-padding > div > p" ).className;
             altId = document.querySelector( ".view-padding > div > p" ).parentNode.className;

@@ -423,7 +423,7 @@ class Controller extends EventTarget {
                 return new Promise( async ( resolve, reject ) => {
                     let holder = this;
                     holder.notify( { brief: "Download started", msg: `${filename}` } );
-                    let { result } = await ( new Promise( response => $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, contents: this.contents, uri } }, response ) ) );
+                    let { result } = await $client.runtime.sendMessage( { message: Date.now(), clientUid: this.clientUid, action: "download", data: { filename, conflictAction, referer, contents: this.contents, uri } } );
                     holder.changeState( constant.__ready__ );
                     switch ( result ) {
                         case "Invalid filename":

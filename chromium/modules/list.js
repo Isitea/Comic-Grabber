@@ -10,7 +10,7 @@ const moduleList = [
     {
         moduleName: "manatoki",
         buildDate: "2021-01-07 16:00",
-        matchPattern: /manatoki.*\.\w+\//,
+        matchPattern: /(mana|new)toki.*\.\w+\//,
         uri: "/modules/manatoki.js",
     },
     {

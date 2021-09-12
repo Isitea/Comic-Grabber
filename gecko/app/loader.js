@@ -22,12 +22,13 @@ async function main () {
                 break;
             }
             default: {
-                browser.runtime.sendMessage( data );
+                browser.runtime.sendMessage( data )
+                    .then( msg => BC.postMessage( { ...msg, message: data.message } ) );
                 break;
             }
         }
     } );
-    browser.runtime.onMessage.addListener( msg => BC.postMessage( msg ) );
+    browser.runtime.onMessage.addListener( msg => { console.log( msg ); BC.postMessage( msg ); } );
 
     let script = document.createElement( "script" );
     script.src = `${browser.runtime.getURL( "" ).replace( /\/$/, "" )}/app/service.js#${pageUid}`;

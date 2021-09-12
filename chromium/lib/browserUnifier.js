@@ -75,7 +75,17 @@ const $client = ( () => {
                     getURL: ( uri = "" ) => baseUri + uri,
                     onMessage: pseudoClient,
                     getManifest: () => pseudoClient.manifest,
-                    sendMessage: msg => BC.postMessage( msg ),
+                    sendMessage: msg => new Promise( function ( response ) {
+                        function uniqueResponse ( { data } ) {
+                            if ( data.message == msg.message ) {
+                                delete data.message;
+                                response( data.data );
+                            }
+                            else BC.addEventListener( "message", uniqueResponse, { once: true } );
+                        }
+                        BC.addEventListener( "message", uniqueResponse, { once: true } );
+                        BC.postMessage( msg );
+                    } ),
                 },
                 i18n: {
                     getMessage: key => pseudoClient.i18n[key].message
