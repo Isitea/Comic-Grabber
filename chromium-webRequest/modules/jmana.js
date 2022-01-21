@@ -13,9 +13,9 @@ let pageModule = async () => new Promise( resolve => {
         }
         let contents =
         [ ...document.querySelectorAll( ".pdf-wrap img.comicdetail" ) ]
-            .map( item => decodeURIComponent( item.src || item.dataset.src ) );
+        .map( item => decodeURIComponent( item.dataset.src || item.src ) );
         let mostMatched = Object.entries( contents.reduce( ( counter, src ) => {
-            let { bundle } = src.match( /.+:\/\/(?<bundle>.+)\// ).groups;
+            let { bundle } = src.match( /.+:\/\/(?<bundle>.+)\// )?.groups || {};
             counter[bundle] = ( counter[bundle] ? counter[bundle] + 1 : 1 );
             return counter;
         }, {} ) ).reduce( ( result, item ) => { result[ item[1] ] = item[0]; return result; }, [] ).pop()
