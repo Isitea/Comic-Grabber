@@ -4,6 +4,7 @@ if ( Test-Path 'dist' ) {
 New-Item -Path 'dist' -ItemType Directory
 Copy-Item -Path 'chromium' -Destination 'dist/chromium' -Recurse
 Remove-Item -Path 'dist/chromium/ui/style.scss'
+#Remove-Item -Path 'dist/chromium/3rdParty/package.json'
 
 Copy-Item -Path 'dist/chromium' -Destination 'dist/chromium-webRequest' -Recurse
 Copy-Item -Path 'chromium-webRequest/*' -Destination 'dist/chromium-webRequest' -Recurse -Force

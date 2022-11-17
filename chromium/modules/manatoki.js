@@ -23,16 +23,20 @@ let pageModule = async () => new Promise( resolve => {
             let id, altId;
             id = document.querySelector( ".view-padding > div > p" ).className;
             altId = document.querySelector( ".view-padding > div > p" ).parentNode.className;
-            [ ...document.querySelectorAll( `div.${altId} > p.${id}` ) ].map( item => item.remove() ) ;
+            [ ...document.querySelectorAll( `div.${ altId } > p.${ id }` ) ].map( item => item.remove() );
             raw = document.querySelector( `.toon-info .toon-title` ).firstChild.textContent.trim();
-            contents = Promise.resolve( [ ...document.querySelectorAll( `div.${altId} img` ) ].map( item => ( { uri: item.dataset[id] } ) ) );
+            contents = ( () => {
+                let Case1 = [ ...document.querySelectorAll( `div.${ altId } img` ) ].map( item => ( { uri: item.dataset[ id ] } ) );
+                let Case2 = [ ...document.querySelectorAll( ".view-img img" ) ].map( item => ( { uri: item.src } ) );
+                return Case1.length > 0 ? Case1 : Case2;
+            } )()
         }
         else if ( document.URL.match( /origin/ ) ) {
             raw = document.querySelector( `.view-wrap article[itemprop=articleBody] h1[itemprop=headline]` ).textContent.trim();
             contents = Promise.resolve( [ ...document.querySelectorAll( `.view-content img` ) ].map( item => ( { uri: item.src } ) ) );
         }
         ( { title, episode } = raw?.match( genEx )?.groups || {} );
-        
+
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '#goNextBtn' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '#goPrevBtn' )?.click(); } ),
@@ -41,6 +45,6 @@ let pageModule = async () => new Promise( resolve => {
         } );
     }
     catch ( error ) { console.log( error ); }
-} ) ;
+} );
 
 export { pageModule };
