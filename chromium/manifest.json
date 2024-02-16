@@ -1,7 +1,7 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "Comic grabber 2",
-    "version": "2.1.8",
+    "version": "2.2.0",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
 	"author": "Isitea",
@@ -27,9 +27,18 @@
 			"all_frames": false
 		}
     ],
-    "web_accessible_resources": [ "*" ],
+    "web_accessible_resources": [
+		{
+			"resources": [
+				"images/*"
+			],
+			"matches": [
+				"*://*/*"
+			]
+		}
+	 ],
     "background": {
-        "scripts": [ "services/serviceProvider.js" ]
+        "service_worker": "services/serviceProvider.js"
 	},
-	"minimum_chrome_version": "91"
+	"minimum_chrome_version": "122"
 }
