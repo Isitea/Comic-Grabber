@@ -27,7 +27,7 @@ let pageModule = async () => new Promise( resolve => {
                 .filter( item => item.textContent.match( 'img_list' ) )
                 .map( item => item.textContent.match( /img_list.+?(?<images>\[.+?\])/ ).groups )[0].images )
             .map( item => ( { uri: item } ) );
-        console.log( contents )
+        //console.log( contents )
         resolve( {
             moveNext: Promise.resolve( async function () { return document.querySelector( '#episode-nav .right-episode.next' )?.click(); } ),
             movePrev: Promise.resolve( async function () { return document.querySelector( '#episode-nav .left-episode.prev' )?.click(); } ),

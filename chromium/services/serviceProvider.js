@@ -12,7 +12,7 @@ async function main () {
             contents.map(
                 ( { uri, content } ) => {
                     if ( uri ) {
-                        return fetch( uri, ( referer ? { headers: { creferer: referer, [referer]: "creferer" } } : {} ) )
+                        return fetch( ( uri.match( /^\/\// ) ? "https:" + uri : uri ), ( referer ? { headers: { creferer: referer, [ referer ]: "creferer" } } : {} ) )
                             .then( response => {
                                 if ( response.status !== 200 ) return Promise.reject( `Network error ${response.status}` );
                                 return response.blob();

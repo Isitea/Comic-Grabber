@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Comic grabber 2 (webRequest mod.)",
-    "version": "2.1.9",
+    "version": "2.1.10",
     "default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
 	"author": "Isitea",
