@@ -68,7 +68,7 @@ class webRequest {
             webRequest?.onBeforeSendHeaders.addListener(
                 onBeforeSendHeaders,
                 { urls: [ '*://*/*' ] },
-                [ 'blocking', 'requestHeaders', 'extraHeaders' ]
+                [ 'blocking', 'requestHeaders' ]
             );
         opened++;
     }
