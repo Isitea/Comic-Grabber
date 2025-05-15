@@ -201,15 +201,13 @@ const
     $alert = `font-size: 12px; color: rgba( 255, 32, 64, 1 );`,
     $inform = `font-size: 12px; color: rgba( 255, 127, 196, 1 );`;
 class logger {
-    constructor ( { log = $log, alert = $alert, inform = $inform } ) {
-        this.log = log;
-        this.alert = alert;
-        this.inform = inform;
+    constructor ( outputStyle ) {
+        this.style = outputStyle;
     }
 
-    log ( message ) { console.log( `%c${message}`, this.log ); }
-    alert ( message ) { console.log( `%c${message}`, this.alert ); }
-    inform ( message ) { console.log( `%c${message}`, this.inform ); }
+    log ( message ) { console.log( `%c${message}`, this.style.log ); }
+    alert ( message ) { console.log( `%c${message}`, this.style.alert ); }
+    inform ( message ) { console.log( `%c${message}`, this.style.inform ); }
 
     static log ( message ) { console.log( `%c${message}`, $log ); }
     static alert ( message ) { console.log( `%c${message}`, $alert ); }
