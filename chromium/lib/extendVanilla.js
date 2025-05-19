@@ -59,6 +59,17 @@ Object.defineProperties( Node.prototype, {
             return this;
         }
     },
+    attachEventListener: {
+        /**
+         * @description Attach event listener on Node. with holding handlelist.
+         * 
+         */
+        value: function ( eventType, listener, options ) {
+            if ( !(this.$eventList instanceof Array) ) { this.$eventList = []; }
+            this.addEventListener( eventType, listener, options );
+            this.$eventList.push( { eventType, listener } );
+        }
+    },
     destroyEventListener: {
         /**
          * @description Destroy event listener on Node.
@@ -94,7 +105,7 @@ class HTML {
      */
     static render ( structure, preset = {} ) {
         if ( structure instanceof NodeList ) return structure;
-        let fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
         if ( structure instanceof Node ) { fragment.appendChild( structure ); }
         else if ( structure instanceof Object ) {
             let list;

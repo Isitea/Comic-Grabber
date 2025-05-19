@@ -1,15 +1,16 @@
 {
-	"manifest_version": 2,
-	"name": "Comic grabber 2",
-    "version": "2.1.10",
-    "default_locale": "ko",
+	"manifest_version": 3,
+	"name": "Comic Grabber",
+	"version": "3.0.0",
+	"default_locale": "ko",
 	"description": "__MSG_extensionDescription__",
 	"author": "Isitea",
 	"icons": {
 		"128": "icon-128.png"
 	},
 	"permissions": [
-		"downloads"
+		"downloads",
+		"scripting"
 	],
 	"browser_action": {
 		"default_title": "__MSG_toggleMode__"
@@ -17,19 +18,29 @@
 	"content_scripts": [
 		{
 			"matches": [
-                "http://*/*",
-                "https://*/*"
+				"https://*toki*/*",
+				"https://comic.naver.com/*",
+				"https://webtoon.daum.net/*"
 			],
 			"js": [
-				"app/service.js"
+				"app/injector.js"
 			],
 			"run_at": "document_end",
 			"all_frames": false
 		}
-    ],
-    "web_accessible_resources": [ "*" ],
-    "background": {
-        "scripts": [ "services/serviceProvider.js" ]
+	],
+	"web_accessible_resources": [
+		{
+			"resources": [ "*" ],
+			"matches": [ "https://*/*" ]
+		}
+	],
+	"background": {
+		"service_worker": "services/serviceProvider.js"
 	},
-	"minimum_chrome_version": "91"
+	"host_permissions": [
+		"https://*toki*/*",
+		"https://comic.naver.com/*",
+		"https://webtoon.daum.net/*"
+	]
 }

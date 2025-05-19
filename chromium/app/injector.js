@@ -14,12 +14,12 @@ async function main () {
         return siteModule;
     }
 
-    logger.inform( 'Comic grabber v2 ( http://isitea.net )' );
-    let { moduleList } = await import( "/modules/list.js" );
+    logger.inform( 'Comic grabber ( http://isitea.net )' );
+    const { moduleList } = await import( "/modules/list.js" );
     let matchedModule;
     if ( matchedModule = searchSiteModule( moduleList ) ) {
-        let [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
-        let grabber = new Controller( pageModule );
+        const [ { pageModule }, { Controller } ] = await Promise.all( [ import( matchedModule ), import( "/app/controller.js" ) ] );
+        const grabber = new Controller( pageModule );
         return grabber.ready( { message: "Scheduled task completed successfully. Waiting user action." } );
     }
     else {
@@ -29,4 +29,4 @@ async function main () {
 
 main()
     .then( ( { message } ) => console.log( message ) )
-    //.catch( error => console.log( "Something goes wrong with a content script.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
+    .catch( error => console.log( "Something goes wrong with a content script.\r\nPlease, contact the developer ( dev@isitea.net ).", error ) );
